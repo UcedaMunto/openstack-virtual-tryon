@@ -1,0 +1,20 @@
+@startuml orden-implementacion
+!theme plain
+title Orden de implementacion (dependencias)
+
+start
+:Etapa 0 · Diseno de IPs / roles / .env;
+:Etapa 1 · Hardware, BIOS, IOMMU, red fisica;
+:Etapa 1.5 · Bootstrap Ansible (base, red, hardening);
+:Etapa 2 · Kolla-Ansible (OpenStack);
+:Etapa 3 · VMs base (k8s-control, workers, db, storage);
+:Etapa 3.5 · Configuracion de VMs con Ansible;
+:Etapa 4 · Kubernetes (1 CP + 2 CPU workers + 1 GPU worker);
+:Etapa 5 · Servicios de plataforma (PostgreSQL, RabbitMQ, Redis, Object Storage);
+:Etapa 6 · Worker FASHN-VTON + benchmark;
+:Etapa 7 · Aplicacion SaaS (GitOps / Argo CD);
+:Etapa 8 · Seguridad, observabilidad y backups;
+:Etapa 9 · Capacidad comercial (jobs/hora, costo);
+stop
+
+@enduml

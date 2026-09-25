@@ -1,0 +1,48 @@
+@startuml kubernetes-logico
+!theme plain
+title Arquitectura logica Kubernetes — SaaS Virtual Try-On
+
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam defaultFontSize 11
+
+package "Kubernetes Cluster" {
+  package "Control Plane (k8s-control-01)" as CP {
+    component "kube-apiserver / scheduler /\ncontroller-manager / etcd" as CPLANE
+  }
+
+  package "CPU Workers (NODE-01 / NODE-02)" as CPU {
+    component "Ingress x2" as ING
+    component "Frontend x2+" as FE
+    component "API x2+" as API
+    component "Auth" as AUTH
+    component "Billing" as BILL
+    component "Upload Service" as UP
+    component "Usage Metering" as METER
+    component "RabbitMQ" as Q
+    component "Redis" as RD
+  }
+
+  package "GPU Worker (NODE-03)" as GPUP {
+    component "FASHN-VTON Worker" as VTON
+  }
+
+  database "PostgreSQL" as DB
+  database "Object Storage" as OBJ
+}
+
+ING --> FE
+FE --> API
+API --> AUTH
+API --> BILL
+API --> UP
+API --> METER
+UP --> OBJ
+UP --> Q
+Q --> VTON
+VTON --> OBJ
+VTON --> DB
+API --> DB
+API --> RD
+
+@enduml

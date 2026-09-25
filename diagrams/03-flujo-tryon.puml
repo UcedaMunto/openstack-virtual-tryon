@@ -1,0 +1,38 @@
+@startuml flujo-tryon
+!theme plain
+title Flujo de una solicitud Virtual Try-On
+
+actor Usuario as U
+participant "Frontend" as FE
+participant "API" as API
+participant "Billing" as B
+database "PostgreSQL" as DB
+database "Object Storage" as S
+participant "RabbitMQ" as Q
+participant "GPU Worker\nFASHN-VTON" as GPU
+
+U -> FE : persona + prenda
+FE -> API : Crear Try-On
+API -> B : validar suscripcion
+B -> DB : consultar saldo / limites
+DB --> B : disponible
+B --> API : autorizado
+
+API -> S : guardar imagenes
+API -> DB : crear Job
+API -> Q : encolar Job
+API --> FE : job_id + status QUEUED
+
+GPU -> Q : tomar Job
+Q --> GPU : trabajo
+GPU -> S : descargar archivos
+GPU -> GPU : ejecutar FASHN-VTON
+GPU -> S : guardar resultado
+GPU -> DB : actualizar COMPLETED
+GPU -> DB : registrar consumo
+
+FE -> API : consultar Job
+API --> FE : URL temporal
+FE --> U : mostrar resultado
+
+@enduml

@@ -1,0 +1,31 @@
+@startuml openstack-kolla
+!theme plain
+title OpenStack (Kolla-Ansible) — distribucion de roles en 3 nodos
+
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam defaultFontSize 11
+
+package "NODE-01 · control + network + compute" as N1 {
+  component "Control plane\nKeystone, Glance, Placement,\nNova API/Scheduler, Neutron Server,\nHorizon, MariaDB, RabbitMQ, Memcached" as CTRL
+  component "Network\nNeutron L3/DHCP/Metadata,\nOpen vSwitch, br-ex" as NET
+  component "Nova Compute CPU" as CMP1
+}
+
+package "NODE-02 · compute + storage" as N2 {
+  component "Nova Compute CPU" as CMP2
+  component "Storage\nCinder volumen LVM" as STOR
+}
+
+package "NODE-03 · compute GPU" as N3 {
+  component "Nova Compute GPU\n+ PCI Passthrough" as CMPG
+  component "GPU NVIDIA" as GPU
+}
+
+CTRL --> NET
+CTRL --> CMP1
+CTRL --> CMP2
+CTRL --> CMPG
+CMPG --> GPU
+
+@enduml

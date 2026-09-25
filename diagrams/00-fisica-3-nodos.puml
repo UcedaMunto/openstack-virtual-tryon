@@ -1,0 +1,55 @@
+@startuml fisica-3-nodos
+!theme plain
+title Arquitectura fisica — 3 nodos, red local, 1 GPU
+
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam defaultFontSize 11
+
+cloud "Red local unica / Switch 10 GbE" as LAN
+
+package "NODE-01 · node-01 · control + compute CPU" as N1 {
+  component "Kolla-Ansible\n(Control + Network)" as KCTRL
+  component "Nova Compute CPU" as NC1
+  component "K8s Control Plane VM" as KCP
+  component "K8s CPU Worker 01" as KW1
+  component "Monitoring / Registry" as MON
+}
+
+package "NODE-02 · node-02 · compute CPU + datos" as N2 {
+  component "Nova Compute CPU" as NC2
+  component "K8s CPU Worker 02" as KW2
+  component "PostgreSQL" as DB
+  component "Object Storage" as OBJ
+  component "Redis / RabbitMQ / Backup" as AUX
+}
+
+package "NODE-03 · node-03 · compute GPU" as N3 {
+  component "Nova Compute GPU" as NCG
+  component "K8s GPU Worker 01" as KG
+  component "GPU fisica\n(passthrough)" as GPU
+  component "FASHN-VTON Worker" as VTON
+}
+
+N1 -down-> LAN
+N2 -down-> LAN
+N3 -down-> LAN
+
+KCTRL --> NC1
+KCTRL --> NC2
+KCTRL --> NCG
+
+NC1 --> KCP
+NC1 --> KW1
+NC2 --> KW2
+NCG --> KG
+GPU --> KG
+KG --> VTON
+
+KW1 --> DB
+KW2 --> DB
+KW1 --> OBJ
+KW2 --> OBJ
+VTON --> OBJ
+
+@enduml

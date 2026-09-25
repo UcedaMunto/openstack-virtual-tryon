@@ -1,0 +1,43 @@
+@startuml red
+!theme plain
+title Red local — VLANs y redes logicas (Kolla-Ansible)
+
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam defaultFontSize 11
+
+actor "Internet" as INET
+
+package "Firewall / Router" as FW {
+  component "NAT / DNAT" as NAT
+}
+
+package "VLAN 10 · Management 10.10.0.0/24" as MGMT {
+  component "node-01 · 10.10.0.11" as N1M
+  component "node-02 · 10.10.0.12" as N2M
+  component "node-03 · 10.10.0.13" as N3M
+  component "VIP keystone · 10.10.0.10" as VIP
+}
+
+package "VLAN 30 · Storage 10.10.2.0/24" as STOR {
+  component "node-01 · .11" as N1S
+  component "node-02 · .12" as N2S
+  component "node-03 · .13" as N3S
+}
+
+package "VLAN 40 · Tunnel VXLAN 10.10.3.0/24" as TUN {
+  component "node-01 · .11" as N1T
+  component "node-02 · .12" as N2T
+  component "node-03 · .13" as N3T
+}
+
+package "VLAN 50 · External 10.10.4.0/24" as EXT {
+  component "floating 10.10.4.100-200" as FLT
+}
+
+INET --> FW
+NAT --> FLT
+N1M --> N2M
+N2M --> N3M
+
+@enduml
