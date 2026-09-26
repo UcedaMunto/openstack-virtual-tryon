@@ -40,6 +40,7 @@ Toda la instalación está automatizada en **scripts secuenciales e idempotentes
 - **Inventario de la red (fuente de verdad):** [`implementacion/inventory/nodes.env`](implementacion/inventory/nodes.env)
 - **Detalle por paso:** [`implementacion/docs/00-orden-de-instalacion.md`](implementacion/docs/00-orden-de-instalacion.md)
 - **Errores y percances:** [`implementacion/docs/ERRORES-Y-PERCANCES.md`](implementacion/docs/ERRORES-Y-PERCANCES.md)
+- **Reconstrucción desde cero (borrado + rebuild):** [`implementacion/docs/REBUILD-DESDE-CERO.md`](implementacion/docs/REBUILD-DESDE-CERO.md)
 
 ```bash
 # Desplegar todo desde cero en otra red:

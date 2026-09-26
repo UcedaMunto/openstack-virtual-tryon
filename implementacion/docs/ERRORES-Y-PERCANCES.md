@@ -26,6 +26,7 @@
 > 🚨 **HALLAZGO CRÍTICO:** el clúster k3s de los 3 nodos **ya ejecuta la propia aplicación VTON** (namespace `vton`: `minio`, `redis`, `vton-api-gateway`, `vton-cpu-worker`, `vton-gpu-worker`, `vton-registry` en puerto 5000, `vton-web`). El despliegue de OpenStack (Kolla) **choca** con esta app (puerto 5000 = Keystone vs registry, etc.). Ver `implementacion/README.md` → "Decisión pendiente: coexistencia con k3s".
 
 | E14 | `cinder-manage db sync` falla: "ProxySQL Error: Access denied for user 'cinder'@'192.168.0.200'" | ProxySQL no tiene el usuario `cinder` sincronizado (el deploy con `--tags cinder` omitió el rol `proxysql`) | ✅ Resuelto: re-ejecutar el **deploy completo** (sin `--tags`), que corre el rol `proxysql` y sincroniza los usuarios de BD |
+| E15 | primer `deploy` falla: "internal endpoint for compute service in RegionOne region not found" | El registro de endpoints de Nova/Neutron quedó incompleto en el primer intento (orden de registro) | ✅ Re-ejecutar `kolla-ansible deploy` (es **idempotente** y retoma donde quedó) |
 
 > ℹ️ **Nota cinder-backup:** tras desplegar Cinder, `openstack volume service list` puede mostrar `cinder-backup` en `down` aunque el contenedor esté `healthy` (heartbeat en BD obsoleto). Es **cosmético**: la creación/borrado de volúmenes funciona correctamente. `cinder-volume` y `cinder-scheduler` quedan `up`.
 

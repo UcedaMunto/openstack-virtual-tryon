@@ -97,6 +97,11 @@ NODE03 (GPU):      server     192.168.0.100
 
 `run-all.sh` deja un log con timestamp en `logs/run-all-<fecha>.log`.
 
+## 🔁 Borrado y reconstrucción
+
+- **Borrado total** (OpenStack + k3s + Cinder + configs): `bash scripts/destroy-all.sh` (⚠️ destructivo, pide "BORRAR").
+- **Guía completa de reconstrucción desde cero:** [`docs/REBUILD-DESDE-CERO.md`](docs/REBUILD-DESDE-CERO.md).
+
 ---
 
 ## Detalle completo
