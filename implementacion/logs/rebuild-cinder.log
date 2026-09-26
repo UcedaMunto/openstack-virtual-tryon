@@ -1,0 +1,42 @@
+nohup: ignoring input
+
+[1;34m===> Creando LVM (cinder-volumes) en el storage node (asus-tuf)[0m
+  VG cinder-volumes creado sobre /dev/loop18 (30720 MB)
+  VG             #PV #LV #SN Attr   VSize   VFree  
+  cinder-volumes   1   0   0 wz--n- <30.00g <30.00g
+
+[1;34m===> Habilitando Cinder en /etc/kolla/globals.yml[0m
+  enable_cinder añadido
+
+[1;34m===> Re-desplegando (deploy completo: proxysql + cinder)[0m
+skipping: no hosts matched
+
+PLAY [Apply role zun] **********************************************************
+skipping: no hosts matched
+
+PLAY [Apply role blazar] *******************************************************
+skipping: no hosts matched
+
+PLAY [Apply role masakari] *****************************************************
+skipping: no hosts matched
+
+PLAY [Apply role skyline] ******************************************************
+skipping: no hosts matched
+
+PLAY RECAP *********************************************************************
+anfitrion                  : ok=415  changed=75   unreachable=0    failed=0    skipped=285  rescued=0    ignored=0   
+asus-tuf                   : ok=99   changed=26   unreachable=0    failed=0    skipped=73   rescued=0    ignored=0   
+localhost                  : ok=4    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+server                     : ok=84   changed=17   unreachable=0    failed=0    skipped=64   rescued=0    ignored=0   
+
+
+[1;34m===> Verificación de Cinder (crear + eliminar volumen de prueba)[0m
+  Estado del volumen de prueba: available
+
++------------------+----------------+------+---------+-------+----------------------------+---------+---------------+
+| Binary           | Host           | Zone | Status  | State | Updated At                 | Cluster | Backend State |
++------------------+----------------+------+---------+-------+----------------------------+---------+---------------+
+| cinder-scheduler | anfitrion      | nova | enabled | up    | 2026-09-26T05:15:17.000000 | None    | None          |
+| cinder-volume    | asus-tuf@lvm-1 | nova | enabled | up    | 2026-09-26T05:15:18.000000 | None    | None          |
+| cinder-backup    | asus-tuf       | nova | enabled | down  | 2026-09-26T05:10:02.000000 | None    | None          |
++------------------+----------------+------+---------+-------+----------------------------+---------+---------------+

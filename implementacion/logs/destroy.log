@@ -1,0 +1,57 @@
+nohup: ignoring input
+════════════════════════════════════════════════════════════════════════
+  ⚠️  BORRADO TOTAL — esto elimina:
+     • OpenStack (Kolla-Ansible): contenedores, volúmenes, configs
+     • Kubernetes (k3s): clúster completo en los 3 nodos
+     • Cinder: volume group LVM + loopback
+     • /etc/kolla  y  /opt/kolla-ansible  (venv)
+     • Imágenes/contenedores Docker
+  Los 3 nodos físicos (Ubuntu 24.04) NO se tocan.
+════════════════════════════════════════════════════════════════════════
+
+[1;34m===> 1. Destruyendo OpenStack (kolla-ansible destroy)[0m
+skipping: [server]
+skipping: [localhost]
+
+TASK [destroy : Remove dhclient.conf] ******************************************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+skipping: [localhost]
+
+PLAY RECAP *********************************************************************
+anfitrion                  : ok=8    changed=3    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0   
+asus-tuf                   : ok=8    changed=3    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0   
+localhost                  : ok=8    changed=3    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0   
+server                     : ok=8    changed=3    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0   
+
+
+[1;34m===> 2. Limpiando Cinder LVM en asus-tuf (192.168.0.126)[0m
+  Logical volume "cinder-volumes-pool" successfully removed.
+  Volume group "cinder-volumes" successfully removed
+  cinder limpio
+
+[1;34m===> 3. Desinstalando k3s (server + agents)[0m
+  --- anfitrion (192.168.0.10) ---
++ [ -d /etc/yum.repos.d ]
++ remove_uninstall
++ rm -f /usr/local/bin/k3s-uninstall.sh
+  --- asus-tuf (192.168.0.126) ---
+/usr/bin/systemctl
+  --- server (192.168.0.100) ---
+/usr/bin/systemctl
+
+[1;34m===> 4. Limpiando /etc/kolla y /opt/kolla-ansible[0m
+
+[1;34m===> 5. Limpieza Docker (contenedores/imágenes) en los 3 nodos[0m
+  --- 192.168.0.10 ---
+
+Total reclaimed space: 132.2GB
+  --- 192.168.0.126 ---
+
+Total reclaimed space: 7.615GB
+  --- 192.168.0.100 ---
+
+Total reclaimed space: 14.07GB
+
+[1;34m===> ✔ Borrado completado. Reconstruir desde cero: bash scripts/run-all.sh + 10/11/12/13[0m

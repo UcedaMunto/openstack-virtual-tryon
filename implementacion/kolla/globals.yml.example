@@ -1,0 +1,38 @@
+# =============================================================================
+# globals.yml.example — Plantilla documentada de configuración de Kolla-Ansible
+# -----------------------------------------------------------------------------
+#  Copiar a /etc/kolla/globals.yml (ajustando las IPs/redes de la empresa).
+#  Generado/aplicado automáticamente por scripts/07-kolla-config.sh.
+# =============================================================================
+
+# Distribución base e instalación (binary = imágenes precompiladas, más rápido)
+kolla_base_distro: "ubuntu"
+kolla_install_type: "binary"
+openstack_release: "2025.2"
+
+# VIP interna (HAProxy/keepalived) — IP LIBRE de la red de management
+kolla_internal_vip_address: "192.168.0.200"
+
+# network_interface se define POR HOST en el inventario (NICs distintas por nodo)
+#   anfitrion -> enp2s0f0
+#   asus-tuf  -> enp2s0
+#   server    -> eno1
+
+# --- Cinder (almacenamiento en bloque, LVM) -----------------------------------
+# Requiere un VG LVM "cinder-volumes" en el nodo de storage (ver script 13)
+enable_cinder: "yes"
+enable_cinder_backend_lvm: "yes"
+cinder_volume_group: "cinder-volumes"
+
+# --- Redes (decisión pendiente: VLANs mgmt/storage/tunnel/external) ------------
+# Con 1 sola NIC por nodo, Neutron usa la misma interfaz para todo.
+# Para separar planos en producción, definir aquí:
+#   storage_interface: "eth1"
+#   tunnel_interface:  "eth1"
+#   neutron_external_interface: "eth0"   # mapea br-ex a la NIC física
+
+# --- Opcionales (descomentar si se necesitan) ---------------------------------
+# enable_horizon: "yes"           # (ya activo por defecto)
+# enable_heat: "yes"              # (ya activo por defecto)
+# enable_swift: "yes"             # Object Storage (fase futura)
+# enable_octavia: "yes"           # LBaaS (fase futura)

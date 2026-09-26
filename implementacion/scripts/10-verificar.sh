@@ -8,6 +8,7 @@
 set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../inventory/nodes.env"
+export PATH="$KOLLA_VENV/bin:$PATH"   # openstack CLI / kolla-ansible para los checks
 
 SSH_OPTS="-o StrictHostKeyChecking=accept-new -o ConnectTimeout=6 -o BatchMode=yes"
 LOCAL_IP="$(hostname -I | awk '{print $1}')"
@@ -69,7 +70,7 @@ echo "  --- Nodos del clúster ---"
 kubectl get nodes -o wide 2>/dev/null | sed 's/^/  /'
 READY=$(kubectl get nodes --no-headers 2>/dev/null | grep -c ' Ready')
 NOTREADY=$(kubectl get nodes --no-headers 2>/dev/null | grep -cv ' Ready' || true)
-[[ "$READY" -gt 0 ]] && ok "nodos Ready: $READY" || bad "sin nodos Ready"
+[[ "$READY" -gt 0 ]] && ok "nodos Ready: $READY" || warn "sin nodos Ready (k3s no desplegado — opcional)"
 [[ "$NOTREADY" -gt 0 ]] && warn "nodos NotReady: $NOTREADY (revisar)"
 
 echo "  --- Dashboard Kubernetes ---"
@@ -78,7 +79,7 @@ if [[ "$DPOD" -ge 1 ]]; then
   NP=$(kubectl -n kubernetes-dashboard get svc kubernetes-dashboard -o jsonpath='{.spec.ports[0].nodePort}' 2>/dev/null)
   ok "Dashboard: $DPOD pod(s) Running — URL https://$LOCAL_IP:${NP:-30443}"
 else
-  bad "Dashboard no desplegado"
+  warn "Dashboard no desplegado (k3s no desplegado — opcional)"
 fi
 
 # ---- 4. KOLLA-ANSIBLE + OPENSTACK --------------------------------------------

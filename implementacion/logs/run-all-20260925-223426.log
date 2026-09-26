@@ -1,3 +1,759 @@
+
+############ 00-bootstrap ############
+
+[1;34m===> Verificando sistema operativo (debe ser Ubuntu 24.04)[0m
+  192.168.0.10  ->  anfitrion  (Ubuntu 24.04)
+  192.168.0.126  ->  asus-tuf  (Ubuntu 24.04)
+  192.168.0.100  ->  server  (Ubuntu 24.04)
+
+[1;34m===> Habilitando sudo NOPASSWD para uceda[0m
+----- 192.168.0.10 -----
+bash: line 1: asdfghjkl: command not found
+----- 192.168.0.126 -----
+bash: line 1: asdfghjkl: command not found
+----- 192.168.0.100 -----
+bash: line 1: asdfghjkl: command not found
+
+[1;34m===> Verificando sudo sin contraseña[0m
+  192.168.0.10: sudo NOPASSWD OK
+  192.168.0.126: sudo NOPASSWD OK
+  192.168.0.100: sudo NOPASSWD OK
+
+[1;34m===> Bootstrap completado[0m
+
+############ 01-base ############
+
+[1;34m===> Instalando paquetes base en 192.168.0.10[0m
+----- [LOCAL] 192.168.0.10 -----
+Get:1 https://download.docker.com/linux/ubuntu noble InRelease [48.5 kB]
+Get:2 https://dl.google.com/linux/chrome-stable/deb stable InRelease [2,548 B]
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Get:4 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+Get:5 http://apt.postgresql.org/pub/repos/apt noble-pgdg InRelease [189 kB]
+Get:6 https://dl.google.com/linux/chrome-stable/deb stable/main amd64 Packages [1,409 B]
+Get:7 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Get:9 https://download.docker.com/linux/ubuntu noble/stable amd64 Packages [66.8 kB]
+Hit:8 https://prod-cdn.packages.k8s.io/repositories/isv:/kubernetes:/core:/stable:/v1.36/deb  InRelease
+Get:10 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+Get:11 http://apt.postgresql.org/pub/repos/apt noble-pgdg/main amd64 Packages [894 kB]
+Get:12 http://archive.ubuntu.com/ubuntu noble-updates/main i386 Packages [554 kB]
+Get:13 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1,053 kB]
+Get:14 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1,319 kB]
+Get:15 http://archive.ubuntu.com/ubuntu noble-updates/main Translation-en [299 kB]
+Get:16 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [181 kB]
+Get:17 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1,698 kB]
+Get:18 http://archive.ubuntu.com/ubuntu noble-updates/universe i386 Packages [1,145 kB]
+Get:19 http://security.ubuntu.com/ubuntu noble-security/main i386 Packages [364 kB]
+Get:20 http://security.ubuntu.com/ubuntu noble-security/main Translation-en [219 kB]
+Get:21 http://security.ubuntu.com/ubuntu noble-security/main amd64 Components [46.3 kB]
+Get:22 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Components [76.3 kB]
+Get:23 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [388 kB]
+Get:24 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
+Get:25 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [5,796 B]
+Get:26 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [12.6 kB]
+Fetched 8,941 kB in 2s (4,116 kB/s)
+Reading package lists...
+W: http://apt.postgresql.org/pub/repos/apt/dists/noble-pgdg/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details.
+Reading package lists...
+Building dependency tree...
+Reading state information...
+curl is already the newest version (8.5.0-2ubuntu10.15).
+wget is already the newest version (1.21.4-1ubuntu4.5).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+vim is already the newest version (2:9.1.0016-1ubuntu7.20).
+htop is already the newest version (3.3.0-4build1).
+net-tools is already the newest version (2.10-0.1ubuntu4.4).
+ca-certificates is already the newest version (20260601~24.04.1).
+gnupg is already the newest version (2.4.4-2ubuntu17.6).
+lsb-release is already the newest version (12.0-2).
+software-properties-common is already the newest version (0.99.49.4).
+chrony is already the newest version (4.5-1ubuntu4.2).
+python3 is already the newest version (3.12.3-0ubuntu2.1).
+python3-pip is already the newest version (24.0+dfsg-1ubuntu1.3).
+python3-venv is already the newest version (3.12.3-0ubuntu2.1).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.2).
+unzip is already the newest version (6.0-28ubuntu4.1).
+bash-completion is already the newest version (1:2.11-8).
+The following packages were automatically installed and are no longer required:
+  libfwupd2 ubuntu-fan
+Use 'sudo apt autoremove' to remove them.
+0 upgraded, 0 newly installed, 0 to remove and 59 not upgraded.
+Synchronizing state of chrony.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable chrony
+base OK en anfitrion
+
+[1;34m===> Instalando paquetes base en 192.168.0.126[0m
+----- [SSH] 192.168.0.126 -----
+Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+Hit:2 https://dl.google.com/linux/chrome-stable/deb stable InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://sv.archive.ubuntu.com/ubuntu noble InRelease
+Hit:5 http://sv.archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:6 http://sv.archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+curl is already the newest version (8.5.0-2ubuntu10.15).
+curl set to manually installed.
+wget is already the newest version (1.21.4-1ubuntu4.5).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+vim is already the newest version (2:9.1.0016-1ubuntu7.20).
+htop is already the newest version (3.3.0-4build1).
+net-tools is already the newest version (2.10-0.1ubuntu4.4).
+ca-certificates is already the newest version (20260601~24.04.1).
+gnupg is already the newest version (2.4.4-2ubuntu17.6).
+lsb-release is already the newest version (12.0-2).
+software-properties-common is already the newest version (0.99.49.4).
+chrony is already the newest version (4.5-1ubuntu4.2).
+python3 is already the newest version (3.12.3-0ubuntu2.1).
+python3-pip is already the newest version (24.0+dfsg-1ubuntu1.3).
+python3-venv is already the newest version (3.12.3-0ubuntu2.1).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.2).
+unzip is already the newest version (6.0-28ubuntu4.1).
+bash-completion is already the newest version (1:2.11-8).
+The following packages were automatically installed and are no longer required:
+  libfwupd2 libisns0t64 libopeniscsiusr
+Use 'sudo apt autoremove' to remove them.
+0 upgraded, 0 newly installed, 0 to remove and 16 not upgraded.
+Synchronizing state of chrony.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable chrony
+base OK en asus-tuf
+
+[1;34m===> Instalando paquetes base en 192.168.0.100[0m
+----- [SSH] 192.168.0.100 -----
+Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+Hit:2 https://dl.google.com/linux/chrome-stable/deb stable InRelease
+Hit:3 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  InRelease
+Hit:4 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:5 http://sv.archive.ubuntu.com/ubuntu noble InRelease
+Hit:6 https://deb.anydesk.com all InRelease
+Hit:7 https://download.sublimetext.com apt/stable/ InRelease
+Hit:8 http://sv.archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:9 http://sv.archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+curl is already the newest version (8.5.0-2ubuntu10.15).
+wget is already the newest version (1.21.4-1ubuntu4.5).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+vim is already the newest version (2:9.1.0016-1ubuntu7.20).
+htop is already the newest version (3.3.0-4build1).
+net-tools is already the newest version (2.10-0.1ubuntu4.4).
+ca-certificates is already the newest version (20260601~24.04.1).
+gnupg is already the newest version (2.4.4-2ubuntu17.6).
+lsb-release is already the newest version (12.0-2).
+software-properties-common is already the newest version (0.99.49.4).
+chrony is already the newest version (4.5-1ubuntu4.2).
+python3 is already the newest version (3.12.3-0ubuntu2.1).
+python3-pip is already the newest version (24.0+dfsg-1ubuntu1.3).
+python3-venv is already the newest version (3.12.3-0ubuntu2.1).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.2).
+unzip is already the newest version (6.0-28ubuntu4.1).
+bash-completion is already the newest version (1:2.11-8).
+The following packages were automatically installed and are no longer required:
+  libisns0t64 libopeniscsiusr
+Use 'sudo apt autoremove' to remove them.
+0 upgraded, 0 newly installed, 0 to remove and 101 not upgraded.
+Synchronizing state of chrony.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable chrony
+base OK en server
+
+[1;34m===> Base completada en todos los nodos[0m
+
+############ 02-docker ############
+
+[1;34m===> Instalando Docker CE en 192.168.0.10[0m
+----- [LOCAL] 192.168.0.10 -----
+Docker ya instalado: Docker version 29.8.1, build 4a63305
+
+[1;34m===> Instalando Docker CE en 192.168.0.126[0m
+----- [SSH] 192.168.0.126 -----
+Docker ya instalado: Docker version 29.8.1, build 4a63305
+
+[1;34m===> Instalando Docker CE en 192.168.0.100[0m
+----- [SSH] 192.168.0.100 -----
+Docker ya instalado: Docker version 29.8.1, build 4a63305
+
+[1;34m===> Docker completado[0m
+
+############ 03-kolla-ansible ############
+
+[1;34m===> Instalando Kolla-Ansible en el nodo de control (192.168.0.10)[0m
+----- [LOCAL] 192.168.0.10 -----
+Reading package lists...
+Building dependency tree...
+Reading state information...
+python3-venv is already the newest version (3.12.3-0ubuntu2.1).
+python3-dev is already the newest version (3.12.3-0ubuntu2.1).
+libffi-dev is already the newest version (3.4.6-1build1).
+gcc is already the newest version (4:13.2.0-7ubuntu1).
+libssl-dev is already the newest version (3.0.13-0ubuntu3.15).
+The following packages were automatically installed and are no longer required:
+  libfwupd2 ubuntu-fan
+Use 'sudo apt autoremove' to remove them.
+0 upgraded, 0 newly installed, 0 to remove and 59 not upgraded.
+Kolla-Ansible instalado: kolla-ansible 21.3.0
+ansible-core: ansible [core 2.18.19]
+
+[1;34m===> Kolla-Ansible completado (control)[0m
+
+############ 04-openstack-cli ############
+
+[1;34m===> Instalando python-openstackclient en el control (192.168.0.10)[0m
+----- [LOCAL] 192.168.0.10 -----
+openstack CLI: openstack 10.3.0
+
+[1;34m===> openstackclient completado[0m
+
+############ 05-k8s-tools ############
+
+[1;34m===> Instalando kubectl + helm en 192.168.0.10[0m
+----- [LOCAL] 192.168.0.10 -----
+kubectl: Client Version: v1.36.3
+helm: v3.22.0+g144ca65
+
+[1;34m===> Instalando kubectl + helm en 192.168.0.126[0m
+----- [SSH] 192.168.0.126 -----
+Hit:1 http://sv.archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 https://download.docker.com/linux/ubuntu noble InRelease
+Hit:3 http://sv.archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 https://dl.google.com/linux/chrome-stable/deb stable InRelease
+Hit:5 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:6 http://sv.archive.ubuntu.com/ubuntu noble-backports InRelease
+Get:7 https://prod-cdn.packages.k8s.io/repositories/isv:/kubernetes:/core:/stable:/v1.36/deb  InRelease [1,227 B]
+Get:8 https://prod-cdn.packages.k8s.io/repositories/isv:/kubernetes:/core:/stable:/v1.36/deb  Packages [9,460 B]
+Fetched 10.7 kB in 1s (10.3 kB/s)
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following packages were automatically installed and are no longer required:
+  libfwupd2 libisns0t64 libopeniscsiusr
+Use 'sudo apt autoremove' to remove them.
+The following NEW packages will be installed:
+  kubectl
+0 upgraded, 1 newly installed, 0 to remove and 16 not upgraded.
+Need to get 11.8 MB of archives.
+After this operation, 59.6 MB of additional disk space will be used.
+Get:1 https://prod-cdn.packages.k8s.io/repositories/isv:/kubernetes:/core:/stable:/v1.36/deb  kubectl 1.36.5-1.1 [11.8 MB]
+Fetched 11.8 MB in 2s (5,740 kB/s)
+Selecting previously unselected package kubectl.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 213239 files and directories currently installed.)
+Preparing to unpack .../kubectl_1.36.5-1.1_amd64.deb ...
+Unpacking kubectl (1.36.5-1.1) ...
+Setting up kubectl (1.36.5-1.1) ...
+
+Running kernel seems to be up-to-date.
+
+The processor microcode seems to be up-to-date.
+
+Restarting services...
+
+Service restarts being deferred:
+ systemctl restart NetworkManager.service
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+User sessions running outdated binaries:
+ uceda @ session #12: gdm-wayland-ses[10171]
+ uceda @ user manager service: at-spi-bus-laun[10320], gnome-session-b[10287], ibus-daemon[10496], systemd[10109]
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+kubectl: Client Version: v1.36.5
+helm: v3.22.0+g144ca65
+
+[1;34m===> Instalando kubectl + helm en 192.168.0.100[0m
+----- [SSH] 192.168.0.100 -----
+Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+Hit:2 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  InRelease
+Hit:3 http://sv.archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 https://dl.google.com/linux/chrome-stable/deb stable InRelease
+Hit:5 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:6 https://download.sublimetext.com apt/stable/ InRelease
+Hit:8 https://deb.anydesk.com all InRelease
+Hit:9 http://sv.archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:10 http://sv.archive.ubuntu.com/ubuntu noble-backports InRelease
+Get:7 https://prod-cdn.packages.k8s.io/repositories/isv:/kubernetes:/core:/stable:/v1.36/deb  InRelease [1,227 B]
+Get:11 https://prod-cdn.packages.k8s.io/repositories/isv:/kubernetes:/core:/stable:/v1.36/deb  Packages [9,460 B]
+Fetched 10.7 kB in 1s (13.4 kB/s)
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following packages were automatically installed and are no longer required:
+  libisns0t64 libopeniscsiusr
+Use 'sudo apt autoremove' to remove them.
+The following NEW packages will be installed:
+  kubectl
+0 upgraded, 1 newly installed, 0 to remove and 101 not upgraded.
+Need to get 11.8 MB of archives.
+After this operation, 59.6 MB of additional disk space will be used.
+Get:1 https://prod-cdn.packages.k8s.io/repositories/isv:/kubernetes:/core:/stable:/v1.36/deb  kubectl 1.36.5-1.1 [11.8 MB]
+Fetched 11.8 MB in 1s (8,544 kB/s)
+Selecting previously unselected package kubectl.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 214024 files and directories currently installed.)
+Preparing to unpack .../kubectl_1.36.5-1.1_amd64.deb ...
+Unpacking kubectl (1.36.5-1.1) ...
+Setting up kubectl (1.36.5-1.1) ...
+
+The processor microcode seems to be up-to-date.
+
+Restarting services...
+
+Service restarts being deferred:
+ systemctl restart NetworkManager.service
+ systemctl restart gdm.service
+ systemctl restart networkd-dispatcher.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+User sessions running outdated binaries:
+ uceda @ session #33: gdm-session-wor[3301], gdm-x-session[3378]
+ uceda @ user manager service: chrome[4435,4452,4453,4455,4482], gnome-session-b[3554], gnome-shell[3587], gvfsd[3537], ibus-daemon[3693], systemd[3320]
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+kubectl: Client Version: v1.36.5
+helm: v3.22.0+g144ca65
+
+[1;34m===> k8s-tools completado[0m
+
+############ 06-nvidia-runtime ############
+
+[1;34m===> Instalando nvidia-container-toolkit en el nodo GPU (192.168.0.100)[0m
+----- [SSH] 192.168.0.100 -----
+time="2026-09-25T22:35:38-06:00" level=info msg="Using config version 1"
+time="2026-09-25T22:35:38-06:00" level=info msg="Using CRI runtime plugin name \"cri\""
+time="2026-09-25T22:35:38-06:00" level=warning msg="Could not infer options from runtimes [runc crun]"
+time="2026-09-25T22:35:38-06:00" level=info msg="Wrote updated config to /etc/containerd/conf.d/99-nvidia.toml"
+time="2026-09-25T22:35:38-06:00" level=info msg="It is recommended that containerd daemon be restarted."
+nvidia-ctk: NVIDIA Container Toolkit CLI version 1.20.1
+commit: dffc40b4f820ce5c512633bac9e0418d0e05a2ee
+GPU: NVIDIA GeForce RTX 3060
+
+[1;34m===> nvidia-runtime completado[0m
+
+############ 07-kolla-config ############
+
+[1;34m===> Generando inventario Kolla-Ansible: /etc/kolla/multinode[0m
+Inventario escrito.
+
+[1;34m===> Generando globals.yml (esqueleto): /etc/kolla/globals.yml[0m
+globals.yml escrito.
+
+[1;34m===> Generando passwords (kolla-genpwd)[0m
+WARNING: Passwords file "/etc/kolla/passwords.yml" is world-readable. The permissions will be changed.
+
+[1;34m===> Ajustando propietario de /etc/kolla a uceda[0m
+
+[1;34m===> Contenido de /etc/kolla:[0m
+total 76
+drwxr-xr-x   2 uceda uceda  4096 Sep 25 22:35 .
+drwxr-xr-x 172 root  root  12288 Sep 25 22:35 ..
+-rw-r--r--   1 uceda uceda  7484 Sep 25 22:35 all-in-one
+-rw-r--r--   1 uceda uceda   479 Sep 25 22:35 globals.yml
+-rw-r--r--   1 uceda uceda  7916 Sep 25 22:35 multinode
+-rw-r-----   1 uceda uceda 36913 Sep 25 22:35 passwords.yml
+
+############ 08-kolla-bootstrap ############
+
+[1;34m===> kolla-ansible bootstrap-servers[0m
+Bootstrapping servers
+[WARNING]: Invalid characters were found in group names but not replaced, use
+-vvvv to see details
+
+PLAY [Gather facts for all hosts] **********************************************
+
+TASK [Group hosts to determine when using --limit] *****************************
+ok: [anfitrion]
+ok: [asus-tuf]
+ok: [server]
+ok: [localhost]
+
+TASK [Gather facts] ************************************************************
+[WARNING]: Could not match supplied host pattern, ignoring:
+all_using_limit_True
+ok: [server]
+ok: [localhost]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+PLAY [Gather facts for all hosts (if using --limit)] ***************************
+skipping: no hosts matched
+
+PLAY [Apply role baremetal] ****************************************************
+
+TASK [openstack.kolla.etc_hosts : Include etc-hosts.yml] ***********************
+included: /home/uceda/.ansible/collections/ansible_collections/openstack/kolla/roles/etc_hosts/tasks/etc-hosts.yml for anfitrion, asus-tuf, server
+
+TASK [openstack.kolla.etc_hosts : Ensure localhost in /etc/hosts] **************
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.etc_hosts : Ensure hostname does not point to 127.0.1.1 in /etc/hosts] ***
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.etc_hosts : Generate /etc/hosts for all of the nodes] ****
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.etc_hosts : Check whether /etc/cloud/cloud.cfg exists] ***
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.etc_hosts : Disable cloud-init manage_etc_hosts] *********
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.baremetal : Ensure unprivileged users can use ping] ******
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.baremetal : Gather package facts] ************************
+ok: [server]
+ok: [asus-tuf]
+ok: [anfitrion]
+
+TASK [openstack.kolla.baremetal : Set firewall default policy] *****************
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.baremetal : Disable firewalld] ***************************
+skipping: [anfitrion] => (item=firewalld) 
+skipping: [anfitrion]
+skipping: [asus-tuf] => (item=firewalld) 
+skipping: [asus-tuf]
+skipping: [server] => (item=firewalld) 
+skipping: [server]
+
+TASK [openstack.kolla.packages : Install packages] *****************************
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.packages : Remove packages] ******************************
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Install/Uninstall] ******************************
+included: /home/uceda/.ansible/collections/ansible_collections/openstack/kolla/roles/docker/tasks/install.yml for anfitrion, asus-tuf, server
+
+TASK [openstack.kolla.docker : Enable Docker repository] ***********************
+included: /home/uceda/.ansible/collections/ansible_collections/openstack/kolla/roles/docker/tasks/repo-Debian.yml for anfitrion, asus-tuf, server
+
+TASK [openstack.kolla.docker : Install CA certificates and gnupg packages] *****
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Ensure apt sources list directory exists] *******
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Ensure apt keyrings directory exists] ***********
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Install docker apt gpg key] *********************
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Install docker apt pin] *************************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker : Ensure old docker repository absent] ************
+ok: [anfitrion]
+ok: [asus-tuf]
+ok: [server]
+
+TASK [openstack.kolla.docker : Enable docker apt repository] *******************
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Update the apt cache] ***************************
+changed: [server]
+changed: [anfitrion]
+changed: [asus-tuf]
+
+TASK [openstack.kolla.docker : Check which containers are running] *************
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Check if docker systemd unit exists] ************
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Mask the docker systemd unit on Debian/Ubuntu] ***
+changed: [anfitrion]
+changed: [server]
+changed: [asus-tuf]
+
+TASK [openstack.kolla.docker : Install packages] *******************************
+ok: [server]
+ok: [asus-tuf]
+ok: [anfitrion]
+
+TASK [openstack.kolla.docker : Start docker] ***********************************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker : Wait for Docker to start] ***********************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker : Ensure containers are running after Docker upgrade] ***
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker : Ensure docker config directory exists] **********
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Write docker config] ****************************
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Flush handlers] *********************************
+
+TASK [openstack.kolla.docker : Flush handlers] *********************************
+
+TASK [openstack.kolla.docker : Flush handlers] *********************************
+
+TASK [openstack.kolla.docker : Get Docker API version] *************************
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Parse Docker system info] ***********************
+ok: [anfitrion]
+ok: [asus-tuf]
+ok: [server]
+
+TASK [openstack.kolla.docker : Determine if Docker uses containerd image store] ***
+ok: [anfitrion]
+ok: [asus-tuf]
+ok: [server]
+
+TASK [openstack.kolla.docker : Ensure /etc/containerd exists] ******************
+skipping: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Copying over containerd config] *****************
+skipping: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Remove old docker options file] *****************
+ok: [anfitrion]
+ok: [asus-tuf]
+ok: [server]
+
+TASK [openstack.kolla.docker : Ensure docker service directory exists] *********
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker : Configure docker service] ***********************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker : Ensure the path for CA file for private registry exists] ***
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker : Ensure the CA file for private registry exists] ***
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker : Flush handlers] *********************************
+
+TASK [openstack.kolla.docker : Flush handlers] *********************************
+
+TASK [openstack.kolla.docker : Flush handlers] *********************************
+
+TASK [openstack.kolla.docker : Start and enable docker] ************************
+changed: [server]
+changed: [anfitrion]
+changed: [asus-tuf]
+
+TASK [openstack.kolla.kolla_user : Ensure groups are present] ******************
+skipping: [anfitrion] => (item=docker) 
+skipping: [anfitrion] => (item=sudo) 
+skipping: [anfitrion] => (item=kolla) 
+skipping: [anfitrion]
+skipping: [asus-tuf] => (item=docker) 
+skipping: [asus-tuf] => (item=sudo) 
+skipping: [asus-tuf] => (item=kolla) 
+skipping: [asus-tuf]
+skipping: [server] => (item=docker) 
+skipping: [server] => (item=sudo) 
+skipping: [server] => (item=kolla) 
+skipping: [server]
+
+TASK [openstack.kolla.kolla_user : Create kolla user] **************************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.kolla_user : Add public key to kolla user authorized keys] ***
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.kolla_user : Grant kolla user passwordless sudo] *********
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker_sdk : Get Python] *********************************
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker_sdk : Check if Python environment is externally managed] ***
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker_sdk : Set docker_sdk_python_externally_managed fact] ***
+ok: [anfitrion]
+ok: [asus-tuf]
+ok: [server]
+
+TASK [openstack.kolla.docker_sdk : Install/Uninstall] **************************
+included: /home/uceda/.ansible/collections/ansible_collections/openstack/kolla/roles/docker_sdk/tasks/install.yml for anfitrion, asus-tuf, server
+
+TASK [openstack.kolla.docker_sdk : Ensure apt sources list directory exists] ***
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker_sdk : Ensure apt keyrings directory exists] *******
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker_sdk : Install osbpo apt gpg key] ******************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker_sdk : Enable osbpo apt repository] ****************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker_sdk : Install packages] ***************************
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker_sdk : Check if virtualenv is a directory] *********
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker_sdk : Check if packaging is already installed] ****
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker_sdk : Install packaging into virtualenv] **********
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker_sdk : Install latest pip and packaging in the virtualenv] ***
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker_sdk : Install docker SDK for python using pip] ****
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.baremetal : Ensure node_config_directory directory exists] ***
+ok: [anfitrion]
+ok: [asus-tuf]
+ok: [server]
+
+TASK [openstack.kolla.apparmor_libvirt : Include tasks from remove-profile.yml] ***
+included: /home/uceda/.ansible/collections/ansible_collections/openstack/kolla/roles/apparmor_libvirt/tasks/remove-profile.yml for anfitrion, asus-tuf, server
+
+TASK [openstack.kolla.apparmor_libvirt : Get stat of libvirtd apparmor profile] ***
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.apparmor_libvirt : Get stat of libvirtd apparmor disable profile] ***
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.apparmor_libvirt : Remove apparmor profile for libvirt] ***
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.baremetal : Change state of selinux] *********************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.baremetal : Set https proxy for git] *********************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.baremetal : Set http proxy for git] **********************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.baremetal : Copying over kolla.target] *******************
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+PLAY RECAP *********************************************************************
+anfitrion                  : ok=42   changed=3    unreachable=0    failed=0    skipped=29   rescued=0    ignored=0   
+asus-tuf                   : ok=44   changed=3    unreachable=0    failed=0    skipped=27   rescued=0    ignored=0   
+localhost                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+server                     : ok=44   changed=3    unreachable=0    failed=0    skipped=27   rescued=0    ignored=0   
+
+
+[1;34m===> kolla-ansible prechecks[0m
 Pre-deployment checking
 [WARNING]: Invalid characters were found in group names but not replaced, use
 -vvvv to see details
@@ -1518,3 +2274,21 @@ asus-tuf                   : ok=37   changed=0    unreachable=0    failed=0    s
 localhost                  : ok=14   changed=0    unreachable=0    failed=0    skipped=13   rescued=0    ignored=0   
 server                     : ok=37   changed=0    unreachable=0    failed=0    skipped=28   rescued=0    ignored=0   
 
+
+[1;34m===> Bootstrap + prechecks completados (ver logs/ y errores en docs/ERRORES-Y-PERCANCES.md)[0m
+
+############ 09-kolla-hosts ############
+
+[1;34m===> Corrigiendo /etc/hosts + avahi en 192.168.0.10[0m
+hosts OK en anfitrion
+
+[1;34m===> Corrigiendo /etc/hosts + avahi en 192.168.0.126[0m
+hosts OK en asus-tuf
+
+[1;34m===> Corrigiendo /etc/hosts + avahi en 192.168.0.100[0m
+hosts OK en server
+
+[1;34m===> Verificación de resolución única:[0m
+  anfitrion -> 192.168.0.10
+  asus-tuf -> 192.168.0.126
+  server -> 192.168.0.100

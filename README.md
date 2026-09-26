@@ -6,11 +6,10 @@ Plataforma SaaS de **Virtual Try-On** sobre **OpenStack (Kolla-Ansible) + Kubern
 
 | Componente | Estado |
 |---|---|
-| **OpenStack (Kolla-Ansible 21.3.0)** | ✅ Desplegado — 26 contenedores, 3 hypervisors `up` |
+| **OpenStack (Kolla-Ansible 21.3.0)** | ✅ Reconstruido — 28 contenedores, 3 hypervisors `up` |
 | **Cinder (bloque, LVM)** | ✅ Operativo — `cinder-volume` up, volúmenes creables |
-| **Kubernetes (k3s v1.36)** | ✅ Activo — 3 nodos Ready |
 | **GPU NVIDIA RTX 3060 (12 GB)** | ✅ Operativa en `server` |
-| **Dashboard Kubernetes** | ✅ `https://192.168.0.10:30443` |
+| **Kubernetes (k3s)** | ⚠️ Borrado (clúster preexistente con la app VTON; no es parte de la nube OpenStack) |
 
 ## 🔑 Acceso a interfaces de administración
 

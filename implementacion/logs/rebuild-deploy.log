@@ -1,3 +1,9 @@
+nohup: ignoring input
+
+[1;34m===> Verificando puerto 5000 (Keystone)[0m
+  ✅ Puerto 5000 libre.
+
+[1;34m===> kolla-ansible deploy (descarga imágenes y arranca OpenStack)[0m
 Deploying Playbooks
 [WARNING]: Invalid characters were found in group names but not replaced, use
 -vvvv to see details

@@ -58,9 +58,11 @@ EOF
   echo "  enable_cinder añadido"
 fi
 
-# ---- 3. Re-deploy de cinder ---------------------------------------------------
-log "Re-desplegando cinder (--tags cinder)"
-$KOLLA_BIN deploy -i "$INV" -t cinder 2>&1 | tee "$SCRIPT_DIR/../logs/cinder-deploy.log" | tail -20
+# ---- 3. Re-deploy (deploy COMPLETO: sincroniza proxysql + despliega cinder) ---
+#  NOTA: usar `-t cinder` falla con "ProxySQL Access denied" (E14) porque no
+#  corre el rol proxysql. Por eso se usa el deploy completo (idempotente).
+log "Re-desplegando (deploy completo: proxysql + cinder)"
+$KOLLA_BIN deploy -i "$INV" 2>&1 | tee "$SCRIPT_DIR/../logs/cinder-deploy.log" | tail -20
 
 log "Verificación de Cinder (crear + eliminar volumen de prueba)"
 source /etc/kolla/admin-openrc.sh

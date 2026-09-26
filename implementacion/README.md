@@ -79,6 +79,14 @@ bash scripts/13-openstack-cinder.sh   # Cinder (bloque) con backend LVM
 
 ---
 
+## Archivos YAML (Ansible + Kolla)
+
+Además del inventario bash, el proyecto incluye los **YAML** declarativos usados con Ansible/Kolla:
+
+- [`ansible/inventory/hosts.yml`](ansible/inventory/hosts.yml) — inventario Ansible (YAML) de los 3 nodos con sus roles.
+- [`ansible/README.md`](ansible/README.md) — cómo usar Ansible para gestionar la infraestructura.
+- [`kolla/globals.yml.example`](kolla/globals.yml.example) — plantilla documentada de configuración Kolla (YAML).
+
 ## Inventario (`inventory/nodes.env`)
 
 Es la **única fuente de verdad** de la red. Contiene:
