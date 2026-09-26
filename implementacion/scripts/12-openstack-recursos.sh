@@ -15,19 +15,22 @@ PUBKEY="${HOME}/.ssh/id_ed25519.pub"
 
 # ---- 1. Flavors --------------------------------------------------------------
 log "Creando flavors"
-declare -A FLAVORS=(
-  [m1.tiny]="--vcpus 1 --ram 512 --disk 1"
-  [m1.small]="--vcpus 1 --ram 2048 --disk 10"
-  [m1.medium]="--vcpus 2 --ram 4096 --disk 20"
-  [gpu.1]="--vcpus 2 --ram 8192 --disk 40"
-)
-for name in "${!FLAVORS[@]}"; do
-  if openstack flavor show "$name" >/dev/null 2>&1; then
-    echo "  flavor $name ya existe"
-  else
-    openstack flavor create $name ${FLAVORS[$name]} --public >/dev/null && echo "  flavor $name creado"
-  fi
-done
+# Creamos cada flavor en una línea (idempotente: si existe, lo salta)
+# flavor m1.tiny (1 vCPU, 512 MB, 1 GB)
+openstack flavor show m1.tiny >/dev/null 2>&1 && echo "  flavor m1.tiny ya existe" || \
+  { openstack flavor create m1.tiny --vcpus 1 --ram 512 --disk 1 --public >/dev/null && echo "  flavor m1.tiny creado"; }
+
+# flavor m1.small (1 vCPU, 2 GB, 10 GB)
+openstack flavor show m1.small >/dev/null 2>&1 && echo "  flavor m1.small ya existe" || \
+  { openstack flavor create m1.small --vcpus 1 --ram 2048 --disk 10 --public >/dev/null && echo "  flavor m1.small creado"; }
+
+# flavor m1.medium (2 vCPU, 4 GB, 20 GB)
+openstack flavor show m1.medium >/dev/null 2>&1 && echo "  flavor m1.medium ya existe" || \
+  { openstack flavor create m1.medium --vcpus 2 --ram 4096 --disk 20 --public >/dev/null && echo "  flavor m1.medium creado"; }
+
+# flavor gpu.1 (2 vCPU, 8 GB, 40 GB — para la VM GPU)
+openstack flavor show gpu.1 >/dev/null 2>&1 && echo "  flavor gpu.1 ya existe" || \
+  { openstack flavor create gpu.1 --vcpus 2 --ram 8192 --disk 40 --public >/dev/null && echo "  flavor gpu.1 creado"; }
 
 # ---- 2. Imagen Cirros --------------------------------------------------------
 log "Creando imagen Cirros (test)"
@@ -56,16 +59,26 @@ fi
 # ---- 4. Security group default -------------------------------------------------
 log "Reglas del security group default"
 SG=$(openstack security group list -f value -c ID -c Name | awk '$2=="default"{print $1}')
-for rule in "icmp" "tcp 22" "tcp 80" "tcp 443" "tcp 8000"; do
-  proto=${rule%% *}; port=${rule##* }
-  if [[ "$proto" == "icmp" ]]; then
-    openstack security group rule list "$SG" --protocol icmp -f value 2>/dev/null | grep -q . || \
-      openstack security group rule create "$SG" --protocol icmp >/dev/null && echo "  regla icmp añadida"
-  else
-    openstack security group rule list "$SG" --protocol tcp --dst-port "$port:$port" -f value 2>/dev/null | grep -q . || \
-      openstack security group rule create "$SG" --protocol tcp --dst-port "$port" >/dev/null && echo "  regla tcp/$port añadida"
-  fi
-done
+
+# Regla ICMP (ping)
+openstack security group rule list "$SG" --protocol icmp -f value 2>/dev/null | grep -q . || \
+  openstack security group rule create "$SG" --protocol icmp >/dev/null && echo "  regla icmp añadida"
+
+# Regla TCP 22 (SSH)
+openstack security group rule list "$SG" --protocol tcp --dst-port 22:22 -f value 2>/dev/null | grep -q . || \
+  openstack security group rule create "$SG" --protocol tcp --dst-port 22 >/dev/null && echo "  regla tcp/22 añadida"
+
+# Regla TCP 80 (HTTP)
+openstack security group rule list "$SG" --protocol tcp --dst-port 80:80 -f value 2>/dev/null | grep -q . || \
+  openstack security group rule create "$SG" --protocol tcp --dst-port 80 >/dev/null && echo "  regla tcp/80 añadida"
+
+# Regla TCP 443 (HTTPS)
+openstack security group rule list "$SG" --protocol tcp --dst-port 443:443 -f value 2>/dev/null | grep -q . || \
+  openstack security group rule create "$SG" --protocol tcp --dst-port 443 >/dev/null && echo "  regla tcp/443 añadida"
+
+# Regla TCP 8000 (API del proyecto)
+openstack security group rule list "$SG" --protocol tcp --dst-port 8000:8000 -f value 2>/dev/null | grep -q . || \
+  openstack security group rule create "$SG" --protocol tcp --dst-port 8000 >/dev/null && echo "  regla tcp/8000 añadida"
 
 # ---- 5. Red self-service (VXLAN) + subnet + router ----------------------------
 log "Creando red self-service (VXLAN)"

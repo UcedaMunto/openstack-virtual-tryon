@@ -54,6 +54,7 @@ bash scripts/10-verificar.sh       # verificación integral (informe PASS/FAIL/W
 bash scripts/11-kolla-deploy.sh    # deploy + post-deploy (OpenStack en línea)
 bash scripts/12-openstack-recursos.sh # recursos base: flavors, imagen, keypair, red
 bash scripts/13-openstack-cinder.sh   # Cinder (bloque) con backend LVM
+bash scripts/15-dns.sh               # DNS local (dnsmasq): icc115.openstack.com / icc115.kubernetes.com
 ```
 
 ---
@@ -76,6 +77,7 @@ bash scripts/13-openstack-cinder.sh   # Cinder (bloque) con backend LVM
 | `11-kolla-deploy.sh` | control | **`deploy` + `post-deploy`** (arranca OpenStack) | 08 |
 | `12-openstack-recursos.sh` | control | recursos base: flavors, imagen Cirros, keypair, red self-service | 11 |
 | `13-openstack-cinder.sh` | control+storage | Cinder (bloque) con backend LVM (loopback) | 11 |
+| `15-dns.sh` | control | DNS local (dnsmasq): `icc115.openstack.com` / `icc115.kubernetes.com` | — |
 
 ---
 

@@ -25,9 +25,9 @@ run_node() {
   fi
 }
 
-for ip in $ALL_NODES; do
-  log "Instalando kubectl + helm en $ip"
-  run_node "$ip" <<'EOF'
+# ---- NODE-01: anfitrion (192.168.0.10) ------------------------------------
+log "Instalando kubectl + helm en anfitrion ($NODE01_IP)"
+run_node "$NODE01_IP" <<'EOF'
 set -e
 export DEBIAN_FRONTEND=noninteractive
 
@@ -48,6 +48,53 @@ fi
 echo "kubectl: $(kubectl version --client 2>/dev/null | head -1 || echo 'ok')"
 echo "helm: $(helm version --short 2>/dev/null || echo 'ok')"
 EOF
-done
+
+# ---- NODE-02: asus-tuf (192.168.0.126) ------------------------------------
+log "Instalando kubectl + helm en asus-tuf ($NODE02_IP)"
+run_node "$NODE02_IP" <<'EOF'
+set -e
+export DEBIAN_FRONTEND=noninteractive
+
+# kubectl vía repositorio oficial de Kubernetes
+if ! command -v kubectl >/dev/null 2>&1; then
+  install -m 0755 -d /etc/apt/keyrings
+  curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.36/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.36/deb/ /" > /etc/apt/sources.list.d/kubernetes.list
+  apt-get update -y
+  apt-get install -y kubectl
+fi
+
+# helm
+if ! command -v helm >/dev/null 2>&1; then
+  curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+fi
+
+echo "kubectl: $(kubectl version --client 2>/dev/null | head -1 || echo 'ok')"
+echo "helm: $(helm version --short 2>/dev/null || echo 'ok')"
+EOF
+
+# ---- NODE-03: server (192.168.0.100) --------------------------------------
+log "Instalando kubectl + helm en server ($NODE03_IP)"
+run_node "$NODE03_IP" <<'EOF'
+set -e
+export DEBIAN_FRONTEND=noninteractive
+
+# kubectl vía repositorio oficial de Kubernetes
+if ! command -v kubectl >/dev/null 2>&1; then
+  install -m 0755 -d /etc/apt/keyrings
+  curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.36/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.36/deb/ /" > /etc/apt/sources.list.d/kubernetes.list
+  apt-get update -y
+  apt-get install -y kubectl
+fi
+
+# helm
+if ! command -v helm >/dev/null 2>&1; then
+  curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+fi
+
+echo "kubectl: $(kubectl version --client 2>/dev/null | head -1 || echo 'ok')"
+echo "helm: $(helm version --short 2>/dev/null || echo 'ok')"
+EOF
 
 log "k8s-tools completado"

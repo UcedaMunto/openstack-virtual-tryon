@@ -23,9 +23,9 @@ run_node() {
   fi
 }
 
-for ip in $ALL_NODES; do
-  log "Instalando Docker CE en $ip"
-  run_node "$ip" <<'EOF'
+# ---- NODE-01: anfitrion (192.168.0.10) ------------------------------------
+log "Instalando Docker CE en anfitrion ($NODE01_IP)"
+run_node "$NODE01_IP" <<'EOF'
 set -e
 export DEBIAN_FRONTEND=noninteractive
 if command -v docker >/dev/null 2>&1; then
@@ -41,6 +41,43 @@ systemctl enable --now docker
 usermod -aG docker "$(id -un 1000 2>/dev/null || echo "$SUDO_USER")" || true
 echo "Docker instalado: $(docker --version)"
 EOF
-done
+
+# ---- NODE-02: asus-tuf (192.168.0.126) ------------------------------------
+log "Instalando Docker CE en asus-tuf ($NODE02_IP)"
+run_node "$NODE02_IP" <<'EOF'
+set -e
+export DEBIAN_FRONTEND=noninteractive
+if command -v docker >/dev/null 2>&1; then
+  echo "Docker ya instalado: $(docker --version)"; exit 0
+fi
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+chmod a+r /etc/apt/keyrings/docker.asc
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" > /etc/apt/sources.list.d/docker.list
+apt-get update -y
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+systemctl enable --now docker
+usermod -aG docker "$(id -un 1000 2>/dev/null || echo "$SUDO_USER")" || true
+echo "Docker instalado: $(docker --version)"
+EOF
+
+# ---- NODE-03: server (192.168.0.100) --------------------------------------
+log "Instalando Docker CE en server ($NODE03_IP)"
+run_node "$NODE03_IP" <<'EOF'
+set -e
+export DEBIAN_FRONTEND=noninteractive
+if command -v docker >/dev/null 2>&1; then
+  echo "Docker ya instalado: $(docker --version)"; exit 0
+fi
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+chmod a+r /etc/apt/keyrings/docker.asc
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" > /etc/apt/sources.list.d/docker.list
+apt-get update -y
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+systemctl enable --now docker
+usermod -aG docker "$(id -un 1000 2>/dev/null || echo "$SUDO_USER")" || true
+echo "Docker instalado: $(docker --version)"
+EOF
 
 log "Docker completado"

@@ -31,17 +31,35 @@ echo "hosts OK en \$(hostname)"
 EOF
 }
 
-for ip in $ALL_NODES; do
-  log "Corrigiendo /etc/hosts + avahi en $ip"
-  if is_local "$ip"; then
-    write_block | bash -s
-  else
-    write_block | ssh $SSH_OPTS "$SSH_USER@$ip" 'bash -s'
-  fi
-done
+# ---- NODE-01: anfitrion (192.168.0.10) ------------------------------------
+log "Corrigiendo /etc/hosts + avahi en anfitrion ($NODE01_IP)"
+if is_local "$NODE01_IP"; then
+  write_block | bash -s
+else
+  write_block | ssh $SSH_OPTS "$SSH_USER@$NODE01_IP" 'bash -s'
+fi
 
+# ---- NODE-02: asus-tuf (192.168.0.126) ------------------------------------
+log "Corrigiendo /etc/hosts + avahi en asus-tuf ($NODE02_IP)"
+if is_local "$NODE02_IP"; then
+  write_block | bash -s
+else
+  write_block | ssh $SSH_OPTS "$SSH_USER@$NODE02_IP" 'bash -s'
+fi
+
+# ---- NODE-03: server (192.168.0.100) --------------------------------------
+log "Corrigiendo /etc/hosts + avahi en server ($NODE03_IP)"
+if is_local "$NODE03_IP"; then
+  write_block | bash -s
+else
+  write_block | ssh $SSH_OPTS "$SSH_USER@$NODE03_IP" 'bash -s'
+fi
+
+# ---- Verificación de resolución única (los 3 nodos) -------------------------
 log "Verificación de resolución única:"
-for h in $NODE01_NAME $NODE02_NAME $NODE03_NAME; do
-  echo -n "  $h -> "
-  getent ahostsv4 "$h" 2>/dev/null | awk 'NR==1{print $1}'
-done
+echo -n "  $NODE01_NAME -> "
+getent ahostsv4 "$NODE01_NAME" 2>/dev/null | awk 'NR==1{print $1}'
+echo -n "  $NODE02_NAME -> "
+getent ahostsv4 "$NODE02_NAME" 2>/dev/null | awk 'NR==1{print $1}'
+echo -n "  $NODE03_NAME -> "
+getent ahostsv4 "$NODE03_NAME" 2>/dev/null | awk 'NR==1{print $1}'

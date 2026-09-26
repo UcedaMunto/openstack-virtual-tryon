@@ -28,11 +28,9 @@ run_node() {
   fi
 }
 
-PKGS="curl wget git vim htop net-tools ca-certificates gnupg lsb-release software-properties-common chrony python3 python3-pip python3-venv jq unzip bash-completion"
-
-for ip in $ALL_NODES; do
-  log "Instalando paquetes base en $ip"
-  run_node "$ip" <<'EOF'
+# ---- NODE-01: anfitrion (192.168.0.10) ------------------------------------
+log "Instalando paquetes base en anfitrion ($NODE01_IP)"
+run_node "$NODE01_IP" <<'EOF'
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
@@ -40,6 +38,27 @@ apt-get install -y curl wget git vim htop net-tools ca-certificates gnupg lsb-re
 systemctl enable --now chrony || systemctl enable --now chronyd 2>/dev/null || true
 echo "base OK en $(hostname)"
 EOF
-done
+
+# ---- NODE-02: asus-tuf (192.168.0.126) ------------------------------------
+log "Instalando paquetes base en asus-tuf ($NODE02_IP)"
+run_node "$NODE02_IP" <<'EOF'
+set -e
+export DEBIAN_FRONTEND=noninteractive
+apt-get update -y
+apt-get install -y curl wget git vim htop net-tools ca-certificates gnupg lsb-release software-properties-common chrony python3 python3-pip python3-venv jq unzip bash-completion
+systemctl enable --now chrony || systemctl enable --now chronyd 2>/dev/null || true
+echo "base OK en $(hostname)"
+EOF
+
+# ---- NODE-03: server (192.168.0.100) --------------------------------------
+log "Instalando paquetes base en server ($NODE03_IP)"
+run_node "$NODE03_IP" <<'EOF'
+set -e
+export DEBIAN_FRONTEND=noninteractive
+apt-get update -y
+apt-get install -y curl wget git vim htop net-tools ca-certificates gnupg lsb-release software-properties-common chrony python3 python3-pip python3-venv jq unzip bash-completion
+systemctl enable --now chrony || systemctl enable --now chronyd 2>/dev/null || true
+echo "base OK en $(hostname)"
+EOF
 
 log "Base completada en todos los nodos"

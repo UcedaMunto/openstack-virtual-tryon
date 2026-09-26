@@ -45,28 +45,40 @@ fi
 
 # ---- 2. Cinder LVM (storage) -------------------------------------------------
 log "2. Limpiando Cinder LVM en $NODE02_NAME ($NODE02_IP)"
-run "$NODE02_IP" 'sudo -n vgremove -f cinder-volumes 2>/dev/null || true; for d in $(sudo -n losetup -a 2>/dev/null | grep cinder | cut -d: -f1); do sudo -n losetup -d "$d"; done; sudo -n rm -f /var/lib/cinder/cinder-volumes.img; echo "  cinder limpio"'
+run "$NODE02_IP" 'sudo -n vgremove -f cinder-volumes 2>/dev/null || true; sudo -n losetup -d $(sudo -n losetup -a 2>/dev/null | grep cinder | cut -d: -f1 | head -1) 2>/dev/null || true; sudo -n rm -f /var/lib/cinder/cinder-volumes.img; echo "  cinder limpio"'
 
 # ---- 3. Kubernetes (k3s) -----------------------------------------------------
 log "3. Desinstalando k3s (server + agents)"
-for pair in "$NODE01_IP:$NODE01_NAME" "$NODE02_IP:$NODE02_NAME" "$NODE03_IP:$NODE03_NAME"; do
-  ip="${pair%%:*}"; name="${pair##*:}"
-  echo "  --- $name ($ip) ---"
-  if is_local "$ip"; then
-    sudo -n /usr/local/bin/k3s-uninstall.sh 2>&1 | tail -3 || sudo -n /usr/local/bin/k3s-agent-uninstall.sh 2>&1 | tail -3 || echo "  (k3s ya desinstalado o sin desinstalador)"
-  else
-    run "$ip" 'sudo -n /usr/local/bin/k3s-uninstall.sh 2>/dev/null || sudo -n /usr/local/bin/k3s-agent-uninstall.sh 2>/dev/null || echo "  (k3s ya desinstalado o sin desinstalador)"'
-  fi
-done
+
+# NODE-01: anfitrion (server, LOCAL)
+echo "  --- anfitrion ($NODE01_IP) ---"
+sudo -n /usr/local/bin/k3s-uninstall.sh 2>&1 | tail -3 || sudo -n /usr/local/bin/k3s-agent-uninstall.sh 2>&1 | tail -3 || echo "  (k3s ya desinstalado o sin desinstalador)"
+
+# NODE-02: asus-tuf (agent, REMOTO)
+echo "  --- asus-tuf ($NODE02_IP) ---"
+run "$NODE02_IP" 'sudo -n /usr/local/bin/k3s-uninstall.sh 2>/dev/null || sudo -n /usr/local/bin/k3s-agent-uninstall.sh 2>/dev/null || echo "  (k3s ya desinstalado o sin desinstalador)"'
+
+# NODE-03: server (agent, REMOTO)
+echo "  --- server ($NODE03_IP) ---"
+run "$NODE03_IP" 'sudo -n /usr/local/bin/k3s-uninstall.sh 2>/dev/null || sudo -n /usr/local/bin/k3s-agent-uninstall.sh 2>/dev/null || echo "  (k3s ya desinstalado o sin desinstalador)"'
 
 # ---- 4. Configs + venv + docker ----------------------------------------------
 log "4. Limpiando /etc/kolla y /opt/kolla-ansible"
 sudo -n rm -rf /etc/kolla /opt/kolla-ansible
 
-log "5. Limpieza Docker (contenedores/imágenes) en los 3 nodos"
-for ip in $ALL_NODES; do
-  echo "  --- $ip ---"
-  run "$ip" 'sudo -n docker system prune -af --volumes 2>&1 | tail -2 || true'
-done
+# ---- 5. Limpieza Docker (los 3 nodos) ----------------------------------------
+log "5. Limpieza Docker (contenedores/imágenes)"
+
+# NODE-01: anfitrion (LOCAL)
+echo "  --- $NODE01_IP ---"
+run "$NODE01_IP" 'sudo -n docker system prune -af --volumes 2>&1 | tail -2 || true'
+
+# NODE-02: asus-tuf (REMOTO)
+echo "  --- $NODE02_IP ---"
+run "$NODE02_IP" 'sudo -n docker system prune -af --volumes 2>&1 | tail -2 || true'
+
+# NODE-03: server (REMOTO)
+echo "  --- $NODE03_IP ---"
+run "$NODE03_IP" 'sudo -n docker system prune -af --volumes 2>&1 | tail -2 || true'
 
 log "✔ Borrado completado. Reconstruir desde cero: bash scripts/run-all.sh + 10/11/12/13"

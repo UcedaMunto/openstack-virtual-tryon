@@ -14,10 +14,45 @@ LOG="$LOG_DIR/run-all-$(date +%Y%m%d-%H%M%S).log"
 
 echo "==> Ejecutando secuencia completa. Log: $LOG"
 {
-  for s in 00-bootstrap 01-base 02-docker 03-kolla-ansible 04-openstack-cli 05-k8s-tools 06-nvidia-runtime 07-kolla-config 08-kolla-bootstrap 09-kolla-hosts; do
-    echo; echo "############ $s ############"
-    bash "$SCRIPT_DIR/$s.sh"
-  done
+  # ---- 00: sudo NOPASSWD + verificación -------------------------------------
+  echo; echo "############ 00-bootstrap ############"
+  bash "$SCRIPT_DIR/00-bootstrap.sh"
+
+  # ---- 01: paquetes base + chrony -------------------------------------------
+  echo; echo "############ 01-base ############"
+  bash "$SCRIPT_DIR/01-base.sh"
+
+  # ---- 02: Docker CE + Compose + containerd ---------------------------------
+  echo; echo "############ 02-docker ############"
+  bash "$SCRIPT_DIR/02-docker.sh"
+
+  # ---- 03: Kolla-Ansible (venv) [control] -----------------------------------
+  echo; echo "############ 03-kolla-ansible ############"
+  bash "$SCRIPT_DIR/03-kolla-ansible.sh"
+
+  # ---- 04: openstack CLI [control] ------------------------------------------
+  echo; echo "############ 04-openstack-cli ############"
+  bash "$SCRIPT_DIR/04-openstack-cli.sh"
+
+  # ---- 05: kubectl + helm [todos] -------------------------------------------
+  echo; echo "############ 05-k8s-tools ############"
+  bash "$SCRIPT_DIR/05-k8s-tools.sh"
+
+  # ---- 06: nvidia-container-toolkit [GPU] -----------------------------------
+  echo; echo "############ 06-nvidia-runtime ############"
+  bash "$SCRIPT_DIR/06-nvidia-runtime.sh"
+
+  # ---- 07: inventario Kolla + globals + passwords ---------------------------
+  echo; echo "############ 07-kolla-config ############"
+  bash "$SCRIPT_DIR/07-kolla-config.sh"
+
+  # ---- 08: bootstrap-servers + prechecks ------------------------------------
+  echo; echo "############ 08-kolla-bootstrap ############"
+  bash "$SCRIPT_DIR/08-kolla-bootstrap.sh"
+
+  # ---- 09: /etc/hosts único + avahi (mask) ----------------------------------
+  echo; echo "############ 09-kolla-hosts ############"
+  bash "$SCRIPT_DIR/09-kolla-hosts.sh"
 } 2>&1 | tee "$LOG"
 
 echo

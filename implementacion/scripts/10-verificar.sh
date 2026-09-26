@@ -34,32 +34,72 @@ echo "========================================================================"
 
 # ---- 1. NODOS ----------------------------------------------------------------
 sec "1. NODOS (conectividad, SO, sudo)"
-for pair in "$NODE01_IP:$NODE01_NAME" "$NODE02_IP:$NODE02_NAME" "$NODE03_IP:$NODE03_NAME"; do
-  ip="${pair%%:*}"; name="${pair##*:}"
-  if ping -c1 -W2 "$ip" >/dev/null 2>&1; then
-    ver=$(run "$ip" "grep -E '^VERSION_ID=' /etc/os-release | cut -d= -f2 | tr -d '\"'")
-    if run "$ip" "sudo -n true" >/dev/null 2>&1; then
-      ok "$name ($ip) — Ubuntu $ver — sudo NOPASSWD OK"
-    else
-      warn "$name ($ip) — Ubuntu $ver — sudo NOPASSWD FALLA"
-    fi
+
+# NODE-01: anfitrion
+if ping -c1 -W2 "$NODE01_IP" >/dev/null 2>&1; then
+  ver=$(run "$NODE01_IP" "grep -E '^VERSION_ID=' /etc/os-release | cut -d= -f2 | tr -d '\"'")
+  if run "$NODE01_IP" "sudo -n true" >/dev/null 2>&1; then
+    ok "$NODE01_NAME ($NODE01_IP) — Ubuntu $ver — sudo NOPASSWD OK"
   else
-    bad "$name ($ip) — no responde a ping"
+    warn "$NODE01_NAME ($NODE01_IP) — Ubuntu $ver — sudo NOPASSWD FALLA"
   fi
-done
+else
+  bad "$NODE01_NAME ($NODE01_IP) — no responde a ping"
+fi
+
+# NODE-02: asus-tuf
+if ping -c1 -W2 "$NODE02_IP" >/dev/null 2>&1; then
+  ver=$(run "$NODE02_IP" "grep -E '^VERSION_ID=' /etc/os-release | cut -d= -f2 | tr -d '\"'")
+  if run "$NODE02_IP" "sudo -n true" >/dev/null 2>&1; then
+    ok "$NODE02_NAME ($NODE02_IP) — Ubuntu $ver — sudo NOPASSWD OK"
+  else
+    warn "$NODE02_NAME ($NODE02_IP) — Ubuntu $ver — sudo NOPASSWD FALLA"
+  fi
+else
+  bad "$NODE02_NAME ($NODE02_IP) — no responde a ping"
+fi
+
+# NODE-03: server
+if ping -c1 -W2 "$NODE03_IP" >/dev/null 2>&1; then
+  ver=$(run "$NODE03_IP" "grep -E '^VERSION_ID=' /etc/os-release | cut -d= -f2 | tr -d '\"'")
+  if run "$NODE03_IP" "sudo -n true" >/dev/null 2>&1; then
+    ok "$NODE03_NAME ($NODE03_IP) — Ubuntu $ver — sudo NOPASSWD OK"
+  else
+    warn "$NODE03_NAME ($NODE03_IP) — Ubuntu $ver — sudo NOPASSWD FALLA"
+  fi
+else
+  bad "$NODE03_NAME ($NODE03_IP) — no responde a ping"
+fi
 
 # ---- 2. DOCKER / CONTAINERD --------------------------------------------------
 sec "2. DOCKER + CONTAINERD"
-for pair in "$NODE01_IP:$NODE01_NAME" "$NODE02_IP:$NODE02_NAME" "$NODE03_IP:$NODE03_NAME"; do
-  ip="${pair%%:*}"; name="${pair##*:}"
-  dv=$(run "$ip" "docker --version 2>/dev/null")
-  ds=$(run "$ip" "systemctl is-active docker 2>/dev/null")
-  if [[ "$dv" == Docker* ]] && [[ "$ds" == "active" ]]; then
-    ok "$name — $dv (servicio active)"
-  else
-    bad "$name — docker: '${dv:-sin version}' servicio: '${ds:-inactive}'"
-  fi
-done
+
+# NODE-01: anfitrion
+dv=$(run "$NODE01_IP" "docker --version 2>/dev/null")
+ds=$(run "$NODE01_IP" "systemctl is-active docker 2>/dev/null")
+if [[ "$dv" == Docker* ]] && [[ "$ds" == "active" ]]; then
+  ok "$NODE01_NAME — $dv (servicio active)"
+else
+  bad "$NODE01_NAME — docker: '${dv:-sin version}' servicio: '${ds:-inactive}'"
+fi
+
+# NODE-02: asus-tuf
+dv=$(run "$NODE02_IP" "docker --version 2>/dev/null")
+ds=$(run "$NODE02_IP" "systemctl is-active docker 2>/dev/null")
+if [[ "$dv" == Docker* ]] && [[ "$ds" == "active" ]]; then
+  ok "$NODE02_NAME — $dv (servicio active)"
+else
+  bad "$NODE02_NAME — docker: '${dv:-sin version}' servicio: '${ds:-inactive}'"
+fi
+
+# NODE-03: server
+dv=$(run "$NODE03_IP" "docker --version 2>/dev/null")
+ds=$(run "$NODE03_IP" "systemctl is-active docker 2>/dev/null")
+if [[ "$dv" == Docker* ]] && [[ "$ds" == "active" ]]; then
+  ok "$NODE03_NAME — $dv (servicio active)"
+else
+  bad "$NODE03_NAME — docker: '${dv:-sin version}' servicio: '${ds:-inactive}'"
+fi
 
 # ---- 3. KUBERNETES (k3s) -----------------------------------------------------
 sec "3. KUBERNETES (k3s) + HERRAMIENTAS"
@@ -92,9 +132,12 @@ fi
 [[ -x "$KOLLA_VENV/bin/openstack" ]] && ok "openstack CLI: $($KOLLA_VENV/bin/openstack --version 2>/dev/null)" || warn "openstack CLI no instalado"
 
 echo "  --- Configuración /etc/kolla ---"
-for f in multinode globals.yml passwords.yml; do
-  [[ -f "/etc/kolla/$f" ]] && ok "/etc/kolla/$f presente" || bad "falta /etc/kolla/$f"
-done
+# Archivo multinode (inventario)
+[[ -f "/etc/kolla/multinode" ]] && ok "/etc/kolla/multinode presente" || bad "falta /etc/kolla/multinode"
+# Archivo globals.yml (configuración)
+[[ -f "/etc/kolla/globals.yml" ]] && ok "/etc/kolla/globals.yml presente" || bad "falta /etc/kolla/globals.yml"
+# Archivo passwords.yml (secretos)
+[[ -f "/etc/kolla/passwords.yml" ]] && ok "/etc/kolla/passwords.yml presente" || bad "falta /etc/kolla/passwords.yml"
 
 echo "  --- Estado del despliegue OpenStack ---"
 OSC=$(docker ps --format '{{.Names}}' 2>/dev/null | grep -cE 'keystone|horizon|nova|neutron|glance|mariadb|rabbitmq|placement|cinder')
@@ -126,16 +169,34 @@ fi
 
 # ---- 6. RED / HOSTS / AVAHI --------------------------------------------------
 sec "6. RED (resolución única + avahi)"
-for name in $NODE01_NAME $NODE02_NAME $NODE03_NAME; do
-  ips=$(getent ahostsv4 "$name" 2>/dev/null | awk '{print $1}' | sort -u | tr '\n' ' ')
-  n=$(echo "$ips" | wc -w)
-  if [[ "$n" -eq 1 ]]; then ok "$name -> $ips (única)"; else warn "$name -> [$ips] (múltiples)"; fi
-done
-for pair in "$NODE01_IP:$NODE01_NAME" "$NODE02_IP:$NODE02_NAME" "$NODE03_IP:$NODE03_NAME"; do
-  ip="${pair%%:*}"; name="${pair##*:}"
-  av=$(run "$ip" "systemctl is-active avahi-daemon 2>/dev/null")
-  [[ "$av" == "inactive" || "$av" == "failed" ]] && ok "$name: avahi desactivado" || warn "$name: avahi ACTIVO (revisar)"
-done
+
+# NODE-01: anfitrion
+ips=$(getent ahostsv4 "$NODE01_NAME" 2>/dev/null | awk '{print $1}' | sort -u | tr '\n' ' ')
+n=$(echo "$ips" | wc -w)
+if [[ "$n" -eq 1 ]]; then ok "$NODE01_NAME -> $ips (única)"; else warn "$NODE01_NAME -> [$ips] (múltiples)"; fi
+
+# NODE-02: asus-tuf
+ips=$(getent ahostsv4 "$NODE02_NAME" 2>/dev/null | awk '{print $1}' | sort -u | tr '\n' ' ')
+n=$(echo "$ips" | wc -w)
+if [[ "$n" -eq 1 ]]; then ok "$NODE02_NAME -> $ips (única)"; else warn "$NODE02_NAME -> [$ips] (múltiples)"; fi
+
+# NODE-03: server
+ips=$(getent ahostsv4 "$NODE03_NAME" 2>/dev/null | awk '{print $1}' | sort -u | tr '\n' ' ')
+n=$(echo "$ips" | wc -w)
+if [[ "$n" -eq 1 ]]; then ok "$NODE03_NAME -> $ips (única)"; else warn "$NODE03_NAME -> [$ips] (múltiples)"; fi
+
+# Verificación de avahi (mDNS) en cada nodo
+# NODE-01: anfitrion
+av=$(run "$NODE01_IP" "systemctl is-active avahi-daemon 2>/dev/null")
+[[ "$av" == "inactive" || "$av" == "failed" ]] && ok "$NODE01_NAME: avahi desactivado" || warn "$NODE01_NAME: avahi ACTIVO (revisar)"
+
+# NODE-02: asus-tuf
+av=$(run "$NODE02_IP" "systemctl is-active avahi-daemon 2>/dev/null")
+[[ "$av" == "inactive" || "$av" == "failed" ]] && ok "$NODE02_NAME: avahi desactivado" || warn "$NODE02_NAME: avahi ACTIVO (revisar)"
+
+# NODE-03: server
+av=$(run "$NODE03_IP" "systemctl is-active avahi-daemon 2>/dev/null")
+[[ "$av" == "inactive" || "$av" == "failed" ]] && ok "$NODE03_NAME: avahi desactivado" || warn "$NODE03_NAME: avahi ACTIVO (revisar)"
 
 # ---- RESUMEN ----------------------------------------------------------------
 echo -e "\n\033[1;34m━━━ RESUMEN ━━━\033[0m"

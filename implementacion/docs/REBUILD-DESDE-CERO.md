@@ -56,7 +56,8 @@ bash scripts/09-kolla-hosts.sh       # 11) /etc/hosts único + avahi (mask)
 bash scripts/11-kolla-deploy.sh      # 12) deploy + post-deploy (¡OpenStack en línea!)
 bash scripts/12-openstack-recursos.sh# 13) flavors, imagen, keypair, red
 bash scripts/13-openstack-cinder.sh  # 14) Cinder (bloque, LVM)
-bash scripts/10-verificar.sh         # 15) verificación integral (0 FAIL esperado)
+bash scripts/15-dns.sh               # 15) DNS local (icc115.openstack.com / icc115.kubernetes.com)
+bash scripts/10-verificar.sh         # 16) verificación integral (0 FAIL esperado)
 ```
 
 > `run-all.sh` ejecuta automáticamente los pasos **00-09**. Los pasos 10-13 se corren aparte (verificación y despliegue).

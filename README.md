@@ -15,9 +15,11 @@ Plataforma SaaS de **Virtual Try-On** sobre **OpenStack (Kolla-Ansible) + Kubern
 
 | Interfaz | URL | Acceso |
 |---|---|---|
-| **OpenStack Horizon** | `http://192.168.0.200/` | usuario `admin` · password en `/etc/kolla/passwords.yml` (o `source /etc/kolla/admin-openrc.sh`) |
-| **Kubernetes Dashboard** | `https://192.168.0.10:30443` | token: `kubectl -n kubernetes-dashboard create token admin-user` |
+| **OpenStack Horizon** | `http://icc115.openstack.com/` (o `http://192.168.0.200/`) | usuario `admin` · password en `/etc/kolla/passwords.yml` (o `source /etc/kolla/admin-openrc.sh`) |
+| **Kubernetes Dashboard** | `https://icc115.kubernetes.com:30443` (o `https://192.168.0.10:30443`) | token: `kubectl -n kubernetes-dashboard create token admin-user` |
 | **kubectl** | CLI | configurado en `~/.kube/config` |
+
+> 🌐 **DNS local** (dnsmasq en `anfitrion`, script `15-dns.sh`): `icc115.openstack.com → 192.168.0.200` y `icc115.kubernetes.com → 192.168.0.10`.
 
 ---
 

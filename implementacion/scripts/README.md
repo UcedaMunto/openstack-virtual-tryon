@@ -21,6 +21,7 @@
 | 11 | `11-kolla-deploy.sh` | control | **`deploy` + `post-deploy`** (arranca OpenStack) | 08 |
 | 12 | `12-openstack-recursos.sh` | control | recursos base: flavors, imagen Cirros, keypair, red self-service | 11 |
 | 13 | `13-openstack-cinder.sh` | control+storage | Cinder (bloque) con backend LVM (loopback) | 11 |
+| 15 | `15-dns.sh` | control | DNS local (dnsmasq): `icc115.openstack.com` / `icc115.kubernetes.com` | — |
 | — | `run-all.sh` | todos | Ejecuta la secuencia **00-09** y guarda log | — |
 | — | `destroy-all.sh` | todos | ⚠️ **BORRADO TOTAL** (OpenStack + k3s + Cinder + configs) — pide confirmación | — |
 
