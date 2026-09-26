@@ -1,0 +1,43 @@
+---
+# =============================================================================
+# playbooks/15_dns.yml — DNS local (adicional al numeral 58)
+# -----------------------------------------------------------------------------
+#  dnsmasq en el control para resolver los dominios del proyecto:
+#     icc115.openstack.com   -> 192.168.0.200 (Horizon, VIP)
+#     icc115.kubernetes.com  -> 192.168.0.10  (Dashboard Kubernetes)
+# =============================================================================
+- name: "15 — DNS local (dnsmasq)"
+  hosts: control
+  become: true
+
+  tasks:
+    - name: Instalar dnsmasq
+      apt:
+        name: dnsmasq
+        state: present
+        update_cache: true
+
+    - name: Configurar dominios del proyecto
+      copy:
+        dest: /etc/dnsmasq.d/icc115.conf
+        mode: "0644"
+        content: |
+          # ===== Dominios del proyecto ICC115 =====
+          address=/icc115.openstack.com/{{ kolla_vip }}
+          address=/icc115.kubernetes.com/{{ node01_ip }}
+          interface={{ node01_nic }}
+          bind-interfaces
+
+    - name: Reiniciar y habilitar dnsmasq
+      systemd:
+        name: dnsmasq
+        enabled: true
+        state: restarted
+
+    - name: Refuerzo en /etc/hosts
+      blockinfile:
+        path: /etc/hosts
+        block: |
+          {{ kolla_vip }}  icc115.openstack.com
+          {{ node01_ip }}   icc115.kubernetes.com
+        marker: "# {mark} ANSIBLE ICC115 DNS"

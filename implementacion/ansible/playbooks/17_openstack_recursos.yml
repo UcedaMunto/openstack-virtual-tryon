@@ -1,0 +1,131 @@
+---
+# =============================================================================
+# playbooks/17_openstack_recursos.yml — Recursos base de OpenStack (adicional)
+# -----------------------------------------------------------------------------
+#  Flavors, imagen Cirros, keypair, reglas SG, red self-service + Cinder.
+#  Idempotente (cada recurso se crea solo si falta). Requiere 05 desplegado.
+# =============================================================================
+- name: "17 — Recursos base de OpenStack"
+  hosts: control
+  become: false
+
+  vars:
+    admin_openrc: /etc/kolla/admin-openrc.sh
+
+  tasks:
+    # ---- Flavors ---------------------------------------------------------------
+    - name: Crear flavor m1.tiny
+      shell: |
+        source {{ admin_openrc }}
+        openstack flavor show m1.tiny >/dev/null 2>&1 || openstack flavor create m1.tiny --vcpus 1 --ram 512 --disk 1 --public
+      changed_when: false
+
+    - name: Crear flavor m1.small
+      shell: |
+        source {{ admin_openrc }}
+        openstack flavor show m1.small >/dev/null 2>&1 || openstack flavor create m1.small --vcpus 1 --ram 2048 --disk 10 --public
+      changed_when: false
+
+    - name: Crear flavor m1.medium
+      shell: |
+        source {{ admin_openrc }}
+        openstack flavor show m1.medium >/dev/null 2>&1 || openstack flavor create m1.medium --vcpus 2 --ram 4096 --disk 20 --public
+      changed_when: false
+
+    - name: Crear flavor gpu.1
+      shell: |
+        source {{ admin_openrc }}
+        openstack flavor show gpu.1 >/dev/null 2>&1 || openstack flavor create gpu.1 --vcpus 2 --ram 8192 --disk 40 --public
+      changed_when: false
+
+    # ---- Imagen Cirros ---------------------------------------------------------
+    - name: Crear imagen Cirros (test)
+      shell: |
+        source {{ admin_openrc }}
+        if ! openstack image show cirros-0.6.2 >/dev/null 2>&1; then
+          curl -fsSL -o /tmp/cirros-0.6.2-x86_64-disk.img https://download.cirros-cloud.net/0.6.2/cirros-0.6.2-x86_64-disk.img
+          openstack image create cirros-0.6.2 --file /tmp/cirros-0.6.2-x86_64-disk.img --disk-format qcow2 --container-format bare --public
+        fi
+      changed_when: false
+
+    # ---- Keypair ---------------------------------------------------------------
+    - name: Crear keypair admin-key
+      shell: |
+        source {{ admin_openrc }}
+        openstack keypair show admin-key >/dev/null 2>&1 || openstack keypair create admin-key --public-key {{ lookup('env', 'HOME') }}/.ssh/id_ed25519.pub
+      changed_when: false
+      ignore_errors: true
+
+    # ---- Reglas del security group default --------------------------------------
+    - name: Regla SG — ICMP (ping)
+      shell: |
+        source {{ admin_openrc }}
+        SG=$(openstack security group list -f value -c ID -c Name | awk '$2=="default"{print $1}')
+        openstack security group rule list "$SG" --protocol icmp -f value 2>/dev/null | grep -q . || openstack security group rule create "$SG" --protocol icmp
+      changed_when: false
+
+    - name: Regla SG — TCP 22 (SSH)
+      shell: |
+        source {{ admin_openrc }}
+        SG=$(openstack security group list -f value -c ID -c Name | awk '$2=="default"{print $1}')
+        openstack security group rule list "$SG" --protocol tcp --dst-port 22:22 -f value 2>/dev/null | grep -q . || openstack security group rule create "$SG" --protocol tcp --dst-port 22
+      changed_when: false
+
+    - name: Regla SG — TCP 80 (HTTP)
+      shell: |
+        source {{ admin_openrc }}
+        SG=$(openstack security group list -f value -c ID -c Name | awk '$2=="default"{print $1}')
+        openstack security group rule list "$SG" --protocol tcp --dst-port 80:80 -f value 2>/dev/null | grep -q . || openstack security group rule create "$SG" --protocol tcp --dst-port 80
+      changed_when: false
+
+    - name: Regla SG — TCP 443 (HTTPS)
+      shell: |
+        source {{ admin_openrc }}
+        SG=$(openstack security group list -f value -c ID -c Name | awk '$2=="default"{print $1}')
+        openstack security group rule list "$SG" --protocol tcp --dst-port 443:443 -f value 2>/dev/null | grep -q . || openstack security group rule create "$SG" --protocol tcp --dst-port 443
+      changed_when: false
+
+    - name: Regla SG — TCP 8000 (API)
+      shell: |
+        source {{ admin_openrc }}
+        SG=$(openstack security group list -f value -c ID -c Name | awk '$2=="default"{print $1}')
+        openstack security group rule list "$SG" --protocol tcp --dst-port 8000:8000 -f value 2>/dev/null | grep -q . || openstack security group rule create "$SG" --protocol tcp --dst-port 8000
+      changed_when: false
+
+    # ---- Red self-service + subnet + router -------------------------------------
+    - name: Crear red selfservice-net
+      shell: |
+        source {{ admin_openrc }}
+        openstack network show selfservice-net >/dev/null 2>&1 || openstack network create selfservice-net
+      changed_when: false
+
+    - name: Crear subnet selfservice-subnet (10.10.10.0/24)
+      shell: |
+        source {{ admin_openrc }}
+        openstack subnet show selfservice-subnet >/dev/null 2>&1 || openstack subnet create selfservice-subnet --network selfservice-net --subnet-range 10.10.10.0/24 --dns-nameserver 8.8.8.8
+      changed_when: false
+
+    - name: Crear router router1 y conectar subnet
+      shell: |
+        source {{ admin_openrc }}
+        openstack router show router1 >/dev/null 2>&1 || openstack router create router1
+        openstack router add subnet router1 selfservice-subnet >/dev/null 2>&1 || true
+      changed_when: false
+
+    # ---- Cinder ----------------------------------------------------------------
+    - name: Habilitar Cinder en globals.yml
+      become: true
+      blockinfile:
+        path: "{{ kolla_config_dir }}/globals.yml"
+        block: |
+          # --- Cinder (almacenamiento en bloque) ---
+          enable_cinder: "yes"
+          enable_cinder_backend_lvm: "yes"
+          cinder_volume_group: "cinder-volumes"
+        marker: "# {mark} ANSIBLE CINDER"
+
+    - name: Re-desplegar (proxysql + cinder)
+      shell: |
+        export PATH={{ kolla_venv }}/bin:$PATH
+        {{ kolla_venv }}/bin/kolla-ansible deploy -i {{ kolla_config_dir }}/multinode
+      changed_when: false

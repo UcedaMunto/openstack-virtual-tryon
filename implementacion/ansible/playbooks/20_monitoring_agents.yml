@@ -1,0 +1,11 @@
+---
+# =============================================================================
+# playbooks/20_monitoring_agents.yml — Monitorización (§58·59.11)
+# -----------------------------------------------------------------------------
+#  Instala agentes/exporters de host (node_exporter, etc.).
+# =============================================================================
+- name: "20 — Agentes de monitorización"
+  hosts: physical_nodes
+
+  roles:
+    - monitoring_agent

@@ -1,0 +1,110 @@
+---
+# =============================================================================
+# playbooks/05_kolla_deploy.yml — Despliegue OpenStack (§58·59.6)
+# -----------------------------------------------------------------------------
+#  Wrapper que ORQUESTA Kolla-Ansible (no lo reimplementa):
+#    config -> bootstrap-servers -> prechecks -> pull -> deploy -> post-deploy
+# =============================================================================
+- name: "05 — Despliegue OpenStack (wrapper Kolla-Ansible)"
+  hosts: control
+  become: false
+
+  vars:
+    kolla_inv: "{{ kolla_config_dir }}/multinode"
+
+  tasks:
+    # ---- Configuración (inventario + globals + passwords) --------------------
+    - name: Generar inventario Kolla (multinode)
+      become: true
+      copy:
+        dest: "{{ kolla_inv }}"
+        mode: "0644"
+        content: |
+          # Inventario Kolla-Ansible (generado por playbook 05)
+          [control]
+          {{ node01_name }} ansible_host={{ node01_ip }} network_interface={{ node01_nic }}
+
+          [network]
+          {{ node01_name }} ansible_host={{ node01_ip }} network_interface={{ node01_nic }}
+
+          [compute]
+          {{ node01_name }} ansible_host={{ node01_ip }} network_interface={{ node01_nic }}
+          {{ node02_name }} ansible_host={{ node02_ip }} network_interface={{ node02_nic }}
+          {{ node03_name }} ansible_host={{ node03_ip }} network_interface={{ node03_nic }}
+
+          [storage]
+          {{ node02_name }} ansible_host={{ node02_ip }} network_interface={{ node02_nic }}
+
+          [monitoring]
+          {{ node01_name }} ansible_host={{ node01_ip }} network_interface={{ node01_nic }}
+
+          [deployment]
+          localhost ansible_connection=local
+
+    - name: Añadir mapeos :children + variables de conexión
+      become: true
+      shell: |
+        SRC={{ kolla_venv }}/share/kolla-ansible/ansible/inventory/multinode
+        if [ -f "$SRC" ]; then
+          awk '/^\[baremetal:children\]/,0' "$SRC" >> {{ kolla_inv }}
+        fi
+        cat >> {{ kolla_inv }} <<'EOF'
+
+        [all:vars]
+        ansible_user={{ ssh_user }}
+        ansible_become=true
+        ansible_python_interpreter=/usr/bin/python3
+        ansible_ssh_common_args: '-o StrictHostKeyChecking=accept-new -o IdentitiesOnly=yes'
+        EOF
+      changed_when: false
+
+    - name: Generar globals.yml
+      become: true
+      copy:
+        dest: "{{ kolla_config_dir }}/globals.yml"
+        mode: "0644"
+        content: |
+          # globals.yml — generado por playbook 05
+          kolla_base_distro: "ubuntu"
+          kolla_install_type: "binary"
+          openstack_release: "2025.2"
+          kolla_internal_vip_address: "{{ kolla_vip }}"
+
+    - name: Generar passwords (kolla-genpwd)
+      become: true
+      command: "{{ kolla_venv }}/bin/kolla-genpwd"
+      args:
+        chdir: "{{ kolla_config_dir }}"
+      changed_when: false
+
+    # ---- Orquestación de Kolla-Ansible ---------------------------------------
+    - name: bootstrap-servers
+      shell: |
+        export PATH={{ kolla_venv }}/bin:$PATH
+        {{ kolla_venv }}/bin/kolla-ansible bootstrap-servers -i {{ kolla_inv }}
+      changed_when: false
+
+    - name: prechecks
+      shell: |
+        export PATH={{ kolla_venv }}/bin:$PATH
+        {{ kolla_venv }}/bin/kolla-ansible prechecks -i {{ kolla_inv }}
+      changed_when: false
+
+    - name: pull (descarga de imágenes)
+      shell: |
+        export PATH={{ kolla_venv }}/bin:$PATH
+        {{ kolla_venv }}/bin/kolla-ansible pull -i {{ kolla_inv }}
+      changed_when: false
+      tags: [pull, never]
+
+    - name: deploy
+      shell: |
+        export PATH={{ kolla_venv }}/bin:$PATH
+        {{ kolla_venv }}/bin/kolla-ansible deploy -i {{ kolla_inv }}
+      changed_when: false
+
+    - name: post-deploy (genera admin-openrc.sh)
+      shell: |
+        export PATH={{ kolla_venv }}/bin:$PATH
+        {{ kolla_venv }}/bin/kolla-ansible post-deploy -i {{ kolla_inv }}
+      changed_when: false

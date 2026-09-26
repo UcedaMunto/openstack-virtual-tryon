@@ -1,0 +1,12 @@
+---
+# =============================================================================
+# playbooks/11_kubernetes_prerequisites.yml — Prerrequisitos de K8s (§58·59.9)
+# -----------------------------------------------------------------------------
+#  Container runtime, módulos kernel, sysctl, dependencias y herramientas.
+# =============================================================================
+- name: "11 — Prerrequisitos Kubernetes (sysctl + kubectl + helm)"
+  hosts: physical_nodes
+  become: true
+
+  roles:
+    - kubernetes_node

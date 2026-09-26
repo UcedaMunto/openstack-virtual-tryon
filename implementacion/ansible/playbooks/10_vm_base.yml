@@ -1,0 +1,15 @@
+---
+# =============================================================================
+# playbooks/10_vm_base.yml — Configuración base de VMs OpenStack (§58·59.8)
+# -----------------------------------------------------------------------------
+#  Configura las VMs creadas por OpenStack (usuarios, SSH, paquetes, DNS, NTP,
+#  certificados, repositorios). FASE FUTURA: las VMs aún no se han creado.
+# =============================================================================
+- name: "10 — Base de VMs OpenStack (futuro)"
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: (placeholder) VMs aún no desplegadas
+      debug:
+        msg: "10_vm_base: pendiente — crear VMs (k8s-control-01, k8s-worker-*, database-01) primero"

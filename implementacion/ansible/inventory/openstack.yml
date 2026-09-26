@@ -1,0 +1,22 @@
+---
+# =============================================================================
+# inventory/openstack.yml — Inventario dinámico de VMs OpenStack (futuro)
+# -----------------------------------------------------------------------------
+#  Cuando las VMs (k8s-control-01, k8s-worker-cpu-*, k8s-worker-gpu-01,
+#  database-01) existan dentro de OpenStack, este inventario dinámico las
+#  descubrirá automáticamente.
+#
+#  Requiere la collection:  ansible-galaxy collection install openstack.cloud
+#  y un clouds.yaml con credenciales OpenStack.
+#
+#  Uso:
+#    ansible-inventory -i inventory/openstack.yml --graph
+# =============================================================================
+
+plugin: openstack.cloud.openstack
+expand_hostvars: true
+fail_on_errors: true
+# clouds: devstack            # nombre del cloud en clouds.yaml (descomentar)
+groups:
+  kubernetes: "'k8s' in (name | lower)"
+  database: "'database' in (name | lower)"

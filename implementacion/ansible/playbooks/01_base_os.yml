@@ -1,0 +1,12 @@
+---
+# =============================================================================
+# playbooks/01_base_os.yml — Sistema base (§58·59.2)
+# -----------------------------------------------------------------------------
+#  Paquetes base, zona horaria, NTP, hostname, repos y herramientas.
+# =============================================================================
+- name: "01 — Sistema base (paquetes, zona horaria, NTP)"
+  hosts: physical_nodes
+  become: true
+
+  roles:
+    - common

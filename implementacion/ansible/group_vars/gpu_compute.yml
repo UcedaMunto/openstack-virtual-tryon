@@ -1,0 +1,17 @@
+---
+# =============================================================================
+# group_vars/gpu_compute.yml — Variables del nodo GPU (NODE-03: server)
+# -----------------------------------------------------------------------------
+#  Se carga en el grupo "gpu_compute". Configura el runtime NVIDIA y los
+#  prerrequisitos para passthrough de GPU.
+# =============================================================================
+
+gpu_node_name: server
+gpu_nic: eno1
+
+# Passthrough / IOMMU (debe habilitarse en BIOS — prerrequisito físico).
+# Ansible solo valida; no puede cambiar BIOS de forma genérica.
+iommu_enabled: true
+
+# Runtime NVIDIA para containerd
+nvidia_runtime: nvidia

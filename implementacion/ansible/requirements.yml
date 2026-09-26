@@ -1,0 +1,18 @@
+---
+# =============================================================================
+# requirements.yml — dependencias de Ansible (collections + roles de Galaxy)
+# -----------------------------------------------------------------------------
+#  Instalar con:
+#    ansible-galaxy install -r requirements.yml
+# =============================================================================
+
+collections:
+  # Módulos genéricos (ufw, timezone, etc.)
+  - name: community.general
+    version: ">=9.0.0"
+  # Módulos POSIX (firewalld, mount, etc.)
+  - name: ansible.posix
+    version: ">=1.5.0"
+
+roles: []
+# Roles externos de Galaxy: ninguno por ahora. Los roles propios están en roles/.

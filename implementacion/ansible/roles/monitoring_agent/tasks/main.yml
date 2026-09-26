@@ -1,0 +1,17 @@
+---
+# rol monitoring_agent — agentes/exporters de monitorización (placeholder)
+
+# TODO(§58·59.11): instalar node_exporter / agentes de monitorización.
+# Ejemplo (descomentar cuando se defina el stack de monitorización):
+#
+# - name: Descargar node_exporter
+#   get_url:
+#     url: https://github.com/prometheus/node_exporter/releases/latest/download/node_exporter-1.8.2.linux-amd64.tar.gz
+#     dest: /tmp/node_exporter.tar.gz
+#
+# - name: Instalar node_exporter como servicio
+#   ...
+
+- name: (placeholder) registrar nodo para monitorización
+  debug:
+    msg: "monitoring_agent: pendiente de implementar en {{ inventory_hostname }}"

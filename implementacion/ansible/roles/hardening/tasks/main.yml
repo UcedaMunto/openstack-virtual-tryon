@@ -1,0 +1,29 @@
+---
+# rol hardening — sudo NOPASSWD, endurecimiento SSH y firewall
+
+- name: Habilitar sudo NOPASSWD para {{ ssh_user }}
+  copy:
+    dest: "/etc/sudoers.d/{{ ssh_user }}-nopasswd"
+    content: "{{ ssh_user }} ALL=(ALL) NOPASSWD:ALL\n"
+    mode: "0440"
+    validate: visudo -cf %s
+
+- name: Deshabilitar login root por SSH
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PermitRootLogin'
+    line: 'PermitRootLogin no'
+  notify: reiniciar sshd
+
+- name: Permitir SSH en el firewall (ufw)
+  ufw:
+    rule: allow
+    port: '22'
+    proto: tcp
+  when: enable_firewall | default(true) | bool
+
+- name: Activar firewall (ufw)
+  ufw:
+    state: enabled
+    policy: deny
+  when: enable_firewall | default(true) | bool

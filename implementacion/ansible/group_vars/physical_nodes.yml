@@ -1,0 +1,25 @@
+---
+# =============================================================================
+# group_vars/physical_nodes.yml — Nodos físicos (IPs / nombres / NICs)
+# -----------------------------------------------------------------------------
+#  Se carga en el grupo "physical_nodes". Equivale a inventory/nodes.env.
+# =============================================================================
+
+# ---- NODO-01 : control + network + compute CPU -------------------------------
+node01_name: anfitrion
+node01_ip: 192.168.0.10
+node01_nic: enp2s0f0
+
+# ---- NODO-02 : compute CPU + storage -----------------------------------------
+node02_name: asus-tuf
+node02_ip: 192.168.0.126
+node02_nic: enp2s0
+
+# ---- NODO-03 : compute GPU (IA) ----------------------------------------------
+node03_name: server
+node03_ip: 192.168.0.100
+node03_nic: eno1
+
+# ---- Listas derivadas --------------------------------------------------------
+control_node: "{{ node01_ip }}"
+gpu_node: "{{ node03_ip }}"

@@ -1,0 +1,81 @@
+---
+# =============================================================================
+# inventory/baremetal.yml — Inventario Ansible (YAML) de los 3 nodos físicos
+# -----------------------------------------------------------------------------
+#  Equivale a ../inventory/nodes.env. Agrupa por rol Kolla (control/network/
+#  compute/storage/monitoring/deployment) y por infraestructura (§58):
+#  physical_nodes / gpu_compute / vault.
+#
+#  Probar:  ansible -i inventory/baremetal.yml all -m ping
+# =============================================================================
+
+all:
+  vars:
+    ansible_user: uceda
+    ansible_become: true
+    ansible_ssh_common_args: "-o StrictHostKeyChecking=accept-new -o IdentitiesOnly=yes"
+
+  children:
+
+    # ---- Grupos base de Kolla-Ansible ----------------------------------------
+    control:            # control plane de OpenStack
+      hosts:
+        anfitrion:
+          ansible_host: 192.168.0.10
+          network_interface: enp2s0f0
+
+    network:            # nodo de red (L3/DHCP/metadata/loadbalancer)
+      hosts:
+        anfitrion:
+          ansible_host: 192.168.0.10
+          network_interface: enp2s0f0
+
+    compute:            # nodos de cómputo (Nova)
+      hosts:
+        anfitrion:
+          ansible_host: 192.168.0.10
+          network_interface: enp2s0f0
+        asus-tuf:
+          ansible_host: 192.168.0.126
+          network_interface: enp2s0
+        server:
+          ansible_host: 192.168.0.100
+          network_interface: eno1
+
+    storage:            # nodo de almacenamiento (Cinder/Swift)
+      hosts:
+        asus-tuf:
+          ansible_host: 192.168.0.126
+          network_interface: enp2s0
+
+    monitoring:         # nodo de monitorización
+      hosts:
+        anfitrion:
+          ansible_host: 192.168.0.10
+          network_interface: enp2s0f0
+
+    deployment:         # host de despliegue (Kolla)
+      hosts:
+        localhost:
+          ansible_connection: local
+
+    # ---- Grupos de infraestructura (§58) -------------------------------------
+    physical_nodes:     # TODOS los nodos físicos (tareas comunes)
+      hosts:
+        anfitrion:
+          ansible_host: 192.168.0.10
+        asus-tuf:
+          ansible_host: 192.168.0.126
+        server:
+          ansible_host: 192.168.0.100
+
+    gpu_compute:        # nodo con GPU (NODE-03: server)
+      hosts:
+        server:
+          ansible_host: 192.168.0.100
+
+    vault:              # grupo para cargar group_vars/vault.yml (secretos)
+      hosts:
+        anfitrion:
+        asus-tuf:
+        server:

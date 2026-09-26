@@ -1,0 +1,13 @@
+---
+# =============================================================================
+# playbooks/03_hardening.yml — Endurecimiento (§58·59.4)
+# -----------------------------------------------------------------------------
+#  Usuarios, SSH, sudo, firewall, parámetros de kernel y desactivación de
+#  servicios innecesarios.
+# =============================================================================
+- name: "03 — Hardening (sudo, SSH, firewall)"
+  hosts: physical_nodes
+  become: true
+
+  roles:
+    - hardening

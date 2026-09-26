@@ -1,0 +1,44 @@
+---
+# =============================================================================
+# playbooks/00_connectivity.yml — Conectividad y validación previa (§58·59.1)
+# -----------------------------------------------------------------------------
+#  Valida: Python, sudo, hostname, NTP y resolución. Solo lectura.
+# =============================================================================
+- name: "00 — Conectividad (Python, sudo, hostname, NTP, DNS)"
+  hosts: physical_nodes
+  gather_facts: true
+
+  tasks:
+    - name: Verificar Python >= 3.10
+      assert:
+        that: ansible_python_version is version('3.10', '>=')
+        success_msg: "{{ inventory_hostname }} Python {{ ansible_python_version }}"
+        fail_msg: "{{ inventory_hostname }} Python demasiado antiguo ({{ ansible_python_version }})"
+
+    - name: Verificar sudo sin contraseña
+      command: sudo -n true
+      changed_when: false
+
+    - name: Mostrar hostname
+      debug:
+        msg: "{{ inventory_hostname }} -> hostname real: {{ ansible_hostname }}"
+
+    - name: Verificar chrony (NTP) activo
+      command: systemctl is-active chrony
+      register: chrony_st
+      changed_when: false
+      failed_when: false
+
+    - name: Informar estado de chrony
+      debug:
+        msg: "{{ inventory_hostname }} chrony: {{ chrony_st.stdout }}"
+
+    - name: Verificar resolución del hostname (debe ser única)
+      command: getent ahostsv4 {{ inventory_hostname }}
+      register: resolv
+      changed_when: false
+      failed_when: false
+
+    - name: Informar resolución
+      debug:
+        msg: "{{ inventory_hostname }} resuelve a: {{ resolv.stdout_lines }}"

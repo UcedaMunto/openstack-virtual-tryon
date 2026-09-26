@@ -1,0 +1,11 @@
+---
+# =============================================================================
+# playbooks/30_backup.yml — Copias de seguridad (§58·59.12)
+# -----------------------------------------------------------------------------
+#  Scripts, destinos, cron/systemd timers, permisos y validaciones.
+# =============================================================================
+- name: "30 — Backup"
+  hosts: physical_nodes
+
+  roles:
+    - backup_agent

@@ -1,0 +1,41 @@
+---
+# rol common — paquetería base, zona horaria y NTP (todos los nodos)
+
+- name: Actualizar caché de apt
+  apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Instalar paquetes base
+  apt:
+    name:
+      - curl
+      - wget
+      - git
+      - vim
+      - htop
+      - net-tools
+      - ca-certificates
+      - gnupg
+      - lsb-release
+      - software-properties-common
+      - chrony
+      - python3
+      - python3-pip
+      - python3-venv
+      - jq
+      - unzip
+      - bash-completion
+    state: present
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+
+- name: Establecer zona horaria
+  timezone:
+    name: "{{ timezone }}"
+
+- name: Habilitar y arrancar chrony (NTP)
+  systemd:
+    name: chrony
+    enabled: true
+    state: started

@@ -1,0 +1,15 @@
+---
+# =============================================================================
+# playbooks/12_gpu_worker.yml — VM worker GPU (§58·59.10)
+# -----------------------------------------------------------------------------
+#  Configura la VM k8s-worker-gpu-01 para exponer la GPU al runtime y a K8s.
+#  FASE FUTURA: la VM GPU aún no se ha creado.
+# =============================================================================
+- name: "12 — VM worker GPU (futuro)"
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: (placeholder) VM k8s-worker-gpu-01 pendiente
+      debug:
+        msg: "12_gpu_worker: pendiente — requiere la VM k8s-worker-gpu-01 (passthrough GPU)"

@@ -1,34 +1,51 @@
-# 📦 Ansible (YAML) — playbooks de gestión declarativa
+# 📦 Ansible — estructura del numeral 58 (ARQUITECTURA)
 
-> Versión **Ansible** de la automatización. Cada script bash de `scripts/` tiene su
-> **playbook equivalente** aquí (idempotente, reutilizable en otras empresas/redes).
+> Estructura **Ansible** alineada con la sección **§58 "Estructura propuesta del
+> proyecto Ansible"** del documento de arquitectura. Roles + playbooks
+> idempotentes, reutilizables en otras empresas/redes.
 
 ## Estructura
 
 ```
 ansible/
+├── ansible.cfg                # config (inventario por defecto, SSH, become)
+├── requirements.yml           # collections/roles de Galaxy
 ├── inventory/
-│   └── hosts.yml              # Inventario (grupos Kolla + grupo "nodes")
+│   ├── baremetal.yml          # grupos por rol (control/network/compute/...) + physical_nodes/gpu_compute/vault
+│   └── openstack.yml          # inventario dinámico de VMs (futuro)
 ├── group_vars/
-│   └── all.yml                # Variables comunes (IPs, nombres, credenciales)
-└── playbooks/
-    ├── site.yml               # Playbook MAESTRO (ejecuta todo en orden)
-    ├── 00-bootstrap.yml       # Ubuntu 24.04 + sudo NOPASSWD
-    ├── 01-base.yml            # Paquetes base + chrony
-    ├── 02-docker.yml          # Docker CE + Compose
-    ├── 03-kolla-ansible.yml   # Kolla-Ansible (venv) en el control
-    ├── 04-openstack-cli.yml   # python-openstackclient
-    ├── 05-k8s-tools.yml       # kubectl + helm
-    ├── 06-nvidia-runtime.yml  # nvidia-container-toolkit (GPU)
-    ├── 07-kolla-config.yml    # multinode + globals.yml + passwords
-    ├── 08-kolla-bootstrap.yml # bootstrap-servers + prechecks
-    ├── 09-kolla-hosts.yml     # /etc/hosts único + desactivar avahi
-    ├── 11-kolla-deploy.yml    # deploy + post-deploy
-    ├── 12-openstack-recursos.yml # flavors/imagen/keypair/SG/red
-    ├── 13-openstack-cinder.yml   # Cinder LVM
-    ├── 15-dns.yml             # dnsmasq (dominios del proyecto)
-    ├── 16-k8s.yml             # k3s + Dashboard + IngressRouteTCP
-    └── verify.yml             # verificación final
+│   ├── all.yml                # variables comunes (NO secretas)
+│   ├── physical_nodes.yml     # IPs/nombres/NICs de los 3 nodos
+│   ├── gpu_compute.yml        # variables del nodo GPU
+│   └── vault.yml              # secretos (ENCRIPTADO con ansible-vault)
+├── playbooks/
+│   ├── site.yml               # Playbook MAESTRO
+│   ├── 00_connectivity.yml
+│   ├── 01_base_os.yml
+│   ├── 02_network.yml
+│   ├── 03_hardening.yml
+│   ├── 04_kolla_prerequisites.yml
+│   ├── 05_kolla_deploy.yml
+│   ├── 06_gpu_host.yml
+│   ├── 10_vm_base.yml         # (futuro)
+│   ├── 11_kubernetes_prerequisites.yml
+│   ├── 12_gpu_worker.yml      # (futuro)
+│   ├── 20_monitoring_agents.yml  # (placeholder)
+│   ├── 30_backup.yml             # (placeholder)
+│   ├── 90_validation.yml
+│   ├── 15_dns.yml             # extra: dnsmasq (dominios)
+│   ├── 16_k8s_cluster.yml     # extra: k3s + Dashboard
+│   └── 17_openstack_recursos.yml # extra: flavors/imagen/SG/red/Cinder
+└── roles/
+    ├── common/                # paquetes base + NTP + zona horaria
+    ├── network/               # resolución única + avahi
+    ├── hardening/             # sudo/SSH/firewall
+    ├── container_runtime/     # Docker CE + containerd
+    ├── kolla_host/            # Kolla-Ansible (venv) + clientes
+    ├── gpu_host/              # nvidia-container-toolkit
+    ├── kubernetes_node/       # kubectl/helm/sysctl
+    ├── monitoring_agent/      # (placeholder)
+    └── backup_agent/          # (placeholder)
 ```
 
 ## Uso
@@ -37,45 +54,54 @@ ansible/
 cd implementacion/ansible
 
 # Validar inventario y conectividad:
-ansible -i inventory/hosts.yml all -m ping
+ansible -i inventory/baremetal.yml all -m ping
 
-# Despliegue COMPLETO (equivale a scripts/run-all.sh):
-ansible-playbook playbooks/site.yml
+# Despliegue COMPLETO (numeral 58 + extras):
+ansible-playbook playbooks/site.yml --vault-password-file <(printf 'asdfghjkl')
 
 # Solo una fase (tags):
-ansible-playbook playbooks/site.yml --tags bootstrap
-ansible-playbook playbooks/site.yml --tags docker
-ansible-playbook playbooks/site.yml --tags deploy
-ansible-playbook playbooks/site.yml --tags verify
+ansible-playbook playbooks/site.yml --tags base_os
+ansible-playbook playbooks/site.yml --tags kolla_deploy
+ansible-playbook playbooks/site.yml --tags validation
 
-# Ejecutar un playbook individual:
-ansible-playbook playbooks/15-dns.yml
+# Un playbook individual:
+ansible-playbook playbooks/15_dns.yml
 ```
 
-> La contraseña sudo se inyecta con `export SUDO_PASSWORD=...` (igual que en
-> `nodes.env`). Sin ella, se usa el valor por defecto de `group_vars/all.yml`.
+## Secretos (Ansible Vault — §60)
 
-## Relación scripts bash ↔ playbooks
+Los secretos están en `group_vars/vault.yml`, **encriptado** con `ansible-vault`
+(no se versionan en claro). Para usarlo:
 
-| Script (`scripts/`) | Playbook (`playbooks/`) |
+```bash
+# Descifrar/editar:
+ansible-vault edit group_vars/vault.yml --vault-password-file <(printf 'asdfghjkl')
+
+# Ejecutar playbooks:
+ansible-playbook playbooks/site.yml --vault-password-file <(printf 'asdfghjkl')
+```
+
+> La contraseña del vault y la sudo coinciden por defecto (`asdfghjkl`, el valor
+> de `nodes.env`); para otra red, cámbiala y re-cifra el vault.
+
+## Relación scripts bash ↔ estructura Ansible
+
+| Script (`scripts/`) | Playbook / rol (`ansible/`) |
 |---|---|
-| `00-bootstrap.sh` | `00-bootstrap.yml` |
-| `01-base.sh` | `01-base.yml` |
-| `02-docker.sh` | `02-docker.yml` |
-| `03-kolla-ansible.sh` | `03-kolla-ansible.yml` |
-| `04-openstack-cli.sh` | `04-openstack-cli.yml` |
-| `05-k8s-tools.sh` | `05-k8s-tools.yml` |
-| `06-nvidia-runtime.sh` | `06-nvidia-runtime.yml` |
-| `07-kolla-config.sh` | `07-kolla-config.yml` |
-| `08-kolla-bootstrap.sh` | `08-kolla-bootstrap.yml` |
-| `09-kolla-hosts.sh` | `09-kolla-hosts.yml` |
-| `10-verificar.sh` | `verify.yml` |
-| `11-kolla-deploy.sh` | `11-kolla-deploy.yml` |
-| `12-openstack-recursos.sh` | `12-openstack-recursos.yml` |
-| `13-openstack-cinder.sh` | `13-openstack-cinder.yml` |
-| `15-dns.sh` | `15-dns.yml` |
-| `16-k8s.sh` | `16-k8s.yml` |
+| `00-bootstrap.sh` | `03_hardening.yml` + `00_connectivity.yml` |
+| `01-base.sh` | `01_base_os.yml` + rol `common` |
+| `02-docker.sh` | `04_kolla_prerequisites.yml` + rol `container_runtime` |
+| `03-kolla-ansible.sh` / `04-openstack-cli.sh` | rol `kolla_host` |
+| `05-k8s-tools.sh` | `11_kubernetes_prerequisites.yml` + rol `kubernetes_node` |
+| `06-nvidia-runtime.sh` | `06_gpu_host.yml` + rol `gpu_host` |
+| `07..09, 11` | `04_kolla_prerequisites.yml` + `05_kolla_deploy.yml` |
+| `10-verificar.sh` | `90_validation.yml` |
+| `12-openstack-recursos.sh` / `13-openstack-cinder.sh` | `17_openstack_recursos.yml` |
+| `15-dns.sh` | `15_dns.yml` |
+| `16-k8s.sh` | `16_k8s_cluster.yml` |
 
 > **Clave del patrón Ansible:** en vez de `for nodo in ...` (bash), el playbook
-> usa `hosts: nodes` y Ansible ejecuta la tarea en los 3 nodos automáticamente.
+> usa `hosts: physical_nodes` (o `control`, `gpu_compute`) y Ansible ejecuta la
+> tarea en todos los nodos automáticamente.
+
 

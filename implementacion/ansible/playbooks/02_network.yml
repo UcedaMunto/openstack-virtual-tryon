@@ -1,0 +1,13 @@
+---
+# =============================================================================
+# playbooks/02_network.yml — Red (§58·59.3)
+# -----------------------------------------------------------------------------
+#  Interfaces, bridges, VLANs, rutas y resolución de nombres.
+#  (En esta etapa: resolución única en /etc/hosts + desactivar avahi/mDNS)
+# =============================================================================
+- name: "02 — Red (resolución única + desactivar avahi)"
+  hosts: physical_nodes
+  become: true
+
+  roles:
+    - network

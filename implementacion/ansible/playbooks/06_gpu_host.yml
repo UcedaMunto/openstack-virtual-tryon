@@ -1,0 +1,13 @@
+---
+# =============================================================================
+# playbooks/06_gpu_host.yml — Nodo GPU (§58·59.7)
+# -----------------------------------------------------------------------------
+#  Exclusivo de NODE-03. Gestiona/valida: IOMMU, módulos, drivers y runtime
+#  NVIDIA para passthrough/containerd.
+# =============================================================================
+- name: "06 — Nodo GPU (runtime NVIDIA)"
+  hosts: gpu_compute
+  become: true
+
+  roles:
+    - gpu_host

@@ -1,0 +1,41 @@
+---
+# =============================================================================
+# playbooks/04_kolla_prerequisites.yml — Prerrequisitos de Kolla (§58·59.5)
+# -----------------------------------------------------------------------------
+#  Docker/runtime, dependencias de kolla-ansible, LVM para Cinder (NODE-02),
+#  interfaces de red esperadas y resolución de nombres.
+# =============================================================================
+
+- name: "04 — Container runtime (Docker + containerd)"
+  hosts: physical_nodes
+  become: true
+
+  roles:
+    - container_runtime
+
+- name: "04 — Kolla-Ansible (venv) en el control"
+  hosts: control
+  become: true
+
+  roles:
+    - kolla_host
+
+- name: "04 — LVM para Cinder en el storage ({{ node02_name }})"
+  hosts: storage
+  become: true
+
+  tasks:
+    - name: Crear VG cinder-volumes (loopback 30 GB)
+      shell: |
+        VG=cinder-volumes
+        IMG_FILE=/var/lib/cinder/cinder-volumes.img
+        if ! vgs "$VG" >/dev/null 2>&1; then
+          mkdir -p /var/lib/cinder
+          [ -f "$IMG_FILE" ] || dd if=/dev/zero of="$IMG_FILE" bs=1M count=30720 status=none
+          LOOP=$(losetup -f)
+          losetup "$LOOP" "$IMG_FILE"
+          pvcreate "$LOOP" >/dev/null
+          vgcreate "$VG" "$LOOP" >/dev/null
+        fi
+        vgs "$VG"
+      changed_when: false

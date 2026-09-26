@@ -1,0 +1,31 @@
+# =============================================================================
+# globals.yml — Plantilla de configuración de Kolla-Ansible
+# -----------------------------------------------------------------------------
+#  Se copia/genera en /etc/kolla/globals.yml (playbook 05_kolla_deploy.yml).
+#  Documentada en kolla/globals.yml.example.
+# =============================================================================
+
+# Distribución base e instalación (binary = imágenes precompiladas)
+kolla_base_distro: "ubuntu"
+kolla_install_type: "binary"
+openstack_release: "2025.2"
+
+# VIP interna (HAProxy/keepalived) — IP LIBRE de la red de management
+kolla_internal_vip_address: "192.168.0.200"
+
+# network_interface se define POR HOST en el inventario (NICs distintas por nodo)
+#   anfitrion -> enp2s0f0
+#   asus-tuf  -> enp2s0
+#   server    -> eno1
+
+# --- Cinder (almacenamiento en bloque, LVM) -----------------------------------
+enable_cinder: "yes"
+enable_cinder_backend_lvm: "yes"
+cinder_volume_group: "cinder-volumes"
+
+# --- Redes (decisión pendiente: VLANs mgmt/storage/tunnel/external) ------------
+# Con 1 sola NIC por nodo, Neutron usa la misma interfaz para todo.
+# Para separar planos en producción, definir aquí:
+#   storage_interface: "eth1"
+#   tunnel_interface:  "eth1"
+#   neutron_external_interface: "eth0"

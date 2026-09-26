@@ -1,0 +1,17 @@
+---
+# rol backup_agent — copias de seguridad (placeholder)
+
+# TODO(§58·59.12): scripts, destinos, cron/systemd timers, permisos y validaciones.
+# Ejemplo (descomentar cuando se defina la política de backup):
+#
+# - name: Instalar rsnapshot
+#   apt:
+#     name: rsnapshot
+#     state: present
+#
+# - name: Configurar destino de backup
+#   ...
+
+- name: (placeholder) registrar nodo para backup
+  debug:
+    msg: "backup_agent: pendiente de implementar en {{ inventory_hostname }}"
