@@ -1,0 +1,39 @@
+---
+# =============================================================================
+# playbooks/09-kolla-hosts.yml
+# -----------------------------------------------------------------------------
+#  /etc/hosts con resolución ÚNICA + desactiva avahi (mDNS). Equivale a
+#  scripts/09-kolla-hosts.sh.
+# =============================================================================
+- name: "09 — /etc/hosts (resolución única) + desactivar avahi"
+  hosts: nodes
+  become: true
+
+  tasks:
+    - name: Backup de /etc/hosts (solo la primera vez)
+      copy:
+        src: /etc/hosts
+        dest: /etc/hosts.bak.kolla
+        remote_src: true
+        force: false
+
+    - name: Eliminar resolución 127.0.1.1 (hostname local)
+      lineinfile:
+        path: /etc/hosts
+        regexp: '^127\.0\.1\.1 '
+        state: absent
+
+    - name: Añadir entradas de los 3 nodos a /etc/hosts
+      blockinfile:
+        path: /etc/hosts
+        block: |
+          {{ node01_ip }} {{ node01_name }}
+          {{ node02_ip }} {{ node02_name }}
+          {{ node03_ip }} {{ node03_name }}
+        marker: "# {mark} ANSIBLE ICC115 NODES"
+
+    - name: Desactivar y enmascarar avahi-daemon
+      shell: |
+        systemctl disable --now avahi-daemon.socket avahi-daemon 2>/dev/null || true
+        systemctl mask avahi-daemon.socket avahi-daemon 2>/dev/null || true
+      changed_when: false

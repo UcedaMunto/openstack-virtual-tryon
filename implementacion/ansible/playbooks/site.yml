@@ -1,0 +1,68 @@
+---
+# =============================================================================
+# playbooks/site.yml — Playbook MAESTRO
+# -----------------------------------------------------------------------------
+#  Ejecuta el despliegue completo en orden (equivale a scripts/run-all.sh).
+#
+#  Uso:
+#    cd implementacion/ansible
+#    ansible-playbook playbooks/site.yml
+#
+#  Para ejecutar solo una fase (tags):
+#    ansible-playbook playbooks/site.yml --tags bootstrap
+#    ansible-playbook playbooks/site.yml --tags docker
+#    ansible-playbook playbooks/site.yml --tags deploy
+# =============================================================================
+
+# ── Fase 0: preparación de los nodos ──────────────────────────────────────────
+- import_playbook: 00-bootstrap.yml
+  tags: bootstrap
+
+- import_playbook: 01-base.yml
+  tags: base
+
+- import_playbook: 02-docker.yml
+  tags: docker
+
+# ── Fase 1: herramientas de control ───────────────────────────────────────────
+- import_playbook: 03-kolla-ansible.yml
+  tags: kolla
+
+- import_playbook: 04-openstack-cli.yml
+  tags: openstack-cli
+
+- import_playbook: 05-k8s-tools.yml
+  tags: k8s-tools
+
+- import_playbook: 06-nvidia-runtime.yml
+  tags: nvidia
+
+# ── Fase 2: configuración y despliegue de OpenStack ───────────────────────────
+- import_playbook: 07-kolla-config.yml
+  tags: kolla-config
+
+- import_playbook: 08-kolla-bootstrap.yml
+  tags: kolla-bootstrap
+
+- import_playbook: 09-kolla-hosts.yml
+  tags: hosts
+
+- import_playbook: 11-kolla-deploy.yml
+  tags: deploy
+
+- import_playbook: 12-openstack-recursos.yml
+  tags: recursos
+
+- import_playbook: 13-openstack-cinder.yml
+  tags: cinder
+
+# ── Fase 3: servicios de red y Kubernetes ─────────────────────────────────────
+- import_playbook: 15-dns.yml
+  tags: dns
+
+- import_playbook: 16-k8s.yml
+  tags: k8s
+
+# ── Fase 4: verificación final ────────────────────────────────────────────────
+- import_playbook: verify.yml
+  tags: verify

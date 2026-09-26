@@ -1,0 +1,54 @@
+---
+# =============================================================================
+# playbooks/13-openstack-cinder.yml
+# -----------------------------------------------------------------------------
+#  Habilita Cinder (bloque) con backend LVM sobre loopback en el storage.
+#  Equivale a scripts/13-openstack-cinder.sh.
+# =============================================================================
+- name: "13 — Cinder (bloque) con LVM"
+  hosts: control
+  become: false
+
+  tasks:
+    - name: Crear LVM cinder-volumes en el storage ({{ node02_name }})
+      delegate_to: "{{ node02_name }}"
+      become: true
+      shell: |
+        VG=cinder-volumes
+        IMG_FILE=/var/lib/cinder/cinder-volumes.img
+        if ! vgs "$VG" >/dev/null 2>&1; then
+          mkdir -p /var/lib/cinder
+          [ -f "$IMG_FILE" ] || dd if=/dev/zero of="$IMG_FILE" bs=1M count=30720 status=none
+          LOOP=$(losetup -f)
+          losetup "$LOOP" "$IMG_FILE"
+          pvcreate "$LOOP" >/dev/null
+          vgcreate "$VG" "$LOOP" >/dev/null
+        fi
+        vgs "$VG"
+      changed_when: false
+
+    - name: Habilitar Cinder en globals.yml
+      become: true
+      blockinfile:
+        path: "{{ kolla_config_dir }}/globals.yml"
+        block: |
+          # --- Cinder (almacenamiento en bloque) ---
+          enable_cinder: "yes"
+          enable_cinder_backend_lvm: "yes"
+          cinder_volume_group: "cinder-volumes"
+        marker: "# {mark} ANSIBLE CINDER"
+
+    - name: Re-desplegar (proxysql + cinder)
+      shell: |
+        export PATH={{ kolla_venv }}/bin:$PATH
+        {{ kolla_venv }}/bin/kolla-ansible deploy -i {{ kolla_config_dir }}/multinode
+      changed_when: false
+
+    - name: Verificación de Cinder (crear + eliminar volumen de prueba)
+      shell: |
+        source /etc/kolla/admin-openrc.sh
+        openstack volume create --size 1 cinder-test-vol >/dev/null 2>&1 || true
+        sleep 5
+        echo "Estado del volumen de prueba: $(openstack volume show cinder-test-vol -c status -f value 2>/dev/null)"
+        openstack volume delete cinder-test-vol >/dev/null 2>&1 || true
+      changed_when: false

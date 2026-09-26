@@ -1,0 +1,35 @@
+---
+# =============================================================================
+# playbooks/11-kolla-deploy.yml
+# -----------------------------------------------------------------------------
+#  Despliega OpenStack (deploy + post-deploy). Equivale a scripts/11-kolla-deploy.sh.
+# =============================================================================
+- name: "11 — Despliegue OpenStack (deploy + post-deploy)"
+  hosts: control
+  become: false
+
+  tasks:
+    - name: Verificar si el puerto 5000 (Keystone) está ocupado
+      become: true
+      shell: ss -tlnp | grep ':5000 ' || true
+      register: port5000
+      changed_when: false
+
+    - name: Liberar puerto 5000 (escalar vton-registry a 0)
+      shell: |
+        kubectl -n vton scale deployment vton-registry --replicas=0 2>/dev/null || \
+        kubectl -n vton scale statefulset vton-registry --replicas=0 2>/dev/null || true
+      when: port5000.stdout | length > 0
+      changed_when: false
+
+    - name: Deploy de OpenStack
+      shell: |
+        export PATH={{ kolla_venv }}/bin:$PATH
+        {{ kolla_venv }}/bin/kolla-ansible deploy -i {{ kolla_config_dir }}/multinode
+      changed_when: false
+
+    - name: post-deploy (genera admin-openrc.sh)
+      shell: |
+        export PATH={{ kolla_venv }}/bin:$PATH
+        {{ kolla_venv }}/bin/kolla-ansible post-deploy -i {{ kolla_config_dir }}/multinode
+      changed_when: false

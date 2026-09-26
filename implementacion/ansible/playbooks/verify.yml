@@ -1,0 +1,42 @@
+---
+# =============================================================================
+# playbooks/verify.yml
+# -----------------------------------------------------------------------------
+#  Verificación final (solo lectura). Equivale a scripts/10-verificar.sh.
+# =============================================================================
+- name: "Verificación — servicios en los nodos"
+  hosts: nodes
+  become: false
+  gather_facts: false
+
+  tasks:
+    - name: Comprobar Docker
+      command: systemctl is-active docker
+      register: docker_st
+      changed_when: false
+      failed_when: false
+
+    - name: Comprobar k3s (si existe)
+      command: systemctl is-active k3s
+      register: k3s_st
+      changed_when: false
+      failed_when: false
+
+    - name: Informar estado de los servicios
+      debug:
+        msg: "{{ inventory_hostname }} -> docker: {{ docker_st.stdout }} | k3s: {{ k3s_st.stdout | default('n/a') }}"
+
+- name: "Verificación — OpenStack (control)"
+  hosts: control
+  become: false
+  gather_facts: false
+
+  tasks:
+    - name: Contar contenedores OpenStack activos
+      shell: docker ps --format '{{.Names}}' | grep -cE 'keystone|horizon|nova|neutron|glance|mariadb|rabbitmq|placement|cinder' || true
+      register: os_containers
+      changed_when: false
+
+    - name: Informar contenedores OpenStack
+      debug:
+        msg: "OpenStack contenedores activos: {{ os_containers.stdout }}"

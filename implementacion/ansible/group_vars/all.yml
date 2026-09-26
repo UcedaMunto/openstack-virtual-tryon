@@ -1,0 +1,41 @@
+---
+# =============================================================================
+# group_vars/all.yml — Variables comunes del proyecto ICC115
+# -----------------------------------------------------------------------------
+#  Equivalente en YAML a inventory/nodes.env. Para otra red/empresa: editar AQUÍ
+#  (IPs, nombres, NICs, credenciales, VIP).
+# =============================================================================
+
+# ---- Credenciales ------------------------------------------------------------
+ssh_user: uceda
+# La contraseña sudo se puede inyectar con:  export SUDO_PASSWORD=...
+sudo_password: "{{ lookup('env', 'SUDO_PASSWORD') | default('asdfghjkl', true) }}"
+ansible_become_password: "{{ sudo_password }}"
+
+# ---- NODO-01 : control + network + compute CPU -------------------------------
+node01_name: anfitrion
+node01_ip: 192.168.0.10
+node01_nic: enp2s0f0
+
+# ---- NODO-02 : compute CPU + storage -----------------------------------------
+node02_name: asus-tuf
+node02_ip: 192.168.0.126
+node02_nic: enp2s0
+
+# ---- NODO-03 : compute GPU (IA) ----------------------------------------------
+node03_name: server
+node03_ip: 192.168.0.100
+node03_nic: eno1
+
+# ---- Listas derivadas --------------------------------------------------------
+control_node: "{{ node01_ip }}"
+gpu_node: "{{ node03_ip }}"
+kolla_vip: 192.168.0.200
+
+# ---- Versiones / rutas -------------------------------------------------------
+kube_version: "v1.36"
+kolla_venv: /opt/kolla-ansible
+kolla_config_dir: /etc/kolla
+
+# ---- Arquitectura para el repo de Docker (amd64 en x86_64) -------------------
+docker_arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}"

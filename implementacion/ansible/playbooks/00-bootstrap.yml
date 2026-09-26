@@ -1,0 +1,31 @@
+---
+# =============================================================================
+# playbooks/00-bootstrap.yml
+# -----------------------------------------------------------------------------
+#  Verifica Ubuntu 24.04 y habilita sudo NOPASSWD para el usuario de gestión.
+#  Equivale a scripts/00-bootstrap.sh. Idempotente.
+# =============================================================================
+- name: "00 — Bootstrap (Ubuntu 24.04 + sudo NOPASSWD)"
+  hosts: nodes
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Verificar que el SO es Ubuntu 24.04
+      assert:
+        that:
+          - ansible_distribution == "Ubuntu"
+          - ansible_distribution_version is version("24.04", "==")
+        fail_msg: "{{ inventory_hostname }} NO es Ubuntu 24.04 (es {{ ansible_distribution }} {{ ansible_distribution_version }})"
+        success_msg: "{{ inventory_hostname }} es Ubuntu {{ ansible_distribution_version }}"
+
+    - name: Habilitar sudo NOPASSWD para {{ ssh_user }}
+      copy:
+        dest: "/etc/sudoers.d/{{ ssh_user }}-nopasswd"
+        content: "{{ ssh_user }} ALL=(ALL) NOPASSWD:ALL\n"
+        mode: "0440"
+        validate: visudo -cf %s
+
+    - name: Verificar sudo sin contraseña
+      command: sudo -n true
+      changed_when: false
