@@ -1,0 +1,156 @@
+apiVersion: ceph.rook.io/v1
+kind: CephCluster
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"ceph.rook.io/v1","kind":"CephCluster","metadata":{"annotations":{},"name":"rook-ceph","namespace":"rook-ceph"},"spec":{"cephVersion":{"allowUnsupported":false,"image":"quay.io/ceph/ceph:v20.2.4"},"crashCollector":{"disable":true},"dashboard":{"enabled":false},"dataDirHostPath":"/var/lib/rook","logCollector":{"enabled":false},"mgr":{"allowMultiplePerNode":false,"count":1},"mon":{"allowMultiplePerNode":false,"count":3},"monitoring":{"enabled":false},"security":{"cephx":{"csi":{"keyType":"aes"}}},"storage":{"nodes":[{"devices":[{"name":"vdb"}],"name":"k8-worker1"},{"devices":[{"name":"vdb"}],"name":"k8-worker2"},{"devices":[{"name":"vdb"}],"name":"k8-worker3"}],"useAllDevices":false,"useAllNodes":false}}}
+  creationTimestamp: "2026-08-26T01:51:11Z"
+  finalizers:
+  - cephcluster.ceph.rook.io
+  generation: 4
+  name: rook-ceph
+  namespace: rook-ceph
+  resourceVersion: "152066"
+  uid: 3b6d80d5-a6d1-4039-8b04-c21b66b99cdf
+spec:
+  cephVersion:
+    allowUnsupported: false
+    image: quay.io/ceph/ceph:v20.2.4
+  cleanupPolicy:
+    sanitizeDisks: {}
+    wipeDevicesFromOtherClusters: false
+  crashCollector:
+    disable: true
+  csi:
+    cephfs: {}
+    readAffinity:
+      enabled: false
+  dashboard:
+    enabled: true
+    port: 7000
+    ssl: false
+  dataDirHostPath: /var/lib/rook
+  disruptionManagement: {}
+  external: {}
+  healthCheck:
+    daemonHealth:
+      mon: {}
+      osd: {}
+      status: {}
+  logCollector:
+    enabled: false
+  mgr:
+    allowMultiplePerNode: false
+    count: 1
+  mon:
+    allowMultiplePerNode: false
+    count: 3
+  monitoring:
+    enabled: false
+  network:
+    multiClusterService: {}
+  security:
+    cephx:
+      csi:
+        keyType: aes
+      daemon: {}
+      rbdMirrorPeer: {}
+    keyRotation:
+      enabled: false
+    kms: {}
+  storage:
+    flappingRestartIntervalHours: 0
+    migration: {}
+    nodes:
+    - devices:
+      - name: vdb
+      name: k8-worker1
+    - devices:
+      - name: vdb
+      name: k8-worker2
+    - devices:
+      - name: vdb
+      name: k8-worker3
+    store: {}
+    useAllDevices: false
+    useAllNodes: false
+status:
+  ceph:
+    capacity:
+      bytesAvailable: 62388240384
+      bytesTotal: 64424509440
+      bytesUsed: 2036269056
+      lastUpdated: "2026-08-27T19:03:14Z"
+    details:
+      AUTH_INSECURE_CLIENT_KEY_TYPE:
+        message: 4 auth client entities with insecure key types
+        severity: HEALTH_WARN
+      AUTH_INSECURE_KEYS_ALLOWED:
+        message: Monitors are configured to allow auth using insecure key types
+        severity: HEALTH_WARN
+      AUTH_INSECURE_KEYS_CREATABLE:
+        message: Monitors are configured to allow creation of insecure key types
+        severity: HEALTH_WARN
+    fsid: 5dbf296d-ca13-4924-ae19-0d1a79d44763
+    health: HEALTH_WARN
+    lastChanged: "2026-08-26T18:42:16Z"
+    lastChecked: "2026-08-27T19:03:14Z"
+    previousHealth: HEALTH_ERR
+    versions:
+      mds:
+        ceph version 20.2.4 (7f793731f1b39eb4f465e960113d2363c311b964) tentacle (stable - RelWithDebInfo): 1
+      mgr:
+        ceph version 20.2.4 (7f793731f1b39eb4f465e960113d2363c311b964) tentacle (stable - RelWithDebInfo): 1
+      mon:
+        ceph version 20.2.4 (7f793731f1b39eb4f465e960113d2363c311b964) tentacle (stable - RelWithDebInfo): 3
+      osd:
+        ceph version 20.2.4 (7f793731f1b39eb4f465e960113d2363c311b964) tentacle (stable - RelWithDebInfo): 3
+      overall:
+        ceph version 20.2.4 (7f793731f1b39eb4f465e960113d2363c311b964) tentacle (stable - RelWithDebInfo): 8
+  cephx:
+    admin: {}
+    cephExporter:
+      keyCephVersion: 20.2.4-0
+      keyGeneration: 1
+    crashCollector:
+      keyCephVersion: 20.2.4-0
+      keyGeneration: 1
+    csi:
+      keyCephVersion: 20.2.4-0
+      keyGeneration: 1
+      keyType: aes
+    mgr:
+      keyCephVersion: 20.2.4-0
+      keyGeneration: 1
+      keyType: aes256k
+    mon:
+      keyCephVersion: 20.2.4-0
+      keyGeneration: 1
+    osd:
+      keyCephVersion: 20.2.4-0
+      keyGeneration: 1
+      keyType: aes256k
+    rbdMirrorPeer:
+      keyCephVersion: 20.2.4-0
+      keyGeneration: 1
+  conditions:
+  - lastHeartbeatTime: "2026-08-27T00:29:51Z"
+    lastTransitionTime: "2026-08-26T01:56:15Z"
+    message: Cluster created successfully
+    reason: ClusterCreated
+    status: "True"
+    type: Ready
+  message: Cluster created successfully
+  observedGeneration: 4
+  phase: Ready
+  state: Created
+  storage:
+    deviceClasses:
+    - name: hdd
+    osd:
+      migrationStatus: {}
+      storeType:
+        bluestore: 3
+  version:
+    image: quay.io/ceph/ceph:v20.2.4
+    version: 20.2.4-0

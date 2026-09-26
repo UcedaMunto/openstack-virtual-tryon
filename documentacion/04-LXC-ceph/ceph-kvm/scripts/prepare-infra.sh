@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+bash "${SCRIPT_DIR}/00-check-prereqs.sh"
+bash "${SCRIPT_DIR}/10-create-networks.sh"
+bash "${SCRIPT_DIR}/20-create-vms.sh"

@@ -1,0 +1,33 @@
+# group_vars/controller.yml
+# Variables específicas del nodo controller
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Servicios que corren en el controller
+controller_services:
+  - keystone
+  - glance-api
+  - nova-api
+  - nova-conductor
+  - nova-scheduler
+  - nova-novncproxy
+  - placement-api
+  - neutron-server
+  - neutron-l3-agent
+  - neutron-dhcp-agent
+  - neutron-metadata-agent
+  - neutron-openvswitch-agent
+  - apache2
+  - mariadb
+  - rabbitmq-server
+  - memcached
+
+# El controller NO es nodo de computo (no tiene nova-compute)
+nova_virt_type: none
+
+# Puertos API del controller
+keystone_port: 5000
+nova_api_port: 8774
+neutron_port: 9696
+placement_port: 8778
+glance_port: 9292
+novnc_port: 6080

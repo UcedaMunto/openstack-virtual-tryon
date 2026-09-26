@@ -1,0 +1,29 @@
+# group_vars/compute.yml
+# Variables específicas de los nodos compute
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Tipo de virtualización en los computes (nested KVM)
+nova_virt_type: kvm
+nova_cpu_mode: host-passthrough
+
+# El local_ip para túneles VXLAN es la IP de gestión del nodo (br-mgmt)
+# Nota: {{ mgmt_ip }} se resuelve con la variable de host definida en hosts.yml
+neutron_local_ip: "{{ mgmt_ip }}"
+
+# Bridge de túneles OVS
+neutron_tunnel_bridge: br-tun
+
+# URL del proxy VNC (apunta al controller)
+nova_novnc_url: "http://{{ controller_public_ip }}:{{ novnc_port | default(6080) }}/vnc_lite.html"
+
+# Servicios que corren en cada compute
+compute_services:
+  - nova-compute
+  - neutron-openvswitch-agent
+  - libvirtd
+
+# Override del servicio libvirtd (sin --timeout 120 que rompe nova-compute)
+libvirtd_override_content: |
+  [Service]
+  ExecStart=
+  ExecStart=/usr/sbin/libvirtd

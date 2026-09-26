@@ -1,0 +1,118 @@
+@startuml
+
+!theme cerulean-outline
+
+skinparam componentStyle rectangle
+skinparam backgroundColor #FEFEFE
+
+' Definición de actores y sistemas externos
+actor Usuario as user
+cloud Internet {
+    node "Router/Gateway" as router #LightBlue
+}
+
+' Host físico
+rectangle "HOST (Ubuntu 24.04)" as host #LightGreen {
+    ' Interfaces físicas
+    card "NIC Ethernet\nenp2s0f0" as eth0 #Orange {
+        note right
+            IP: 192.168.0.195/24
+            MAC: 88:a4:c2:37:e9:c7
+            Velocidad: 1 Gbps
+        end note
+    }
+
+    card "NIC WiFi\nwlp3s0" as wifi #Orange {
+        note right
+            IP: 192.168.0.152/24
+            Estado: UP (activa)
+        end note
+    }
+
+    ' Bridges virtuales
+    rectangle "Bridges Virtuales" as bridges #LightYellow {
+        card "br0\n192.168.100.1/24" as br0 #Green {
+            note bottom
+                Bridge de la práctica
+                Red: 192.168.100.0/24
+            end note
+        }
+
+        card "virbr0\n192.168.122.1/24" as virbr0 #LightGray
+        card "docker0\n172.17.0.1/16" as docker0 #LightGray
+    }
+
+    ' Interfaces TAP
+    rectangle "Interfaces TAP" as taps #LightCyan {
+        card "tap0" as tap0 #Cyan {
+            note right: Para VM1
+        }
+        card "tap1" as tap1 #Cyan {
+            note right: Para VM2
+        }
+        card "vnet0" as vnet0 #LightGray {
+            note right: VM antigua
+        }
+    }
+}
+
+' Máquinas virtuales
+rectangle "Máquinas Virtuales" as vms #LightPink {
+    card "VM1\nvm1-practica" as vm1 #Pink {
+        note bottom
+            SO: Alpine Linux
+            RAM: 2 GB
+            vCPUs: 2
+            VNC: localhost:5901
+        end note
+    }
+
+    card "VM2\nvm2-practica" as vm2 #Pink {
+        note bottom
+            SO: Alpine Linux
+            RAM: 2 GB
+            vCPUs: 2
+            VNC: localhost:5902
+        end note
+    }
+
+    card "VM antigua\nubuntu-guest" as vmold #LightGray
+}
+
+' Relaciones
+user --> router : "Accede"
+router --> eth0 : "Internet\n(cable)"
+router --> wifi : "Internet\n(WiFi)"
+
+eth0 -[hidden]down-> bridges
+wifi -[hidden]down-> bridges
+
+br0 --> tap0 : "conecta"
+br0 --> tap1 : "conecta"
+virbr0 --> vnet0 : "conecta"
+
+tap0 --> vm1 : "interfaz\nvirtual"
+tap1 --> vm2 : "interfaz\nvirtual"
+vnet0 --> vmold : "interfaz\nvirtual"
+
+note right of vm1
+    <b>Configuración sugerida:</b>
+    IP: 192.168.100.10/24
+    Gateway: 192.168.100.1
+end note
+
+note right of vm2
+    <b>Configuración sugerida:</b>
+    IP: 192.168.100.20/24
+    Gateway: 192.168.100.1
+end note
+
+legend bottom
+    |= Símbolo |= Significado |
+    | <back:Green>   </back> | Activo - Práctica actual |
+    | <back:LightGray>   </back> | Preexistente |
+    | <back:Orange>   </back> | Hardware físico |
+    | <back:Pink>   </back> | Máquinas virtuales |
+endlegend
+
+@enduml

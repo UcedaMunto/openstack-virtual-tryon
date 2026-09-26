@@ -1,0 +1,37 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam linetype ortho
+
+title Red provider actual - provider-net 192.168.122.0/24
+
+cloud "provider-net\nprovider-subnet 192.168.122.0/24" as PROVIDER
+cloud "Salida externa" as EXT
+
+node "controller\nbr-provider + br-vlan\nqrouter qg-port" as CTRL
+node "compute1\nbr-provider + br-vlan" as C1
+node "compute2\nbr-provider + br-vlan" as C2
+node "compute3\nbr-provider + br-vlan" as C3
+node "compute4\nbr-provider + br-vlan" as C4
+
+PROVIDER -- CTRL
+PROVIDER -- C1
+PROVIDER -- C2
+PROVIDER -- C3
+PROVIDER -- C4
+PROVIDER -- EXT
+
+rectangle "Floating IPs\n192.168.122.137 -> wp-web-01 (10.10.10.76)\n192.168.122.152 -> wp-db-01 (10.10.10.152)\n192.168.122.115 -> test-vm1 (10.10.10.229)\n192.168.122.136 -> libre" as FIPS
+
+CTRL .. FIPS : DNAT/SNAT en qrouter
+
+note bottom
+Interfaces relevantes:
+- Controller: enp8s0 -> br-vlan -> OVS br-provider
+- Computes: enp8s0 -> br-vlan -> OVS br-provider
+- Router Neutron: router1 ACTIVE/UP
+end note
+
+@enduml

@@ -1,0 +1,61 @@
+@startuml 01-red-y-bridges
+title Red y bridges del laboratorio Kubernetes (192.168.90.0/24)
+
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+node "anfitrion (host KVM/libvirt)" as anfitrion {
+  component "virbr90\n(bridge libvirt)" as virbr90
+  component "libvirt network\nk8s-lab (NAT/aislada)" as netxml
+}
+
+cloud "Subred k8s-lab\n192.168.90.0/24" as subred
+
+node "k8-master\n192.168.90.1" as master
+node "k8-worker1\n192.168.90.2" as w1
+node "k8-worker2\n192.168.90.3" as w2
+node "k8-worker3\n192.168.90.4" as w3
+
+anfitrion -down-> subred : 192.168.90.254\n(IP del anfitrion en el bridge)
+virbr90 -- netxml : define red y rango DHCP
+netxml -down-> subred
+
+subred -- master
+subred -- w1
+subred -- w2
+subred -- w3
+
+note right of subred
+  Definicion de red: kubernetes/net/k8s-lab-network.xml
+  Comandos utiles (NODO: anfitrion):
+  virsh net-list --all
+  virsh net-dhcp-leases k8s-lab
+  ip route get 192.168.90.1
+end note
+
+package "IPs de servicios expuestos sobre la misma subred" as servicios {
+  component "wordpress-lb\n192.168.90.50\n(MetalLB LoadBalancer, puerto 80)" as lb
+  component "NodePort k8s Dashboard\n192.168.90.1:32000" as dash
+  component "NodePort NGINX prueba\n192.168.90.1:30885" as nginx
+  component "NodePort Ceph Dashboard\n192.168.90.1:32174\n(Service propio, no gestionado por Rook)" as ceph
+}
+
+subred -down-> servicios
+
+note bottom of servicios
+  Todas alcanzables directamente desde el anfitrion
+  sin pasos adicionales (ver guia, seccion 19).
+end note
+
+legend right
+  |= Termino / Tecnologia |= Que es |
+  | libvirt | Capa de gestion de virtualizacion (KVM/QEMU) usada en el anfitrion para crear VMs y redes virtuales |
+  | virbr90 | Bridge Linux que crea libvirt para la red "k8s-lab"; conecta las interfaces virtuales de las VMs entre si y con el anfitrion |
+  | Red NAT/aislada libvirt | Red virtual definida en XML (kubernetes/net/k8s-lab-network.xml) con su propio rango DHCP, independiente de la red fisica del anfitrion |
+  | DHCP | Protocolo que asigna automaticamente IP a cada VM al arrancar, segun el rango definido en la red libvirt |
+  | MetalLB | Load-balancer software para clusters Kubernetes bare-metal/VM; asigna IPs "flotantes" (tipo LoadBalancer) sobre la misma subred, sin necesitar un cloud provider |
+  | NodePort | Tipo de Service de Kubernetes que expone un puerto fijo en la IP de cada nodo del cluster (ej. 192.168.90.1:32000) |
+  | LoadBalancer | Tipo de Service de Kubernetes que solicita una IP externa dedicada; en este lab la entrega MetalLB (192.168.90.50) |
+endlegend
+
+@enduml

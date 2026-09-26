@@ -1,0 +1,22 @@
+# RBAC del Dashboard de Kubernetes: usuario admin-user con cluster-admin.
+# El Dashboard en si se instala con Helm (chart kubernetes-dashboard-7.14.0)
+# y se expone por NodePort 32000 parcheando el Service kong-proxy.
+# Ver scripts/deploy-manifests.sh y scripts/bootstrap-cluster.sh.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kubernetes-dashboard
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: admin-user
+    namespace: kubernetes-dashboard

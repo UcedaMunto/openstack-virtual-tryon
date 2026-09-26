@@ -1,0 +1,359 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ==========================================================
+# LAB CEPH EN KVM - CREACION ORDENADA
+# ==========================================================
+# Este archivo deja el flujo en orden para crear:
+# - Red ceph-net
+# - 5 VMs: ceph-admin, ceph-mon, ceph-osd1, ceph-osd2, ceph-osd3
+# - Discos de sistema y discos de datos para OSD
+# - Configuracion inicial de /etc/hosts
+#
+# Uso:
+#   bash "comandos ejecutados.txt"
+#
+# Requisitos:
+# - Clave publica SSH en ~/.ssh/id_rsa.pub
+# - Imagen base en: $IMG_DIR/ubuntu-22.04-base.qcow2
+# ==========================================================
+
+IMG_DIR="${IMG_DIR:-/var/lib/libvirt/images}"
+BASE_IMG="$IMG_DIR/ubuntu-22.04-base.qcow2"
+CEPH_NET="ceph-net"
+
+VM_NAMES=(ceph-admin ceph-mon ceph-osd1 ceph-osd2 ceph-osd3)
+
+declare -A VM_IPS=(
+  [ceph-admin]="192.168.5.40"
+  [ceph-mon]="192.168.5.41"
+  [ceph-osd1]="192.168.5.42"
+  [ceph-osd2]="192.168.5.43"
+  [ceph-osd3]="192.168.5.44"
+)
+
+if [[ ! -f "$HOME/.ssh/id_rsa.pub" ]]; then
+  echo "[ERROR] No existe $HOME/.ssh/id_rsa.pub"
+  echo "Generala con: ssh-keygen -t rsa -b 4096 -N \"\" -f ~/.ssh/id_rsa"
+  exit 1
+fi
+
+if [[ ! -f "$BASE_IMG" ]]; then
+  echo "[ERROR] No existe la imagen base: $BASE_IMG"
+  echo "Descargala con:"
+  echo "sudo wget -O $BASE_IMG https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img"
+  exit 1
+fi
+
+write_cloud_init() {
+  local vm_name="$1"
+  local vm_ip="$2"
+  local cloud_file="/tmp/user-data-${vm_name}.yaml"
+
+  cat > "$cloud_file" <<EOF
+#cloud-config
+hostname: $vm_name
+manage_etc_hosts: false
+users:
+  - name: ceph
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - $(cat "$HOME/.ssh/id_rsa.pub")
+chpasswd:
+  list: |
+    root:ceph1234
+    ceph:ceph1234
+  expire: false
+write_files:
+  - path: /etc/hosts
+    content: |
+      127.0.0.1 localhost
+      127.0.1.1 $vm_name
+      192.168.5.40 ceph-admin
+      192.168.5.41 ceph-mon
+      192.168.5.42 ceph-osd1
+      192.168.5.43 ceph-osd2
+      192.168.5.44 ceph-osd3
+network:
+  version: 2
+  ethernets:
+    enp1s0:
+      addresses: [$vm_ip/24]
+      gateway4: 192.168.5.1
+      nameservers:
+        addresses: [8.8.8.8, 8.8.4.4]
+EOF
+}
+
+create_network() {
+  echo "[INFO] Creando red $CEPH_NET..."
+
+  cat > /tmp/ceph-net.xml <<'EOF'
+<network>
+  <name>ceph-net</name>
+  <forward mode='nat'/>
+  <ip address='192.168.5.1' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='192.168.5.100' end='192.168.5.200'/>
+    </dhcp>
+  </ip>
+</network>
+EOF
+
+  if ! sudo virsh net-info "$CEPH_NET" >/dev/null 2>&1; then
+    sudo virsh net-define /tmp/ceph-net.xml
+  fi
+
+  sudo virsh net-start "$CEPH_NET" 2>/dev/null || true
+  sudo virsh net-autostart "$CEPH_NET"
+  sudo virsh net-list --all
+}
+
+create_vm() {
+  local vm_name="$1"
+  local vm_ip="$2"
+  local system_disk="$IMG_DIR/${vm_name}.qcow2"
+  local cloud_file="/tmp/user-data-${vm_name}.yaml"
+
+  echo "[INFO] Preparando $vm_name ($vm_ip)..."
+  write_cloud_init "$vm_name" "$vm_ip"
+
+  if [[ ! -f "$system_disk" ]]; then
+    sudo qemu-img create -f qcow2 -b "$BASE_IMG" -F qcow2 "$system_disk" 20G
+  fi
+
+  if [[ "$vm_name" == ceph-osd1 || "$vm_name" == ceph-osd2 || "$vm_name" == ceph-osd3 ]]; then
+    local data_disk="$IMG_DIR/${vm_name}-data.qcow2"
+
+    if [[ ! -f "$data_disk" ]]; then
+      sudo qemu-img create -f qcow2 "$data_disk" 50G
+    fi
+
+    sudo virt-install \
+      --name "$vm_name" \
+      --ram 2048 \
+      --vcpus 2 \
+      --disk "path=$system_disk,format=qcow2" \
+      --disk "path=$data_disk,format=qcow2" \
+      --network "network=$CEPH_NET,model=virtio" \
+      --os-variant ubuntu22.04 \
+      --cloud-init "user-data=$cloud_file" \
+      --noautoconsole \
+      --import
+  else
+    sudo virt-install \
+      --name "$vm_name" \
+      --ram 2048 \
+      --vcpus 2 \
+      --disk "path=$system_disk,format=qcow2" \
+      --network "network=$CEPH_NET,model=virtio" \
+      --os-variant ubuntu22.04 \
+      --cloud-init "user-data=$cloud_file" \
+      --noautoconsole \
+      --import
+  fi
+}
+
+start_vms() {
+  echo "[INFO] Iniciando VMs..."
+  for vm in "${VM_NAMES[@]}"; do
+    sudo virsh start "$vm" 2>/dev/null || true
+  done
+  sudo virsh list --all
+}
+
+configure_hosts_remote() {
+  echo "[INFO] Reforzando /etc/hosts en cada VM..."
+
+  for vm in "${VM_NAMES[@]}"; do
+    ip="${VM_IPS[$vm]}"
+    ssh -o StrictHostKeyChecking=no "ceph@$ip" "sudo tee /etc/hosts > /dev/null <<'EOF'
+127.0.0.1 localhost
+127.0.1.1 $vm
+192.168.5.40 ceph-admin
+192.168.5.41 ceph-mon
+192.168.5.42 ceph-osd1
+192.168.5.43 ceph-osd2
+192.168.5.44 ceph-osd3
+EOF"
+  done
+}
+
+install_basic_packages() {
+  echo "[INFO] Instalando paquetes base (chrony, openssh-server, curl)..."
+
+  for vm in "${VM_NAMES[@]}"; do
+    ip="${VM_IPS[$vm]}"
+    ssh -o StrictHostKeyChecking=no "ceph@$ip" \
+      "sudo apt update && sudo apt install -y chrony openssh-server curl && sudo systemctl enable --now chrony ssh"
+  done
+}
+
+show_final_status() {
+  echo "[INFO] Estado final de VMs:"
+  sudo virsh list --all
+
+  echo
+  echo "[INFO] Leases DHCP actuales:"
+  sudo virsh net-dhcp-leases "$CEPH_NET" || true
+}
+
+
+# ==========================================================
+# EJECUCION
+# ==========================================================
+create_network
+
+create_vm ceph-admin "${VM_IPS[ceph-admin]}"
+create_vm ceph-mon "${VM_IPS[ceph-mon]}"
+create_vm ceph-osd1 "${VM_IPS[ceph-osd1]}"
+create_vm ceph-osd2 "${VM_IPS[ceph-osd2]}"
+create_vm ceph-osd3 "${VM_IPS[ceph-osd3]}"
+
+start_vms
+configure_hosts_remote
+install_basic_packages
+show_final_status
+
+echo
+echo "[OK] Laboratorio Ceph creado y ordenado."
+
+
+# ==========================================================
+# 3.1 ACTUALIZAR HOSTNAME Y /etc/hosts (MANUAL)
+# ==========================================================
+# Ejecuta estos comandos dentro de cada nodo (o via SSH) para
+# reforzar el hostname y la resolucion local de nombres.
+
+# Ejemplo dentro de ceph-admin:
+# hostnamectl set-hostname ceph-admin
+# exec bash
+
+# Tabla /etc/hosts comun para todos los nodos:
+# 192.168.5.40 ceph-admin
+# 192.168.5.41 ceph-mon
+# 192.168.5.42 ceph-osd1
+# 192.168.5.43 ceph-osd2
+# 192.168.5.44 ceph-osd3
+
+# Comandos listos por SSH:
+ssh ceph@192.168.5.40 "sudo hostnamectl set-hostname ceph-admin && sudo tee /etc/hosts >/dev/null <<'EOF'
+127.0.0.1 localhost
+127.0.1.1 ceph-admin
+192.168.5.40 ceph-admin
+192.168.5.41 ceph-mon
+192.168.5.42 ceph-osd1
+192.168.5.43 ceph-osd2
+192.168.5.44 ceph-osd3
+EOF
+"
+
+ssh ceph@192.168.5.41 "sudo hostnamectl set-hostname ceph-mon && sudo tee /etc/hosts >/dev/null <<'EOF'
+127.0.0.1 localhost
+127.0.1.1 ceph-mon
+192.168.5.40 ceph-admin
+192.168.5.41 ceph-mon
+192.168.5.42 ceph-osd1
+192.168.5.43 ceph-osd2
+192.168.5.44 ceph-osd3
+EOF
+"
+
+ssh ceph@192.168.5.42 "sudo hostnamectl set-hostname ceph-osd1 && sudo tee /etc/hosts >/dev/null <<'EOF'
+127.0.0.1 localhost
+127.0.1.1 ceph-osd1
+192.168.5.40 ceph-admin
+192.168.5.41 ceph-mon
+192.168.5.42 ceph-osd1
+192.168.5.43 ceph-osd2
+192.168.5.44 ceph-osd3
+EOF
+"
+
+ssh ceph@192.168.5.43 "sudo hostnamectl set-hostname ceph-osd2 && sudo tee /etc/hosts >/dev/null <<'EOF'
+127.0.0.1 localhost
+127.0.1.1 ceph-osd2
+192.168.5.40 ceph-admin
+192.168.5.41 ceph-mon
+192.168.5.42 ceph-osd1
+192.168.5.43 ceph-osd2
+192.168.5.44 ceph-osd3
+EOF
+"
+
+ssh ceph@192.168.5.44 "sudo hostnamectl set-hostname ceph-osd3 && sudo tee /etc/hosts >/dev/null <<'EOF'
+127.0.0.1 localhost
+127.0.1.1 ceph-osd3
+192.168.5.40 ceph-admin
+192.168.5.41 ceph-mon
+192.168.5.42 ceph-osd1
+192.168.5.43 ceph-osd2
+192.168.5.44 ceph-osd3
+EOF
+"
+
+
+# ==========================================================
+# 3.2 INSTALAR Y ACTIVAR SSH + CHRONY EN TODOS LOS NODOS
+# ==========================================================
+# Debe realizarse en todos los nodos que participaran del cluster.
+# Comandos base:
+# apt install chrony openssh-server curl -y
+# systemctl enable --now chrony
+# systemctl enable --now ssh
+
+for ip in 192.168.5.40 192.168.5.41 192.168.5.42 192.168.5.43 192.168.5.44; do
+  echo "[INFO] Instalando en $ip..."
+  ssh -o StrictHostKeyChecking=no "ceph@$ip" \
+    "sudo apt update && sudo apt install chrony openssh-server curl -y && sudo systemctl enable --now chrony && sudo systemctl enable --now ssh"
+done
+
+echo "[OK] SSH y Chrony instalados/activados en todos los nodos."
+
+
+# ==========================================================
+# 3.3 CONFIGURAR CHRONY PARA TODO EL CLUSTER
+# ==========================================================
+# Objetivo:
+# - ceph-admin toma hora de NTP externo
+# - ceph-admin sirve hora al resto de nodos
+# - todos los nodos cliente sincronizan contra ceph-admin
+
+# En ceph-admin:
+# server ntp.ues.edu.sv iburst
+# allow 192.168.5.0/24
+
+# En nodos cliente:
+# server ceph-admin iburst
+
+# 1) Configurar ceph-admin como servidor de tiempo para la red del cluster
+ssh -o StrictHostKeyChecking=no ceph@192.168.5.40 "sudo tee /etc/chrony/conf.d/ceph-cluster.conf >/dev/null <<'EOF'
+server ntp.ues.edu.sv iburst
+allow 192.168.5.0/24
+EOF
+sudo systemctl restart chrony
+sudo systemctl enable chrony
+"
+
+# 2) Configurar todos los demas nodos para usar ceph-admin como fuente de tiempo
+for ip in 192.168.5.41 192.168.5.42 192.168.5.43 192.168.5.44; do
+  echo "[INFO] Configurando chrony cliente en $ip..."
+  ssh -o StrictHostKeyChecking=no "ceph@$ip" "sudo tee /etc/chrony/conf.d/ceph-cluster.conf >/dev/null <<'EOF'
+server ceph-admin iburst
+EOF
+sudo systemctl restart chrony
+sudo systemctl enable chrony
+"
+done
+
+# 3) Verificacion rapida del estado de sincronizacion
+for ip in 192.168.5.40 192.168.5.41 192.168.5.42 192.168.5.43 192.168.5.44; do
+  echo "===== $ip ====="
+  ssh -o StrictHostKeyChecking=no "ceph@$ip" "chronyc sources -v | head -n 20"
+done
+
+echo "[OK] Chrony configurado en todos los nodos."
+
+
+

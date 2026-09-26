@@ -1,0 +1,24 @@
+ Id   Name                State
+------------------------------------
+ -    ansible-ctrl        shut off
+ -    compute             shut off
+ -    compute-clone7      shut off
+ -    compute2            shut off
+ -    compute2-clone7     shut off
+ -    compute3            shut off
+ -    compute3-clone7     shut off
+ -    compute4            shut off
+ -    controller          shut off
+ -    controller-clone7   shut off
+ -    controller-clone8   shut off
+ -    server1             shut off
+ -    server2             shut off
+ -    server3             shut off
+ -    storage1-clone7     shut off
+ -    swift1              shut off
+ -    swift1-clone7       shut off
+ -    swift2              shut off
+ -    swift2-clone7       shut off
+ -    swift3              shut off
+ -    swift3-clone7       shut off
+

@@ -1,0 +1,7 @@
+<network>
+  <name>openstack-provider</name>
+  <uuid>d048767a-b21b-45bf-be80-408af8457dc0</uuid>
+  <bridge name='virbr30' stp='on' delay='0'/>
+  <mac address='52:54:00:5f:38:e3'/>
+</network>
+

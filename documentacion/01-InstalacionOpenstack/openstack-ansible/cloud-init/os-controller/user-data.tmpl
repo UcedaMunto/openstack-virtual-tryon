@@ -1,0 +1,37 @@
+#cloud-config
+# user-data.tmpl: plantilla de la que se genera user-data (con
+# scripts/gen-user-data.sh). El marcador de la clave publica (mas abajo, en
+# ssh_authorized_keys) se sustituye por el contenido real de la clave SSH
+# (p.ej. ~/.ssh/openstack_lab.pub), asi el .pub sigue siendo la unica fuente
+# de verdad y no hay que pegarla a mano en cada user-data.
+
+hostname: os-controller
+fqdn: os-controller.openstack.lab
+manage_etc_hosts: true          # cloud-init mantiene /etc/hosts con hostname/fqdn (resolucion local)
+
+users:
+  - default                     # conserva el usuario por defecto de la imagen base (para no perder acceso)
+  - name: uceda                 # usuario adicional para administrar el lab (Ansible, SSH manual)
+    groups: [sudo]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL   # sudo sin password: comodo para que Ansible ejecute tareas privilegiadas sin prompt
+    ssh_authorized_keys:
+      - __SSH_PUBLIC_KEY__
+
+ssh_pwauth: false                # deshabilita login SSH por password (solo autenticacion por clave)
+disable_root: true                # evita login directo como root por seguridad
+
+package_update: true              # ejecuta apt update antes de instalar los paquetes de abajo
+
+packages:
+  - qemu-guest-agent              # permite a libvirt/virsh conocer la IP y apagar/reiniciar la VM de forma limpia
+  - python3                       # requerido por Ansible para ejecutar modulos en el nodo remoto
+  - python3-pip
+  - curl
+  - vim
+  - net-tools
+
+runcmd:
+  - systemctl enable --now qemu-guest-agent   # arranca y habilita el guest agent al finalizar cloud-init
+
+final_message: "Cloud-init os-controller terminado"   # mensaje que cloud-init deja en consola/log al terminar todo el proceso

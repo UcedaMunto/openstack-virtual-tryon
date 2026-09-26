@@ -1,0 +1,154 @@
+services:
+  # Nodo Administrador
+  ceph-admin:
+    image: ubuntu:22.04
+    container_name: ceph-admin
+    hostname: ceph-admin
+    networks:
+      admin_net:
+        ipv4_address: 192.168.122.100
+    volumes:
+      - admin_data:/etc/ceph
+      - admin_home:/root/.ssh
+      - admin_scripts:/scripts
+      - ./scripts/init-admin.sh:/docker-entrypoint.sh
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+    ports:
+      - "8443:8443"
+    privileged: true
+    stdin_open: true
+    tty: true
+    entrypoint: /bin/bash
+    command: -c "bash /docker-entrypoint.sh && /bin/bash"
+
+  # Nodo Monitor
+  ceph-mon:
+    image: ubuntu:22.04
+    container_name: ceph-mon
+    hostname: ceph-mon
+    networks:
+      admin_net:
+        ipv4_address: 192.168.122.10
+    volumes:
+      - mon_data:/var/lib/ceph
+      - mon_etc:/etc/ceph
+      - ./scripts/init-mon.sh:/docker-entrypoint.sh
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+    privileged: true
+    stdin_open: true
+    tty: true
+    entrypoint: /bin/bash
+    command: -c "bash /docker-entrypoint.sh && /bin/bash"
+    depends_on:
+      - ceph-admin
+
+  # Nodo OSD 1
+  ceph-1:
+    image: ubuntu:22.04
+    container_name: ceph-1
+    hostname: ceph-1
+    networks:
+      admin_net:
+        ipv4_address: 192.168.122.11
+      data_net:
+        ipv4_address: 192.168.5.11
+    volumes:
+      - osd1_etc:/etc/ceph
+      - osd1_var:/var/lib/ceph
+      - osd1_data:/data
+      - ./scripts/init-osd.sh:/docker-entrypoint.sh
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+      - OSD_ID=0
+    privileged: true
+    stdin_open: true
+    tty: true
+    entrypoint: /bin/bash
+    command: -c "bash /docker-entrypoint.sh && /bin/bash"
+    depends_on:
+      - ceph-mon
+
+  # Nodo OSD 2
+  ceph-2:
+    image: ubuntu:22.04
+    container_name: ceph-2
+    hostname: ceph-2
+    networks:
+      admin_net:
+        ipv4_address: 192.168.122.12
+      data_net:
+        ipv4_address: 192.168.5.12
+    volumes:
+      - osd2_etc:/etc/ceph
+      - osd2_var:/var/lib/ceph
+      - osd2_data:/data
+      - ./scripts/init-osd.sh:/docker-entrypoint.sh
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+      - OSD_ID=1
+    privileged: true
+    stdin_open: true
+    tty: true
+    entrypoint: /bin/bash
+    command: -c "bash /docker-entrypoint.sh && /bin/bash"
+    depends_on:
+      - ceph-mon
+
+  # Nodo OSD 3
+  ceph-3:
+    image: ubuntu:22.04
+    container_name: ceph-3
+    hostname: ceph-3
+    networks:
+      admin_net:
+        ipv4_address: 192.168.122.13
+      data_net:
+        ipv4_address: 192.168.5.13
+    volumes:
+      - osd3_etc:/etc/ceph
+      - osd3_var:/var/lib/ceph
+      - osd3_data:/data
+      - ./scripts/init-osd.sh:/docker-entrypoint.sh
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+      - OSD_ID=2
+    privileged: true
+    stdin_open: true
+    tty: true
+    entrypoint: /bin/bash
+    command: -c "bash /docker-entrypoint.sh && /bin/bash"
+    depends_on:
+      - ceph-mon
+
+networks:
+  # Switch de administración
+  admin_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.122.0/24
+
+  # Switch de datos
+  data_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.5.0/24
+
+volumes:
+  admin_data:
+  admin_home:
+  admin_scripts:
+  mon_data:
+  mon_etc:
+  osd1_etc:
+  osd1_var:
+  osd1_data:
+  osd2_etc:
+  osd2_var:
+  osd2_data:
+  osd3_etc:
+  osd3_var:
+  osd3_data:

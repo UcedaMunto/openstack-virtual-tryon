@@ -1,0 +1,44 @@
+apiVersion: ceph.rook.io/v1
+kind: CephCluster
+metadata:
+  name: rook-ceph
+  namespace: rook-ceph
+spec:
+  cephVersion:
+    image: quay.io/ceph/ceph:v20.2.4
+    allowUnsupported: false
+  dataDirHostPath: /var/lib/rook
+  mon:
+    count: 3
+    allowMultiplePerNode: false
+  mgr:
+    count: 1
+    allowMultiplePerNode: false
+  dashboard:
+    enabled: false
+  monitoring:
+    enabled: false
+  crashCollector:
+    disable: true
+  logCollector:
+    enabled: false
+  security:
+    cephx:
+      csi:
+        keyType: aes256k
+  storage:
+    useAllNodes: false
+    useAllDevices: false
+    nodes:
+      - name: "k8-worker1"
+        devices:
+          - name: "vdb"
+      - name: "k8-worker2"
+        devices:
+          - name: "vdb"
+      - name: "k8-worker3"
+        devices:
+          - name: "vdb"
+      - name: "k8-worker4"
+        devices:
+          - name: "vdb"

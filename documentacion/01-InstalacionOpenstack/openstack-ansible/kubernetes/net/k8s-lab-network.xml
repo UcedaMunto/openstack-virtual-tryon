@@ -1,0 +1,16 @@
+<network>
+  <name>k8s-lab</name>
+  <forward mode='nat'/>
+  <bridge name='virbr90' stp='on' delay='0'/>
+  <domain name='k8s.lab'/>
+  <ip address='192.168.90.254' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='192.168.90.100' end='192.168.90.200'/>
+      <host mac='52:54:00:90:00:01' name='k8-master'  ip='192.168.90.1'/>
+      <host mac='52:54:00:90:00:02' name='k8-worker1' ip='192.168.90.2'/>
+      <host mac='52:54:00:90:00:03' name='k8-worker2' ip='192.168.90.3'/>
+      <host mac='52:54:00:90:00:04' name='k8-worker3' ip='192.168.90.4'/>
+      <host mac='52:54:00:90:00:05' name='k8-worker4' ip='192.168.90.5'/>
+    </dhcp>
+  </ip>
+</network>

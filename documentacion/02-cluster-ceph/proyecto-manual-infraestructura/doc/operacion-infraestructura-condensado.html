@@ -1,0 +1,2521 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Operacion Infraestructura HA/HC - Tabla Operativa</title>
+  <style>
+    :root {
+      --bg: #f3f5f7;
+      --card: #ffffff;
+      --ink: #1f2933;
+      --muted: #52606d;
+      --line: #d9e2ec;
+      --head: #102a43;
+      --accent: #2f855a;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "JetBrains Mono", "Fira Code", "DejaVu Sans Mono", monospace;
+      font-size: 11px;
+      line-height: 1.3;
+    }
+    .wrap {
+      margin: 10px auto;
+      padding: 0 10px 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      align-items: start;
+    }
+    .grid-full {
+      grid-column: 1 / -1;
+    }
+    h1 {
+      font-size: 14px;
+      margin: 0 0 6px;
+      color: var(--head);
+    }
+    h2 {
+      font-size: 12px;
+      margin: 14px 0 6px;
+      color: var(--head);
+    }
+    .meta {
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px;
+      box-shadow: 0 1px 2px rgba(16, 42, 67, 0.05);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 5px;
+      vertical-align: top;
+      word-wrap: break-word;
+      overflow-wrap: anywhere;
+    }
+    th {
+      background: #e6eef5;
+      color: #0b2239;
+      font-weight: 700;
+      text-align: left;
+    }
+    code, pre {
+      font-family: "JetBrains Mono", "Fira Code", "DejaVu Sans Mono", monospace;
+      font-size: 10px;
+    }
+    pre {
+      background: #0f1720;
+      color: #d7e2ea;
+      border-radius: 6px;
+      padding: 8px;
+      margin: 6px 0;
+      white-space: pre-wrap;
+    }
+    .ok {
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .note {
+      color: var(--muted);
+    }
+    .card h2 {
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card h2::before {
+      content: '▼';
+      font-size: 9px;
+      display: inline-block;
+      transition: transform 0.15s;
+      min-width: 10px;
+    }
+    .card h2.collapsed::before {
+      content: '▶';
+    }
+    .card-content.hidden {
+      display: none;
+    }
+    .card.expanded {
+      grid-column: 1 / -1;
+    }
+    /* ===== SEARCH BAR ===== */
+    #search-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--head);
+      padding: 7px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    #search-bar label {
+      color: #a0c4e0;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+    #search-input {
+      flex: 1;
+      max-width: 480px;
+      background: #1c3a55;
+      border: 1px solid #3a6a8a;
+      border-radius: 5px;
+      color: #e8f4ff;
+      font-family: "JetBrains Mono", "Fira Code", monospace;
+      font-size: 11px;
+      padding: 4px 8px;
+      outline: none;
+    }
+    #search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(47,133,90,0.3);
+    }
+    #search-count {
+      color: #7ab8d8;
+      font-size: 10px;
+      white-space: nowrap;
+      min-width: 90px;
+    }
+    #search-clear {
+      background: #2f5575;
+      border: none;
+      border-radius: 4px;
+      color: #a0c4e0;
+      font-size: 10px;
+      padding: 3px 8px;
+      cursor: pointer;
+    }
+    #search-clear:hover { background: #3a6a8a; color: #fff; }
+    .search-hidden { display: none !important; }
+    .search-highlight {
+      background: #f6d860;
+      color: #0f1720;
+      border-radius: 2px;
+      padding: 0 1px;
+    }
+    .card.search-no-match { opacity: 0.25; }
+  </style>
+</head>
+<body>
+  <div id="search-bar">
+    <label for="search-input">&#128269; Buscar comando:</label>
+    <input id="search-input" type="text" placeholder="nginx, bind9, wsrep, redis-cli, 192.168.30.21 ..." autocomplete="off" spellcheck="false">
+    <span id="search-count"></span>
+    <button id="search-clear" title="Limpiar (Esc)">&#x2715; Limpiar</button>
+  </div>
+  <div class="wrap">
+    <h1 class="grid-full">Operacion Infraestructura HA/HC - Resumen Condensado</h1>
+    <div class="meta grid-full">Dominio: mimas.net / ti.mimas.net | Backend activo recomendado: <span class="ok">Winter + Redis Cluster (APP_STACK=winter)</span></div>
+
+    <div class="card">
+      <h2>Comandos ejecutados para levantar las VMs</h2>
+      <pre>which virsh && virsh --version
+virsh list --all
+bash configuraciones-run.sh 2>&1
+virsh list --all</pre>
+      <pre>Resultado final esperado:
+    [OK] Arranque completado.
+    VMs running core: dns-principal, dns-delegado, mariadb-1, mariadb-2, mariadb-3,
+    maxscale-1, redis-1..redis-7, lb1, lb2 y stack backend seleccionado por APP_STACK (winter o wintercms).</pre>
+    </div>
+
+    </div>
+
+    <!-- SUBIR / BAJAR SERVICIOS -->
+    <div class="card grid-full">
+      <h2>Subir / Bajar servicios por componente (start · stop · restart · status)</h2>
+      <p class="note">Todos los comandos se ejecutan via SSH desde el host KVM. Sustituir <code>start|stop|restart|status</code> segun la accion necesaria.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width:12%">Servicio</th>
+            <th style="width:14%">VM / IP</th>
+            <th style="width:37%">Bajar (stop) &amp; Subir (start)</th>
+            <th style="width:37%">Restart completo &amp; verificar estado</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- NGINX LB -->
+          <tr>
+            <td><strong>Nginx LB</strong><br><span class="note">lb1 / lb2</span></td>
+            <td>192.168.10.20<br>192.168.10.21</td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "sudo systemctl stop nginx"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "sudo systemctl start nginx"</code><br>
+              <span class="note">(repetir con .21 para lb2)</span>
+            </td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "sudo nginx -t &amp;&amp; sudo systemctl restart nginx"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "systemctl status nginx --no-pager"</code>
+            </td>
+          </tr>
+
+          <!-- KEEPALIVED -->
+          <tr>
+            <td><strong>Keepalived</strong><br><span class="note">lb1 / lb2</span></td>
+            <td>192.168.10.20<br>192.168.10.21</td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "sudo systemctl stop keepalived"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "sudo systemctl start keepalived"</code>
+            </td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "sudo systemctl restart keepalived &amp;&amp; ip addr show ens3 | grep 10.19"</code><br>
+              <span class="note">Verificar cual nodo tiene la VIP 192.168.10.19</span>
+            </td>
+          </tr>
+
+          <!-- NGINX BACKEND (WinterCMS) -->
+          <tr>
+            <td><strong>Nginx + PHP-FPM</strong><br><span class="note">appWinter1/2/3</span></td>
+            <td>192.168.20.10<br>192.168.20.11<br>192.168.20.12</td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "sudo systemctl stop nginx php8.1-fpm"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "sudo systemctl start nginx php8.1-fpm"</code><br>
+              <span class="note">(repetir con .11 y .12)</span>
+            </td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "sudo systemctl restart nginx php8.1-fpm &amp;&amp; systemctl status nginx php8.1-fpm --no-pager"</code>
+            </td>
+          </tr>
+
+          <!-- MAXSCALE -->
+          <tr>
+            <td><strong>MaxScale</strong><br><span class="note">maxscale-1</span></td>
+            <td>192.168.30.20</td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "sudo systemctl stop maxscale"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "sudo systemctl start maxscale"</code>
+            </td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "sudo maxscale --config-check &amp;&amp; sudo systemctl restart maxscale"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "maxctrl list servers"</code>
+            </td>
+          </tr>
+
+          <!-- MARIADB GALERA -->
+          <tr>
+            <td><strong>MariaDB</strong><br><span class="note">mariadb-1/2/3</span></td>
+            <td>192.168.30.21<br>192.168.30.22<br>192.168.30.23</td>
+            <td>
+              <span class="note">&#9660; <strong>Stop</strong> (orden Galera: -3 → -2 → -1)</span><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.23 "sudo systemctl stop mariadb"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.22 "sudo systemctl stop mariadb"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "sudo systemctl stop mariadb"</code><br>
+              <span class="note">&#9650; <strong>Start</strong> (orden Galera: -1 → -2 → -3)</span><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "sudo systemctl start mariadb"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.22 "sudo systemctl start mariadb"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.23 "sudo systemctl start mariadb"</code>
+            </td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "sudo systemctl restart mariadb"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "mysql -u root -e \"SHOW STATUS LIKE 'wsrep_cluster_size';\"" </code>
+            </td>
+          </tr>
+
+          <!-- MARIADB GALERA BOOTSTRAP -->
+          <tr>
+            <td><strong>Galera bootstrap</strong><br><span class="note">solo si cluster caido</span></td>
+            <td>mariadb-1<br>192.168.30.21</td>
+            <td colspan="2">
+              <span class="note">&#9888; Solo usar si <strong>todos</strong> los nodos estan caidos y el cluster no arranca solo.</span><br>
+              1) En el nodo con mayor seqno: <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "sudo galera_new_cluster"</code><br>
+              2) Luego arrancar los demas: <code>sudo systemctl start mariadb</code> en .22 y .23<br>
+              3) Verificar: <code>mysql -u root -e "SHOW STATUS LIKE 'wsrep_cluster_size';"</code> &rarr; debe mostrar 3
+            </td>
+          </tr>
+
+          <!-- REDIS -->
+          <tr>
+            <td><strong>Redis</strong><br><span class="note">redis-1..7</span></td>
+            <td>192.168.30.10<br>...<br>192.168.30.16</td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "sudo systemctl stop redis-server"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "sudo systemctl start redis-server"</code><br>
+              <span class="note">(repetir para .11 al .16)</span>
+            </td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "sudo systemctl restart redis-server &amp;&amp; redis-cli -h 127.0.0.1 cluster info | head -3"</code>
+            </td>
+          </tr>
+
+          <!-- REDIS - todos en bucle -->
+          <tr>
+            <td><strong>Redis todos</strong><br><span class="note">bucle desde host</span></td>
+            <td>192.168.30.10-16</td>
+            <td colspan="2">
+<pre style="margin:4px 0;">for ip in 192.168.30.10 192.168.30.11 192.168.30.12 192.168.30.13 192.168.30.14 192.168.30.15 192.168.30.16; do
+  echo "=== $ip ==="
+  ssh -i ssh-keys/id_rsa -o ConnectTimeout=5 userinfrakv@$ip \
+    "sudo systemctl restart redis-server 2>&amp;1 &amp;&amp; redis-cli ping"
+done</pre>
+            </td>
+          </tr>
+
+          <!-- DNS PRINCIPAL -->
+          <tr>
+            <td><strong>BIND9</strong><br><span class="note">dns-principal</span></td>
+            <td>192.168.10.10</td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "sudo systemctl stop bind9"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "sudo systemctl start bind9"</code>
+            </td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "sudo named-checkconf &amp;&amp; sudo systemctl restart bind9"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "rndc status"</code>
+            </td>
+          </tr>
+
+          <!-- DNS DELEGADO -->
+          <tr>
+            <td><strong>BIND9</strong><br><span class="note">dns-delegado</span></td>
+            <td>192.168.10.11</td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "sudo systemctl stop bind9"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "sudo systemctl start bind9"</code>
+            </td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "sudo named-checkconf &amp;&amp; sudo systemctl restart bind9"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "rndc reload ti.mimas.net"</code>
+            </td>
+          </tr>
+
+          <!-- CEPH -->
+          <tr>
+            <td><strong>Ceph</strong><br><span class="note">ceph1</span></td>
+            <td>192.168.60.11</td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "sudo systemctl stop ceph.target"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "sudo systemctl start ceph.target"</code>
+            </td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "sudo systemctl restart ceph.target &amp;&amp; ceph -s"</code><br>
+              <span class="note">Servicios individuales: <code>ceph-mon@ceph1</code> · <code>ceph-mgr@ceph1</code> · <code>ceph-osd@0</code></span>
+            </td>
+          </tr>
+
+          <!-- ORDEN RECOMENDADO ARRANQUE COMPLETO -->
+          <tr style="background:#e6f0ea;">
+            <td><strong>Orden arranque completo</strong></td>
+            <td colspan="3">
+              <strong>1.</strong> dns-principal (bind9) &nbsp;|&nbsp;
+              <strong>2.</strong> dns-delegado (bind9) &nbsp;|&nbsp;
+              <strong>3.</strong> mariadb-1 (bootstrap si aplica) &rarr; mariadb-2 &rarr; mariadb-3 &nbsp;|&nbsp;
+              <strong>4.</strong> maxscale-1 &nbsp;|&nbsp;
+              <strong>5.</strong> redis-1..7 &nbsp;|&nbsp;
+              <strong>6.</strong> appWinter1/2/3 (nginx + php-fpm) &nbsp;|&nbsp;
+              <strong>7.</strong> lb1 + lb2 (nginx + keepalived)
+            </td>
+          </tr>
+
+          <!-- ORDEN RECOMENDADO APAGADO -->
+          <tr style="background:#f5ece6;">
+            <td><strong>Orden apagado completo</strong></td>
+            <td colspan="3">
+              <strong>1.</strong> lb1 + lb2 (keepalived, luego nginx) &nbsp;|&nbsp;
+              <strong>2.</strong> appWinter1/2/3 (nginx, php-fpm) &nbsp;|&nbsp;
+              <strong>3.</strong> redis-7..1 &nbsp;|&nbsp;
+              <strong>4.</strong> maxscale-1 &nbsp;|&nbsp;
+              <strong>5.</strong> mariadb-3 &rarr; mariadb-2 &rarr; mariadb-1 &nbsp;|&nbsp;
+              <strong>6.</strong> dns-delegado &nbsp;|&nbsp;
+              <strong>7.</strong> dns-principal
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <!-- STOP RAPIDO POR SERVIDOR -->
+    <div class="card grid-full">
+      <h2>Stop rapido de servicios por servidor &mdash; cheatsheet</h2>
+      <p class="note">Comandos SSH individuales listos para copiar. Para parar toda la infraestructura usar el script al final de esta seccion.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width:14%">Servidor / IP</th>
+            <th style="width:18%">Servicio</th>
+            <th style="width:68%">Comando stop (desde host KVM)</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <tr>
+            <td><strong>lb1</strong><br>192.168.10.20</td>
+            <td>keepalived<br>nginx</td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "sudo systemctl stop keepalived nginx"</code>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>lb2</strong><br>192.168.10.21</td>
+            <td>keepalived<br>nginx</td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.21 "sudo systemctl stop keepalived nginx"</code>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>appWinter1</strong><br>192.168.20.10</td>
+            <td>nginx<br>php8.1-fpm</td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "sudo systemctl stop nginx php8.1-fpm"</code>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>appWinter2</strong><br>192.168.20.11</td>
+            <td>nginx<br>php8.1-fpm</td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.11 "sudo systemctl stop nginx php8.1-fpm"</code>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>appWinter3</strong><br>192.168.20.12</td>
+            <td>nginx<br>php8.1-fpm</td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.12 "sudo systemctl stop nginx php8.1-fpm"</code>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>maxscale-1</strong><br>192.168.30.20</td>
+            <td>maxscale</td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "sudo systemctl stop maxscale"</code>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>mariadb-3</strong><br>192.168.30.23</td>
+            <td>mariadb<br><span class="note">(bajar primero)</span></td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.23 "sudo systemctl stop mariadb"</code>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>mariadb-2</strong><br>192.168.30.22</td>
+            <td>mariadb</td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.22 "sudo systemctl stop mariadb"</code>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>mariadb-1</strong><br>192.168.30.21</td>
+            <td>mariadb<br><span class="note">(bajar ultimo)</span></td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "sudo systemctl stop mariadb"</code>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>redis-1..7</strong><br>192.168.30.10-16</td>
+            <td>redis-server</td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "sudo systemctl stop redis-server"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.11 "sudo systemctl stop redis-server"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.12 "sudo systemctl stop redis-server"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.13 "sudo systemctl stop redis-server"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.14 "sudo systemctl stop redis-server"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.15 "sudo systemctl stop redis-server"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.16 "sudo systemctl stop redis-server"</code>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>dns-delegado</strong><br>192.168.10.11</td>
+            <td>bind9</td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "sudo systemctl stop bind9"</code>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>dns-principal</strong><br>192.168.10.10</td>
+            <td>bind9<br><span class="note">(bajar al final)</span></td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "sudo systemctl stop bind9"</code>
+            </td>
+          </tr>
+
+          <!-- STATUS RAPIDO TODOS -->
+          <tr style="background:#e8f0f8;">
+            <td><strong>Status todos</strong><br><span class="note">verificacion</span></td>
+            <td>todos</td>
+            <td>
+<pre style="margin:4px 0;">SSH="ssh -i ssh-keys/id_rsa -o ConnectTimeout=5 -o StrictHostKeyChecking=no userinfrakv"
+echo "--- LBs ---"
+$SSH@192.168.10.20 "systemctl is-active keepalived nginx" 2>/dev/null | tr '\n' ' '; echo " (lb1)"
+$SSH@192.168.10.21 "systemctl is-active keepalived nginx" 2>/dev/null | tr '\n' ' '; echo " (lb2)"
+echo "--- AppWinter ---"
+for ip in 192.168.20.10 192.168.20.11 192.168.20.12; do
+  $SSH@$ip "systemctl is-active nginx php8.1-fpm" 2>/dev/null | tr '\n' ' '; echo " ($ip)"
+done
+echo "--- MaxScale ---"
+$SSH@192.168.30.20 "systemctl is-active maxscale" 2>/dev/null; echo " (maxscale-1)"
+echo "--- MariaDB ---"
+for ip in 192.168.30.21 192.168.30.22 192.168.30.23; do
+  $SSH@$ip "systemctl is-active mariadb" 2>/dev/null; echo " ($ip)"
+done
+echo "--- Redis ---"
+for ip in 192.168.30.10 192.168.30.11 192.168.30.12 192.168.30.13 192.168.30.14 192.168.30.15 192.168.30.16; do
+  $SSH@$ip "systemctl is-active redis-server" 2>/dev/null; echo " ($ip)"
+done
+echo "--- DNS ---"
+$SSH@192.168.10.10 "systemctl is-active bind9" 2>/dev/null; echo " (dns-principal)"
+$SSH@192.168.10.11 "systemctl is-active bind9" 2>/dev/null; echo " (dns-delegado)"</pre>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+
+      <h2 style="font-size:11px; color:var(--muted); margin:14px 0 4px; cursor:default;">Script stop-all &mdash; detener toda la infraestructura en orden seguro</h2>
+      <pre>#!/bin/bash
+# stop-all-services.sh  -  ejecutar desde host KVM
+# Detiene servicios en orden inverso al arranque para evitar split-brain en Galera.
+
+SSH_BASE="ssh -i ssh-keys/id_rsa -o StrictHostKeyChecking=no -o ConnectTimeout=8 userinfrakv"
+
+run() { local ip=$1; shift; echo "[STOP] $ip: $*"; $SSH_BASE@$ip "sudo systemctl stop $*" 2>/dev/null && echo "  OK" || echo "  WARN (puede no estar corriendo)"; }
+
+echo "=== 1. LBs (keepalived + nginx) ==="
+run 192.168.10.20 keepalived nginx
+run 192.168.10.21 keepalived nginx
+
+echo "=== 2. Backend WinterCMS ==="
+run 192.168.20.10 nginx php8.1-fpm
+run 192.168.20.11 nginx php8.1-fpm
+run 192.168.20.12 nginx php8.1-fpm
+
+echo "=== 3. MaxScale ==="
+run 192.168.30.20 maxscale
+
+echo "=== 4. Redis (todos) ==="
+for ip in 192.168.30.16 192.168.30.15 192.168.30.14 192.168.30.13 192.168.30.12 192.168.30.11 192.168.30.10; do
+  run $ip redis-server
+done
+
+echo "=== 5. MariaDB Galera (orden: db3 -> db2 -> db1) ==="
+run 192.168.30.23 mariadb
+sleep 2
+run 192.168.30.22 mariadb
+sleep 2
+run 192.168.30.21 mariadb
+
+echo "=== 6. DNS ==="
+run 192.168.10.11 bind9
+run 192.168.10.10 bind9
+
+echo "=== DONE - todos los servicios detenidos ==="</pre>
+      <p class="note">Guardar como <code>configuraciones-stop-services.sh</code> y ejecutar con <code>bash configuraciones-stop-services.sh</code> desde el directorio del proyecto.</p>
+    </div>
+
+    <div class="card">
+      <h2>1) Inventario de VMs + comandos de operacion y configuracion</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 10%">VM</th>
+            <th style="width: 8%">IP principal</th>
+            <th style="width: 10%">Rol</th>
+            <th style="width: 20%">Comandos mas usados (servicios)</th>
+            <th style="width: 23%">Comandos para modificar configuracion</th>
+            <th style="width: 29%">Redireccion/proxy (Nginx) y notas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>dns-principal</td>
+            <td>192.168.10.10</td>
+            <td>BIND9 master</td>
+            <td>systemctl status|restart bind9<br>rndc status<br>named-checkconf</td>
+            <td>nano /etc/bind/named.conf.local<br>nano /etc/bind/db.mimas.net<br>nano /etc/bind/db.gepardo.com<br>named-checkzone mimas.net /etc/bind/db.mimas.net<br>systemctl reload bind9</td>
+            <td>Delega y/o forward de zonas (ti.mimas.net, occidente.gepardo.com). Validar serial SOA tras cambios.</td>
+          </tr>
+          <tr>
+            <td>dns-delegado</td>
+            <td>192.168.10.11</td>
+            <td>BIND9 delegado</td>
+            <td>systemctl status|restart bind9<br>rndc reload ti.mimas.net</td>
+            <td>nano /etc/bind/db.ti.mimas.net<br>nano /etc/bind/db.occidente.gepardo.com<br>named-checkzone ti.mimas.net /etc/bind/db.ti.mimas.net</td>
+            <td>Autoridad de ti.mimas.net. Aqui se agregan A/CNAME de app1, app2, app3, lb1, db, redis, redis1..redis7.</td>
+          </tr>
+          <tr>
+            <td>lb1 / lb2</td>
+            <td>192.168.10.20 / .21</td>
+            <td>Nginx LB</td>
+            <td>systemctl status|restart nginx<br>nginx -t<br>ss -lntup | grep nginx</td>
+            <td>nano /etc/nginx/sites-available/ti.mimas.net<br>ln -sf /etc/nginx/sites-available/ti.mimas.net /etc/nginx/sites-enabled/ti.mimas.net<br>nginx -t && systemctl reload nginx</td>
+            <td>Archivo clave de redireccion/proxy: /etc/nginx/sites-available/ti.mimas.net<br>Bloque ejemplo: upstream winter_kvm_pool { server 192.168.20.10; server 192.168.20.11; server 192.168.20.12; } + proxy_pass http://winter_kvm_pool;</td>
+          </tr>
+          <tr>
+            <td>app backend 1/2/3</td>
+            <td>192.168.20.10/.11/.12</td>
+            <td>WinterCMS</td>
+            <td>systemctl status|restart nginx php8.1-fpm php8.2-fpm</td>
+            <td>/opt/apps/wintercms/.env y /etc/nginx/sites-available/wintercms.conf</td>
+            <td>Backend actual en appWinter1/appWinter2/appWinter3.</td>
+          </tr>
+          <tr>
+            <td>mariadb-1/2/3</td>
+            <td>192.168.30.21/.22/.23</td>
+            <td>MariaDB Galera</td>
+            <td>systemctl status|restart mariadb<br>mysql -u root -p -e "SHOW STATUS LIKE 'wsrep%';"</td>
+            <td>nano /etc/mysql/mariadb.conf.d/50-server.cnf<br>galera_new_cluster (solo bootstrap)<br>systemctl restart mariadb</td>
+            <td>Modificar solo nodo bootstrap con cuidado. Verificar wsrep_cluster_size luego de reinicios.</td>
+          </tr>
+          <tr>
+            <td>maxscale-1</td>
+            <td>192.168.30.20</td>
+            <td>Proxy DB</td>
+            <td>systemctl status|restart maxscale<br>maxctrl list servers<br>maxctrl list services</td>
+            <td>nano /etc/maxscale.cnf<br>maxscale --config-check<br>systemctl restart maxscale</td>
+            <td>Entrada DB para apps: 3306/4008 segun servicio configurado.</td>
+          </tr>
+          <tr>
+            <td>appWinter1/2/3</td>
+            <td>192.168.20.10/.11/.12</td>
+            <td>WinterCMS</td>
+            <td>systemctl status|restart nginx php8.1-fpm<br>journalctl -u nginx -n 50</td>
+            <td>nano /opt/apps/wintercms/.env<br>nano /etc/nginx/sites-available/wintercms.conf</td>
+            <td>Stack backend actual en pruebas HA junto a LB1/LB2.</td>
+          </tr>
+          <tr>
+            <td>ceph1</td>
+            <td>192.168.40.30 / 192.168.60.11</td>
+            <td>Ceph MON+MGR+OSD</td>
+            <td>ceph -s<br>ceph orch ps<br>systemctl status ceph-*.target</td>
+            <td>nano /etc/ceph/ceph.conf<br>ceph config dump<br>ceph osd tree</td>
+            <td>Plano interno: red 192.168.60.0/24. Clientes por red storage 192.168.40.0/24.</td>
+          </tr>
+          <tr>
+            <td>ubuntu-guest*</td>
+            <td>lab</td>
+            <td>Auxiliares</td>
+            <td>virsh start|shutdown nombre-vm</td>
+            <td>Uso libre de laboratorio</td>
+            <td>No impactan servicios core del dominio ti.mimas.net.</td>
+          </tr>
+          <tr>
+            <td>Host KVM</td>
+            <td>host fisico</td>
+            <td>Hypervisor</td>
+            <td>virsh list --all<br>virsh start vm<br>virsh shutdown vm<br>virsh reboot vm</td>
+            <td>bash configuraciones-run.sh<br>bash configuraciones-despliegue.sh precheck|run</td>
+            <td>Orquestacion central del laboratorio.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>2) Archivos criticos por maquina/rol</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 14%">Maquina/Rol</th>
+            <th style="width: 36%">Archivos criticos</th>
+            <th style="width: 26%">Que controla</th>
+            <th style="width: 24%">Comando de validacion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>DNS principal</td>
+            <td>/etc/bind/named.conf<br>/etc/bind/named.conf.local<br>/etc/bind/db.mimas.net<br>/etc/bind/db.gepardo.com</td>
+            <td>Zonas master, delegaciones, registros NS/A</td>
+            <td>named-checkconf<br>named-checkzone mimas.net /etc/bind/db.mimas.net</td>
+          </tr>
+          <tr>
+            <td>DNS delegado</td>
+            <td>/etc/bind/named.conf.local<br>/etc/bind/db.ti.mimas.net<br>/etc/bind/db.occidente.gepardo.com</td>
+            <td>Subdominios ti.mimas.net y occidente.gepardo.com</td>
+            <td>named-checkzone ti.mimas.net /etc/bind/db.ti.mimas.net</td>
+          </tr>
+          <tr>
+            <td>Nginx LB</td>
+            <td>/etc/nginx/nginx.conf<br>/etc/nginx/sites-available/ti.mimas.net<br>/etc/nginx/sites-enabled/ti.mimas.net</td>
+            <td>Vhosts, TLS, upstream, proxy_pass a appWinter1/appWinter2/appWinter3</td>
+            <td>nginx -t && systemctl reload nginx</td>
+          </tr>
+          <tr>
+            <td>Backend app (Winter)</td>
+            <td>/opt/apps/wintercms/.env<br>/etc/nginx/sites-available/wintercms.conf</td>
+            <td>Conexion a MaxScale, Redis de sesiones, host header y runtime de Winter</td>
+            <td>php artisan winter:up<br>systemctl status nginx</td>
+          </tr>
+          <tr>
+            <td>MariaDB</td>
+            <td>/etc/mysql/mariadb.conf.d/50-server.cnf<br>/etc/mysql/my.cnf</td>
+            <td>Parametros Galera/replicacion/red</td>
+            <td>mysql -e "SHOW VARIABLES LIKE 'wsrep%';"</td>
+          </tr>
+          <tr>
+            <td>MaxScale</td>
+            <td>/etc/maxscale.cnf</td>
+            <td>Servicios de lectura/escritura y routing</td>
+            <td>maxscale --config-check<br>maxctrl list services</td>
+          </tr>
+          <tr>
+            <td>Redis cluster</td>
+            <td>/etc/redis/redis.conf<br>/var/lib/redis/nodes.conf</td>
+            <td>Cache/sesiones WinterCMS en cluster (7 nodos)</td>
+            <td>redis-cli -h 127.0.0.1 cluster info<br>redis-cli -h 127.0.0.1 cluster nodes</td>
+          </tr>
+          <tr>
+            <td>Ceph</td>
+            <td>/etc/ceph/ceph.conf<br>/etc/ceph/ceph.client.admin.keyring</td>
+            <td>Topologia del cluster y autenticacion de cliente admin</td>
+            <td>ceph -s<br>ceph health detail</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>3) Comandos SSH para acceso a cada server</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 20%">Servidor</th>
+            <th style="width: 14%">IP</th>
+            <th style="width: 66%">Comando SSH</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>dns-principal</td><td>192.168.10.10</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10</td></tr>
+          <tr><td>dns-delegado</td><td>192.168.10.11</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11</td></tr>
+          <tr><td>lb1</td><td>192.168.10.20</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20</td></tr>
+          <tr><td>lb2</td><td>192.168.10.21</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.21</td></tr>
+          <tr><td>app backend 1</td><td>192.168.20.10</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10</td></tr>
+          <tr><td>app backend 2</td><td>192.168.20.11</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.11</td></tr>
+          <tr><td>app backend 3</td><td>192.168.20.12</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.12</td></tr>
+          <tr><td>maxscale-1</td><td>192.168.30.20</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20</td></tr>
+          <tr><td>mariadb-1</td><td>192.168.30.21</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21</td></tr>
+          <tr><td>mariadb-2</td><td>192.168.30.22</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.22</td></tr>
+          <tr><td>mariadb-3</td><td>192.168.30.23</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.23</td></tr>
+          <tr><td>redis-1</td><td>192.168.30.10</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10</td></tr>
+          <tr><td>redis-2</td><td>192.168.30.11</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.11</td></tr>
+          <tr><td>redis-3</td><td>192.168.30.12</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.12</td></tr>
+          <tr><td>redis-4</td><td>192.168.30.13</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.13</td></tr>
+          <tr><td>redis-5</td><td>192.168.30.14</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.14</td></tr>
+          <tr><td>redis-6</td><td>192.168.30.15</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.15</td></tr>
+          <tr><td>redis-7</td><td>192.168.30.16</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.16</td></tr>
+          <tr><td>ceph1</td><td>192.168.60.11</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11</td></tr>
+          <tr><td>bastion</td><td>192.168.50.2</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.50.2</td></tr>
+          <tr><td>monitor</td><td>192.168.50.3</td><td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.50.3</td></tr>
+        </tbody>
+      </table>
+      <p class="note">Tip: si usas bastion, aplica ProxyJump: ssh -J userinfrakv@192.168.50.2 userinfrakv@IP_DESTINO</p>
+    </div>
+
+    <div class="card">
+      <h2>4) Comandos de diagnostico/pruebas (host vs dentro de VM)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 16%">Objetivo</th>
+            <th style="width: 42%">Desde host (afuera)</th>
+            <th style="width: 42%">Dentro de la VM / entre VMs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Estado de VMs</td>
+            <td>virsh list --all<br>virsh domstate appWinter1<br>virsh console appWinter1</td>
+            <td>uptime<br>hostname -f<br>ip -br a</td>
+          </tr>
+          <tr>
+            <td>Red y reachability</td>
+            <td>ping -c 3 192.168.10.20<br>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "ip route"</td>
+            <td>ping -c 3 192.168.30.20<br>nc -zv 192.168.30.20 3306<br>traceroute 192.168.10.10</td>
+          </tr>
+          <tr>
+            <td>DNS</td>
+            <td>dig @192.168.10.10 app1.ti.mimas.net +short<br>dig @192.168.10.11 db.ti.mimas.net +short</td>
+            <td>named-checkconf<br>named-checkzone ti.mimas.net /etc/bind/db.ti.mimas.net<br>rndc reload</td>
+          </tr>
+          <tr>
+            <td>Nginx LB</td>
+            <td>curl -I http://www.ti.mimas.net<br>curl -H "Host: app1.ti.mimas.net" http://192.168.10.20/</td>
+            <td>nginx -t<br>systemctl status nginx<br>tail -f /var/log/nginx/access.log /var/log/nginx/error.log</td>
+          </tr>
+          <tr>
+            <td>WinterCMS</td>
+            <td>curl -I http://192.168.20.10<br>ssh ... "systemctl status nginx php8.1-fpm php8.2-fpm"</td>
+            <td>php artisan winter:version<br>php artisan winter:env<br>journalctl -f -u nginx -u php8.1-fpm -u php8.2-fpm</td>
+          </tr>
+          <tr>
+            <td>MariaDB/Galera</td>
+            <td>nc -zv 192.168.30.21 3306<br>mysql -h 192.168.30.20 -P 3306 -u app -p</td>
+            <td>mysql -u root -p -e "SHOW STATUS LIKE 'wsrep_cluster_size';"<br>systemctl status mariadb</td>
+          </tr>
+          <tr>
+            <td>MaxScale</td>
+            <td>nc -zv 192.168.30.20 3306<br>nc -zv 192.168.30.20 4008</td>
+            <td>maxctrl list servers<br>maxctrl list services<br>journalctl -u maxscale -n 100</td>
+          </tr>
+          <tr>
+            <td>Redis</td>
+            <td>nc -zv 192.168.30.10 6379<br>nc -zv 192.168.30.11 6379<br>nc -zv 192.168.30.12 6379<br>nc -zv 192.168.30.13 6379<br>nc -zv 192.168.30.14 6379<br>nc -zv 192.168.30.15 6379<br>nc -zv 192.168.30.16 6379</td>
+            <td>redis-cli -h 127.0.0.1 cluster info<br>redis-cli -h 127.0.0.1 cluster nodes</td>
+          </tr>
+          <tr>
+            <td>Ceph</td>
+            <td>nc -zv 192.168.40.30 6789<br>nc -zv 192.168.40.30 3300</td>
+            <td>ceph -s<br>ceph osd tree<br>ceph health detail</td>
+          </tr>
+          <tr>
+            <td>Logs globales</td>
+            <td>ssh ... "journalctl -p err -n 100 --no-pager"</td>
+            <td>journalctl -xe<br>dmesg | tail -n 50<br>df -h && free -m</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Validacion real de comandos informativos (2026-05-12)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 38%">Comando</th>
+            <th style="width: 8%">Estado</th>
+            <th style="width: 54%">Resultado / ajuste recomendado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>virsh list --all / virsh domstate appWinter1</td><td>OK</td><td>Funcionan y muestran VMs en running.</td></tr>
+          <tr><td>ping -c 2 192.168.10.20</td><td>OK</td><td>Conectividad a LB confirmada.</td></tr>
+          <tr><td>dig @192.168.10.10 app1.ti.mimas.net +short</td><td>OK</td><td>Resuelve 192.168.20.10.</td></tr>
+          <tr><td>dig @192.168.10.11 db.ti.mimas.net +short</td><td>OK</td><td>Resuelve 192.168.30.20.</td></tr>
+          <tr><td>curl -I http://www.ti.mimas.net</td><td>OK</td><td>Respuesta HTTP valida (redireccion HTTP esperada).</td></tr>
+          <tr><td>curl -I -H "Host: app1.ti.mimas.net" http://192.168.10.20/</td><td>OK</td><td>LB responde correctamente.</td></tr>
+          <tr><td>curl -I http://192.168.20.10</td><td>OK</td><td>Nodo backend responde HTTP.</td></tr>
+          <tr><td>nc -zv 192.168.30.20 3306 / 4008</td><td>OK</td><td>Puertos de MaxScale accesibles.</td></tr>
+          <tr><td>nc -zv 192.168.30.21 3306</td><td>FAIL</td><td>Connection refused: MariaDB en db1 no esta arriba actualmente (comando valido).</td></tr>
+          <tr><td>nc -zv 192.168.30.10 6379 / 192.168.30.11 6379</td><td>FAIL</td><td>Timeout / no route: Redis-1/2 no estan alcanzables en este host/ruta.</td></tr>
+          <tr><td>nc -zv 192.168.40.30 6789 / 3300</td><td>FAIL</td><td>No route o timeout hacia red storage desde host actual.</td></tr>
+          <tr><td>SSH con userinfrakv a 192.168.10.x, 20.x, 30.20-23, 60.11</td><td>OK</td><td>Acceso confirmado a DNS, LB, nodos winter/app, DB y ceph1.</td></tr>
+          <tr><td>SSH a 192.168.30.10, 192.168.30.11, 192.168.50.2, 192.168.50.3</td><td>FAIL</td><td>No route to host (segmentos/rutas no expuestos desde host actual).</td></tr>
+          <tr><td>nginx -t, systemctl status nginx, ss -lntup | grep nginx</td><td>OK</td><td>Valido en lb1/lb2.</td></tr>
+          <tr><td>systemctl status nginx/php-fpm en 192.168.20.10/11/12</td><td>OK</td><td>Servicios disponibles en nodos winter1/2/3.</td></tr>
+          <tr><td>systemctl status mariadb en 192.168.30.21/22/23</td><td>FAIL</td><td>Servicio existe pero en estado failed en al menos db1; comando valido para diagnostico.</td></tr>
+          <tr><td>maxctrl list servers/services y maxscale --config-check</td><td>OK</td><td>Comandos operativos en maxscale-1.</td></tr>
+          <tr><td>ceph -s / ceph osd tree / ceph health detail</td><td>OK</td><td>Comandos ejecutan en ceph1.</td></tr>
+          <tr><td>SKIP: virsh console, tail -f, journalctl -f, mysql -p</td><td>SKIP</td><td>Se omiten por ser interactivos o bloqueantes.</td></tr>
+        </tbody>
+      </table>
+      <p class="note">Las IPs 192.168.20.10/11/12 corresponden al backend WinterCMS actual.</p>
+    </div>
+
+    <div class="card">
+      <h2>5) TROUBLESHOOTING - Errores comunes y soluciones</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 20%">Error/Síntoma</th>
+            <th style="width: 30%">Causa probable</th>
+            <th style="width: 50%">Solución</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Invalid security token al hacer login</strong></td>
+            <td>APP_URL mal configurado, mismatch entre DNS/LB y nodo backend, CSRF token generado en contexto diferente</td>
+            <td>1) Verificar: <code>grep APP_URL /opt/apps/wintercms/.env</code><br>2) Debe ser IP del LB: <code>APP_URL=http://192.168.10.20</code><br>3) Limpiar cache: <code>php artisan cache:clear</code><br>4) Verificar Redis está accesible: <code>redis-cli ping</code></td>
+          </tr>
+          <tr>
+            <td><strong>Ruta /backend/backend/auth/signin (doble backend)</strong></td>
+            <td>backendUri en config/cms.php conflictúa con rutas de LB, middleware genera URLs con prefijo extra</td>
+            <td>1) Revisar <code>grep backendUri /opt/apps/wintercms/config/cms.php</code><br>2) Debe ser simple: <code>'backendUri' => 'auth'</code> (no 'backend')<br>3) En LB Nginx, usar rewrite para corregir: <code>rewrite ^/backend/(backend.*) /$1 permanent;</code></td>
+          </tr>
+          <tr>
+            <td><strong>404 Not Found en /backend</strong></td>
+            <td>WinterCMS routing no mapea correctamente, middleware de sesión/autenticación falla</td>
+            <td>1) Ejecutar: <code>php artisan route:list</code><br>2) Verificar que <code>ANY backend/{slug?}</code> existe<br>3) Revisar logs: <code>tail -50 /var/log/nginx/error.log</code><br>4) Reiniciar: <code>systemctl restart nginx php*-fpm</code></td>
+          </tr>
+          <tr>
+            <td><strong>Session stored in Redis pero CSRF falla</strong></td>
+            <td>Redis CLUSTER mode requiere hash-tags para slots consistentes, WinterCMS usa prefijos sin hash-tags</td>
+            <td>1) Verificar en .env: <code>REDIS_PREFIX={k3}_</code> (hash-tag con llaves {})<br>2) Verificar cluster status: <code>redis-cli -h 192.168.30.10 cluster info</code><br>3) Validar connection: <code>redis-cli -c -h 192.168.30.10 ping</code></td>
+          </tr>
+          <tr>
+            <td><strong>Nginx LB recibe POST pero retorna 403</strong></td>
+            <td>CSRF token no coincide entre GET (form load) y POST (submit), proxy_pass no preserva headers</td>
+            <td>1) En Nginx LB, verificar headers: <code>proxy_set_header Host $host;</code><br>2) Verificar X-Forwarded-For y X-Forwarded-Proto:<br><code>proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;<br>proxy_set_header X-Forwarded-Proto $scheme;</code><br>3) Reload: <code>nginx -t && systemctl reload nginx</code></td>
+          </tr>
+          <tr>
+            <td><strong>MariaDB Galera wsrep_cluster_size != 3</strong></td>
+            <td>Un nodo está fuera de la replicación, timeout en comunicación entre nodos, puerto 4567 bloqueado</td>
+            <td>1) En cada DB: <code>mysql -u root -e 'SHOW STATUS LIKE "wsrep%";'</code><br>2) Si solo 1 nodo: bootstrap el cluster: <code>mysqld --wsrep-cluster-address=gcomm://</code><br>3) Revisar logs: <code>tail -50 /var/log/mysql/error.log</code></td>
+          </tr>
+          <tr>
+            <td><strong>Redis cluster_state:fail o disconnected nodes</strong></td>
+            <td>Nodos Redis no tienen cluster-enabled activado, firewall bloquea puerto 6379 o cluster-bus (6379+10000)</td>
+            <td>1) Verificar config: <code>sudo grep cluster-enabled /etc/redis/redis.conf</code><br>2) Debe ser: <code>cluster-enabled yes</code><br>3) Reiniciar: <code>sudo systemctl restart redis-server</code><br>4) Recrear cluster: <code>redis-cli --cluster create node1:6379 ... --cluster-replicas 1</code></td>
+          </tr>
+          <tr>
+            <td><strong>DNS no resuelve app1.ti.mimas.net</strong></td>
+            <td>Registro A no existe en zona ti.mimas.net, o dns-delegado no está expuesto en DNS master</td>
+            <td>1) Verificar en master (192.168.10.10): <code>grep app1 /etc/bind/db.ti.mimas.net</code><br>2) Debe existir: <code>app1 IN A 192.168.10.20</code> (LB, no backend)<br>3) Recargar BIND: <code>rndc reload ti.mimas.net</code><br>4) Test: <code>dig @192.168.10.10 app1.ti.mimas.net +short</code></td>
+          </tr>
+          <tr>
+            <td><strong>Nginx error: [error] 123#0: *456 upstream timed out (110: Connection timed out)</strong></td>
+            <td>Backend node (192.168.20.x) no responde a tiempo, PHP-FPM bloqueado o consumiendo CPU</td>
+            <td>1) SSH a backend: <code>ssh userinfrakv@192.168.20.10</code><br>2) Revisar PHP-FPM: <code>systemctl status php*-fpm</code><br>3) Ver procesos: <code>ps aux | grep nginx php8.1-fpm php8.2-fpm</code><br>4) Aumentar timeout en LB nginx: <code>proxy_read_timeout 60s;</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>6) Comandos para revisar LOGS de cada componente (troubleshooting)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 16%">Componente</th>
+            <th style="width: 20%">Servidor(es)</th>
+            <th style="width: 64%">Comando SSH para revisar logs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Nginx LB (access)</strong></td>
+            <td>lb1 / lb2<br>192.168.10.20 / .21</td>
+            <td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "sudo tail -n 50 /var/log/nginx/access.log"<br>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.21 "sudo tail -n 50 /var/log/nginx/access.log"</td>
+          </tr>
+          <tr>
+            <td><strong>Nginx LB (errors)</strong></td>
+            <td>lb1 / lb2<br>192.168.10.20 / .21</td>
+            <td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "sudo tail -n 50 /var/log/nginx/error.log"<br>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.21 "sudo tail -n 50 /var/log/nginx/error.log"</td>
+          </tr>
+          <tr>
+            <td><strong>Nginx LB (systemd)</strong></td>
+            <td>lb1 / lb2<br>192.168.10.20 / .21</td>
+            <td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "sudo journalctl -u nginx -n 30 --no-pager"<br>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.21 "sudo journalctl -u nginx -n 30 --no-pager"</td>
+          </tr>
+          <tr>
+            <td><strong>PHP-FPM (Winter)</strong></td>
+            <td>appWinter1/2/3<br>192.168.20.10 / .11 / .12</td>
+            <td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "sudo tail -n 50 /var/log/php*-fpm.log"<br>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.11 "sudo tail -n 50 /var/log/php*-fpm.log"<br>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.12 "sudo tail -n 50 /var/log/php*-fpm.log"</td>
+          </tr>
+          <tr>
+            <td><strong>Nginx (Winter nodes)</strong></td>
+            <td>appWinter1/2/3<br>192.168.20.10 / .11 / .12</td>
+            <td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "sudo tail -n 50 /var/log/nginx/error.log"<br>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.11 "sudo tail -n 50 /var/log/nginx/error.log"<br>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.12 "sudo tail -n 50 /var/log/nginx/error.log"</td>
+          </tr>
+          <tr>
+            <td><strong>MySQL / MariaDB (error log)</strong></td>
+            <td>mariadb-1/2/3<br>192.168.30.21 / .22 / .23</td>
+            <td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "sudo tail -n 50 /var/log/mysql/error.log"<br>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.22 "sudo tail -n 50 /var/log/mysql/error.log"<br>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.23 "sudo tail -n 50 /var/log/mysql/error.log"</td>
+          </tr>
+          <tr>
+            <td><strong>MySQL / MariaDB (systemd)</strong></td>
+            <td>mariadb-1/2/3<br>192.168.30.21 / .22 / .23</td>
+            <td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "sudo journalctl -u mariadb -n 30 --no-pager"<br>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.22 "sudo journalctl -u mariadb -n 30 --no-pager"<br>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.23 "sudo journalctl -u mariadb -n 30 --no-pager"</td>
+          </tr>
+          <tr>
+            <td><strong>MaxScale (service log)</strong></td>
+            <td>maxscale-1<br>192.168.30.20</td>
+            <td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "sudo tail -n 50 /var/log/maxscale/maxscale.log"</td>
+          </tr>
+          <tr>
+            <td><strong>MaxScale (systemd)</strong></td>
+            <td>maxscale-1<br>192.168.30.20</td>
+            <td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "sudo journalctl -u maxscale -n 30 --no-pager"</td>
+          </tr>
+          <tr>
+            <td><strong>Redis (systemd)</strong></td>
+            <td>redis-1/2/3/4/5/6/7<br>192.168.30.10-16</td>
+            <td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "sudo journalctl -u redis-server -n 30 --no-pager"<br>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.11 "sudo journalctl -u redis-server -n 30 --no-pager"<br>...(repetir para .12 al .16)</td>
+          </tr>
+          <tr>
+            <td><strong>DNS BIND (query log)</strong></td>
+            <td>dns-principal<br>192.168.10.10</td>
+            <td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "sudo tail -n 50 /var/log/bind/query.log"<br>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "sudo journalctl -u bind9 -n 30 --no-pager"</td>
+          </tr>
+          <tr>
+            <td><strong>DNS BIND (delegado)</strong></td>
+            <td>dns-delegado<br>192.168.10.11</td>
+            <td>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "sudo tail -n 50 /var/log/bind/query.log"<br>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "sudo journalctl -u bind9 -n 30 --no-pager"</td>
+          </tr>
+          <tr>
+            <td><strong>Syslog (errores globales)</strong></td>
+            <td>Todos<br>cualquier IP</td>
+            <td>ssh -i ssh-keys/id_rsa userinfrakv@IP_TARGET "sudo journalctl -p err -n 50 --no-pager"<br>ssh -i ssh-keys/id_rsa userinfrakv@IP_TARGET "sudo tail -n 50 /var/log/syslog"</td>
+          </tr>
+          <tr>
+            <td><strong>Dmesg (kernel messages)</strong></td>
+            <td>Todos<br>cualquier IP</td>
+            <td>ssh -i ssh-keys/id_rsa userinfrakv@IP_TARGET "sudo dmesg | tail -n 50"</td>
+          </tr>
+        </tbody>
+      </table>
+      <h3 style="font-size: 11px; margin-top: 12px;">Script rápido para revisar todos los logs (desde host):</h3>
+      <pre>bash tools-sh/check-logs-all.sh [componente]
+# Componentes: todos | lb | winter | mariadb | maxscale | redis | dns | systemd</pre>
+    </div>
+
+    <!-- ====== DIAGNOSTICO DNS-PRINCIPAL ====== -->
+    <div class="card">
+      <h2>Diag: dns-principal (192.168.10.10)</h2>
+      <table>
+        <thead><tr><th style="width:40%">Comando (solo lectura)</th><th style="width:60%">Que verifica</th></tr></thead>
+        <tbody>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "systemctl status bind9 --no-pager"</code></td><td>Estado del servicio BIND9 (activo/inactivo/errores)</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "named-checkconf && echo OK"</code></td><td>Validar sintaxis de named.conf sin reiniciar</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "named-checkzone mimas.net /etc/bind/db.mimas.net"</code></td><td>Validar zona mimas.net (serial, registros)</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "rndc status"</code></td><td>Estado runtime: versión, zonas cargadas, queries</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "rndc zonestatus mimas.net"</code></td><td>Estado de la zona mimas.net en memoria</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "ss -lnup | grep named"</code></td><td>Puertos que escucha named (53 UDP/TCP)</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "sudo journalctl -u bind9 -n 40 --no-pager"</code></td><td>Ultimas 40 lineas de log de bind9</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "sudo tail -n 30 /var/log/bind/query.log 2>/dev/null || echo 'query.log no disponible'"</code></td><td>Query log de BIND (si esta habilitado)</td></tr>
+          <tr><td><code>dig @192.168.10.10 mimas.net SOA +short</code></td><td>Verifica SOA y serial desde fuera (host)</td></tr>
+          <tr><td><code>dig @192.168.10.10 ti.mimas.net NS +short</code></td><td>Verifica delegacion de ti.mimas.net a dns-delegado</td></tr>
+          <tr><td><code>dig @192.168.10.10 app1.ti.mimas.net +short</code></td><td>Resolucion de nombre critico via master</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "uptime && free -m && df -h /"</code></td><td>Salud general del nodo (carga, RAM, disco)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====== DIAGNOSTICO DNS-DELEGADO ====== -->
+    <div class="card">
+      <h2>Diag: dns-delegado (192.168.10.11)</h2>
+      <table>
+        <thead><tr><th style="width:40%">Comando (solo lectura)</th><th style="width:60%">Que verifica</th></tr></thead>
+        <tbody>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "systemctl status bind9 --no-pager"</code></td><td>Estado del servicio BIND9 delegado</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "named-checkconf && echo OK"</code></td><td>Sintaxis de named.conf</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "named-checkzone ti.mimas.net /etc/bind/db.ti.mimas.net"</code></td><td>Validar zona ti.mimas.net (serial, A/CNAME)</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "rndc status"</code></td><td>Estado runtime del DNS delegado</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "rndc zonestatus ti.mimas.net"</code></td><td>Estado de zona ti.mimas.net en memoria</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "sudo journalctl -u bind9 -n 40 --no-pager"</code></td><td>Ultimas 40 lineas de log bind9</td></tr>
+          <tr><td><code>dig @192.168.10.11 ti.mimas.net SOA +short</code></td><td>SOA y serial de ti.mimas.net</td></tr>
+          <tr><td><code>dig @192.168.10.11 app1.ti.mimas.net +short</code></td><td>Resolucion app1 (debe ser 192.168.10.20 LB)</td></tr>
+          <tr><td><code>dig @192.168.10.11 db.ti.mimas.net +short</code></td><td>Resolucion db (debe ser 192.168.30.20 MaxScale)</td></tr>
+          <tr><td><code>dig @192.168.10.11 redis1.ti.mimas.net +short</code></td><td>Resolucion redis1 en zona ti</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "grep -c 'IN A' /etc/bind/db.ti.mimas.net"</code></td><td>Cantidad de registros A en la zona</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "uptime && free -m && df -h /"</code></td><td>Salud general del nodo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====== DIAGNOSTICO LB1 ====== -->
+    <div class="card">
+      <h2>Diag: lb1 (192.168.10.20)</h2>
+      <table>
+        <thead><tr><th style="width:40%">Comando (solo lectura)</th><th style="width:60%">Que verifica</th></tr></thead>
+        <tbody>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "systemctl status nginx --no-pager"</code></td><td>Estado del servicio Nginx LB</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "nginx -t"</code></td><td>Validar configuracion de Nginx sin recargar</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "ss -lntup | grep nginx"</code></td><td>Puertos en escucha (80/443)</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "cat /etc/nginx/sites-available/ti.mimas.net"</code></td><td>Ver config actual de vhost/upstream</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "sudo tail -n 30 /var/log/nginx/access.log"</code></td><td>Ultimas requests al LB</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "sudo tail -n 30 /var/log/nginx/error.log"</code></td><td>Errores recientes de Nginx</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "sudo journalctl -u nginx -n 40 --no-pager"</code></td><td>Log systemd de nginx</td></tr>
+          <tr><td><code>curl -s -o /dev/null -w "%{http_code}" http://192.168.10.20/</code></td><td>Codigo HTTP respuesta del LB (desde host)</td></tr>
+          <tr><td><code>curl -s -I -H "Host: app1.ti.mimas.net" http://192.168.10.20/ | head -5</code></td><td>Respuesta con Host header de app1</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "uptime && free -m && df -h /"</code></td><td>Salud general del nodo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====== DIAGNOSTICO LB2 ====== -->
+    <div class="card">
+      <h2>Diag: lb2 (192.168.10.21)</h2>
+      <table>
+        <thead><tr><th style="width:40%">Comando (solo lectura)</th><th style="width:60%">Que verifica</th></tr></thead>
+        <tbody>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.21 "systemctl status nginx --no-pager"</code></td><td>Estado del servicio Nginx LB2</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.21 "nginx -t"</code></td><td>Validar configuracion sin recargar</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.21 "ss -lntup | grep nginx"</code></td><td>Puertos en escucha</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.21 "sudo tail -n 30 /var/log/nginx/access.log"</code></td><td>Ultimas requests</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.21 "sudo tail -n 30 /var/log/nginx/error.log"</code></td><td>Errores recientes</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.21 "sudo journalctl -u nginx -n 40 --no-pager"</code></td><td>Log systemd de nginx</td></tr>
+          <tr><td><code>curl -s -o /dev/null -w "%{http_code}" http://192.168.10.21/</code></td><td>Codigo HTTP respuesta LB2 (desde host)</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.21 "uptime && free -m && df -h /"</code></td><td>Salud general del nodo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====== DIAGNOSTICO APPWINTER1 ====== -->
+    <div class="card">
+      <h2>Diag: appWinter1 (192.168.20.10)</h2>
+      <table>
+        <thead><tr><th style="width:40%">Comando (solo lectura)</th><th style="width:60%">Que verifica</th></tr></thead>
+        <tbody>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "systemctl status nginx php8.1-fpm php8.2-fpm --no-pager"</code></td><td>Estado de Nginx y PHP-FPM</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "nginx -t"</code></td><td>Validar config nginx sin recargar</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "php -v && php --ini | head -5"</code></td><td>Version PHP activa y archivos ini</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "cat /opt/apps/wintercms/.env | grep -E 'APP_URL|DB_|REDIS_|SESSION_|CACHE_'"</code></td><td>Config critica de WinterCMS</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "cd /opt/apps/wintercms && php artisan winter:version 2>&1"</code></td><td>Version de WinterCMS instalada</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "cd /opt/apps/wintercms && php artisan route:list --compact 2>&1 | head -20"</code></td><td>Rutas registradas (incluye /backend)</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "sudo tail -n 30 /var/log/nginx/error.log"</code></td><td>Errores nginx del backend</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "sudo tail -n 30 /var/log/php*-fpm.log 2>/dev/null"</code></td><td>Errores PHP-FPM</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "sudo tail -n 30 /opt/apps/wintercms/storage/logs/winter.log 2>/dev/null"</code></td><td>Log de la aplicacion WinterCMS</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "ss -lntup | grep -E '80|443|9000'"</code></td><td>Puertos web y PHP-FPM activos</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "uptime && free -m && df -h /"</code></td><td>Salud general del nodo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====== DIAGNOSTICO APPWINTER2 ====== -->
+    <div class="card">
+      <h2>Diag: appWinter2 (192.168.20.11)</h2>
+      <table>
+        <thead><tr><th style="width:40%">Comando (solo lectura)</th><th style="width:60%">Que verifica</th></tr></thead>
+        <tbody>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.11 "systemctl status nginx php8.1-fpm php8.2-fpm --no-pager"</code></td><td>Estado de Nginx y PHP-FPM</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.11 "nginx -t"</code></td><td>Validar config nginx sin recargar</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.11 "cat /opt/apps/wintercms/.env | grep -E 'APP_URL|DB_|REDIS_|SESSION_|CACHE_'"</code></td><td>Config critica de WinterCMS</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.11 "sudo tail -n 30 /var/log/nginx/error.log"</code></td><td>Errores nginx del backend</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.11 "sudo tail -n 30 /var/log/php*-fpm.log 2>/dev/null"</code></td><td>Errores PHP-FPM</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.11 "sudo tail -n 30 /opt/apps/wintercms/storage/logs/winter.log 2>/dev/null"</code></td><td>Log aplicacion WinterCMS</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.11 "ss -lntup | grep -E '80|443|9000'"</code></td><td>Puertos activos</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.11 "uptime && free -m && df -h /"</code></td><td>Salud general del nodo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====== DIAGNOSTICO APPWINTER3 ====== -->
+    <div class="card">
+      <h2>Diag: appWinter3 (192.168.20.12)</h2>
+      <table>
+        <thead><tr><th style="width:40%">Comando (solo lectura)</th><th style="width:60%">Que verifica</th></tr></thead>
+        <tbody>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.12 "systemctl status nginx php8.1-fpm php8.2-fpm --no-pager"</code></td><td>Estado de Nginx y PHP-FPM</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.12 "nginx -t"</code></td><td>Validar config nginx sin recargar</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.12 "cat /opt/apps/wintercms/.env | grep -E 'APP_URL|DB_|REDIS_|SESSION_|CACHE_'"</code></td><td>Config critica de WinterCMS</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.12 "sudo tail -n 30 /var/log/nginx/error.log"</code></td><td>Errores nginx del backend</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.12 "sudo tail -n 30 /var/log/php*-fpm.log 2>/dev/null"</code></td><td>Errores PHP-FPM</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.12 "sudo tail -n 30 /opt/apps/wintercms/storage/logs/winter.log 2>/dev/null"</code></td><td>Log aplicacion WinterCMS</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.12 "ss -lntup | grep -E '80|443|9000'"</code></td><td>Puertos activos</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.12 "uptime && free -m && df -h /"</code></td><td>Salud general del nodo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====== DIAGNOSTICO MARIADB-1 ====== -->
+    <div class="card">
+      <h2>Diag: mariadb-1 (192.168.30.21)</h2>
+      <table>
+        <thead><tr><th style="width:40%">Comando (solo lectura)</th><th style="width:60%">Que verifica</th></tr></thead>
+        <tbody>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "systemctl status mariadb --no-pager"</code></td><td>Estado del servicio MariaDB</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "mysql -u root -e \"SHOW STATUS LIKE 'wsrep_cluster_size';\""</code></td><td>Cuantos nodos estan en el cluster Galera</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "mysql -u root -e \"SHOW STATUS LIKE 'wsrep_local_state_comment';\""</code></td><td>Estado local del nodo en Galera (Synced/Donor/etc)</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "mysql -u root -e \"SHOW STATUS LIKE 'wsrep%';\""</code></td><td>Todos los estados wsrep del cluster</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "mysql -u root -e \"SHOW DATABASES;\""</code></td><td>Bases de datos existentes</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "mysql -u root -e \"SHOW GLOBAL VARIABLES LIKE 'wsrep_cluster_address';\""</code></td><td>Direccion del cluster configurada</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "mysql -u root -e \"SELECT User,Host FROM mysql.user;\""</code></td><td>Usuarios de base de datos</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "sudo tail -n 30 /var/log/mysql/error.log"</code></td><td>Errores recientes de MariaDB</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "ss -lntup | grep mysql"</code></td><td>Puerto 3306 en escucha</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "uptime && free -m && df -h /"</code></td><td>Salud general del nodo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====== DIAGNOSTICO MARIADB-2 ====== -->
+    <div class="card">
+      <h2>Diag: mariadb-2 (192.168.30.22)</h2>
+      <table>
+        <thead><tr><th style="width:40%">Comando (solo lectura)</th><th style="width:60%">Que verifica</th></tr></thead>
+        <tbody>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.22 "systemctl status mariadb --no-pager"</code></td><td>Estado del servicio MariaDB</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.22 "mysql -u root -e \"SHOW STATUS LIKE 'wsrep_cluster_size';\""</code></td><td>Nodos activos en el cluster</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.22 "mysql -u root -e \"SHOW STATUS LIKE 'wsrep_local_state_comment';\""</code></td><td>Estado local del nodo</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.22 "mysql -u root -e \"SHOW STATUS LIKE 'wsrep%';\""</code></td><td>Todos los estados wsrep</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.22 "sudo tail -n 30 /var/log/mysql/error.log"</code></td><td>Errores recientes de MariaDB</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.22 "ss -lntup | grep mysql"</code></td><td>Puerto 3306 en escucha</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.22 "uptime && free -m && df -h /"</code></td><td>Salud general del nodo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====== DIAGNOSTICO MARIADB-3 ====== -->
+    <div class="card">
+      <h2>Diag: mariadb-3 (192.168.30.23)</h2>
+      <table>
+        <thead><tr><th style="width:40%">Comando (solo lectura)</th><th style="width:60%">Que verifica</th></tr></thead>
+        <tbody>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.23 "systemctl status mariadb --no-pager"</code></td><td>Estado del servicio MariaDB</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.23 "mysql -u root -e \"SHOW STATUS LIKE 'wsrep_cluster_size';\""</code></td><td>Nodos activos en el cluster</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.23 "mysql -u root -e \"SHOW STATUS LIKE 'wsrep_local_state_comment';\""</code></td><td>Estado local del nodo</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.23 "mysql -u root -e \"SHOW STATUS LIKE 'wsrep%';\""</code></td><td>Todos los estados wsrep</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.23 "sudo tail -n 30 /var/log/mysql/error.log"</code></td><td>Errores recientes de MariaDB</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.23 "ss -lntup | grep mysql"</code></td><td>Puerto 3306 en escucha</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.23 "uptime && free -m && df -h /"</code></td><td>Salud general del nodo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====== DIAGNOSTICO MAXSCALE-1 ====== -->
+    <div class="card">
+      <h2>Diag: maxscale-1 (192.168.30.20)</h2>
+      <table>
+        <thead><tr><th style="width:40%">Comando (solo lectura)</th><th style="width:60%">Que verifica</th></tr></thead>
+        <tbody>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "systemctl status maxscale --no-pager"</code></td><td>Estado del servicio MaxScale</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "maxscale --config-check 2>&1"</code></td><td>Validar configuracion sin reiniciar</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "maxctrl list servers"</code></td><td>Estado de cada backend DB en MaxScale</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "maxctrl list services"</code></td><td>Servicios configurados (read/write split)</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "maxctrl list listeners"</code></td><td>Puertos que escucha MaxScale (3306/4008)</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "maxctrl list sessions"</code></td><td>Sesiones activas</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "maxctrl show server mariadb-1"</code></td><td>Detalle de conexiones a mariadb-1</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "sudo tail -n 30 /var/log/maxscale/maxscale.log"</code></td><td>Log reciente de MaxScale</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "sudo journalctl -u maxscale -n 40 --no-pager"</code></td><td>Log systemd de MaxScale</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "ss -lntup | grep maxscale"</code></td><td>Puertos activos de MaxScale</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "uptime && free -m && df -h /"</code></td><td>Salud general del nodo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====== DIAGNOSTICO REDIS-1/2/3 ====== -->
+    <div class="card">
+      <h2>Diag: redis-1/2/3 (192.168.30.10-12)</h2>
+      <table>
+        <thead><tr><th style="width:40%">Comando (solo lectura)</th><th style="width:60%">Que verifica</th></tr></thead>
+        <tbody>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "systemctl status redis-server --no-pager"</code></td><td>Estado redis-1</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "redis-cli -h 127.0.0.1 ping"</code></td><td>redis-1 responde PONG</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "redis-cli -h 127.0.0.1 cluster info | grep -E 'cluster_state|cluster_size|known_nodes'"</code></td><td>Estado del cluster desde redis-1</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "redis-cli -h 127.0.0.1 cluster nodes | awk '{print $1,$2,$3}'"</code></td><td>Nodos del cluster y sus roles (master/slave)</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "redis-cli -h 127.0.0.1 info server | grep -E 'redis_version|uptime|role'"</code></td><td>Version, uptime y rol en el cluster</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "redis-cli -h 127.0.0.1 info memory | grep -E 'used_memory_human|maxmemory_human'"</code></td><td>Uso de memoria Redis</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.11 "redis-cli -h 127.0.0.1 ping && redis-cli -h 127.0.0.1 cluster info | grep cluster_state"</code></td><td>redis-2: PONG + estado cluster</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.12 "redis-cli -h 127.0.0.1 ping && redis-cli -h 127.0.0.1 cluster info | grep cluster_state"</code></td><td>redis-3: PONG + estado cluster</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "sudo journalctl -u redis-server -n 30 --no-pager"</code></td><td>Log systemd redis-1</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "uptime && free -m"</code></td><td>Salud del nodo redis-1</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====== DIAGNOSTICO REDIS-4/5/6/7 ====== -->
+    <div class="card">
+      <h2>Diag: redis-4/5/6/7 (192.168.30.13-16)</h2>
+      <table>
+        <thead><tr><th style="width:40%">Comando (solo lectura)</th><th style="width:60%">Que verifica</th></tr></thead>
+        <tbody>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.13 "systemctl status redis-server --no-pager"</code></td><td>Estado redis-4</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.13 "redis-cli -h 127.0.0.1 ping && redis-cli -h 127.0.0.1 cluster info | grep cluster_state"</code></td><td>redis-4: PONG + estado cluster</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.13 "redis-cli -h 127.0.0.1 cluster nodes | awk '{print $1,$2,$3}'"</code></td><td>Topologia cluster desde redis-4</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.14 "redis-cli -h 127.0.0.1 ping && redis-cli -h 127.0.0.1 cluster info | grep cluster_state"</code></td><td>redis-5: PONG + estado cluster</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.15 "redis-cli -h 127.0.0.1 ping && redis-cli -h 127.0.0.1 cluster info | grep cluster_state"</code></td><td>redis-6: PONG + estado cluster</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.16 "redis-cli -h 127.0.0.1 ping && redis-cli -h 127.0.0.1 cluster info | grep cluster_state"</code></td><td>redis-7: PONG + estado cluster</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.13 "redis-cli -h 127.0.0.1 info replication | grep -E 'role|master_host|master_link_status'"</code></td><td>Replicacion: rol (master/replica) y estado de enlace</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.13 "redis-cli -h 127.0.0.1 info memory | grep used_memory_human"</code></td><td>Uso de memoria redis-4</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.13 "sudo journalctl -u redis-server -n 20 --no-pager"</code></td><td>Log systemd redis-4</td></tr>
+          <tr><td><code>for i in 13 14 15 16; do echo "redis $.168.30.$i:"; ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.$i "redis-cli ping 2>&1"; done</code></td><td>PING masivo redis 4-7 (desde host)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====== DIAGNOSTICO CEPH1 ====== -->
+    <div class="card">
+      <h2>Diag: ceph1 (192.168.60.11 / 192.168.40.30)</h2>
+      <table>
+        <thead><tr><th style="width:40%">Comando (solo lectura)</th><th style="width:60%">Que verifica</th></tr></thead>
+        <tbody>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "ceph -s"</code></td><td>Estado global del cluster Ceph (HEALTH_OK/WARN)</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "ceph health detail"</code></td><td>Detalle de avisos o errores de salud</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "ceph osd tree"</code></td><td>Arbol de OSDs: host, peso, estado (up/down)</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "ceph osd stat"</code></td><td>Cuantos OSDs up/in/out</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "ceph mon stat"</code></td><td>Estado de los monitors</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "ceph mgr stat"</code></td><td>Estado del manager (activo/standby)</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "ceph df"</code></td><td>Uso de espacio total y por pool</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "ceph pg stat"</code></td><td>Estado de los placement groups (active+clean)</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "ceph orch ps"</code></td><td>Estado de los daemons orquestados (mon/mgr/osd)</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "systemctl status ceph-*.target --no-pager"</code></td><td>Estado de los targets systemd de ceph</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "sudo journalctl -u 'ceph-mon@*' -n 20 --no-pager 2>/dev/null"</code></td><td>Log del monitor ceph</td></tr>
+          <tr><td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "uptime && free -m && df -h /"</code></td><td>Salud general del nodo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====== SECCION: ARCHIVOS CRITICOS DE CONFIGURACION ====== -->
+    <h1 class="grid-full" style="margin-top: 18px; border-top: 2px solid var(--line); padding-top: 12px;">
+      Archivos Criticos de Configuracion por Servidor
+    </h1>
+    <div class="meta grid-full">Rutas verificadas segun despliegue. Para cada archivo: comando para ver contenido y para confirmar existencia.</div>
+
+    <!-- CONFIG: DNS-PRINCIPAL -->
+    <div class="card">
+      <h2>Config: dns-principal (192.168.10.10)</h2>
+      <table>
+        <thead><tr><th style="width:32%">Archivo / Ruta</th><th style="width:46%">SSH para ver / verificar</th><th style="width:22%">Que controla</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>/etc/bind/named.conf</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "cat /etc/bind/named.conf"</code><br><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "test -f /etc/bind/named.conf && echo EXISTE || echo FALTA"</code></td>
+            <td>Entrada principal BIND9, incluye local y options</td>
+          </tr>
+          <tr>
+            <td><code>/etc/bind/named.conf.local</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "cat /etc/bind/named.conf.local"</code></td>
+            <td>Definicion de zonas: mimas.net, gepardo.com, delegacion ti.mimas.net</td>
+          </tr>
+          <tr>
+            <td><code>/etc/bind/named.conf.options</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "cat /etc/bind/named.conf.options"</code></td>
+            <td>Forwarders, allow-query, recursion, listen-on</td>
+          </tr>
+          <tr>
+            <td><code>/etc/bind/db.mimas.net</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "cat /etc/bind/db.mimas.net"</code></td>
+            <td>Zona mimas.net: SOA, NS, registros A del dominio principal</td>
+          </tr>
+          <tr>
+            <td><code>/etc/bind/db.gepardo.com</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "cat /etc/bind/db.gepardo.com"</code></td>
+            <td>Zona gepardo.com</td>
+          </tr>
+          <tr>
+            <td><code>/etc/default/named</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "cat /etc/default/named"</code></td>
+            <td>Opciones de arranque del daemon BIND (flags, -4/-6)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CONFIG: DNS-DELEGADO -->
+    <div class="card">
+      <h2>Config: dns-delegado (192.168.10.11)</h2>
+      <table>
+        <thead><tr><th style="width:32%">Archivo / Ruta</th><th style="width:46%">SSH para ver / verificar</th><th style="width:22%">Que controla</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>/etc/bind/named.conf.local</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "cat /etc/bind/named.conf.local"</code></td>
+            <td>Zonas delegadas: ti.mimas.net, occidente.gepardo.com</td>
+          </tr>
+          <tr>
+            <td><code>/etc/bind/named.conf.options</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "cat /etc/bind/named.conf.options"</code></td>
+            <td>Allow-query, forwarders (si aplica), listen-on</td>
+          </tr>
+          <tr>
+            <td><code>/etc/bind/db.ti.mimas.net</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "cat /etc/bind/db.ti.mimas.net"</code></td>
+            <td>Zona ti.mimas.net: todos los A/CNAME del cluster (app1-3, lb1, db, redis1-7)</td>
+          </tr>
+          <tr>
+            <td><code>/etc/bind/db.occidente.gepardo.com</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "test -f /etc/bind/db.occidente.gepardo.com && cat /etc/bind/db.occidente.gepardo.com || echo FALTA"</code></td>
+            <td>Zona occidente.gepardo.com</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- NUEVO DOMINIO EN DNS-DELEGADO -->
+    <div class="card grid-full">
+      <h2>Como levantar un nuevo dominio en dns-delegado (192.168.10.11)</h2>
+      <p class="note">
+        Dos casos: <strong>A)</strong> Subdominio de un dominio ya existente en dns-principal (ej. <code>nuevo.mimas.net</code>) &mdash;
+        requiere delegar desde dns-principal. &nbsp;|&nbsp;
+        <strong>B)</strong> Dominio completamente nuevo (ej. <code>midominio.com</code>) &mdash;
+        solo se declara en el delegado, no necesita cambios en dns-principal salvo que quieras forward.
+      </p>
+
+      <!-- PASO A PASO -->
+      <h2 style="font-size:11px; color:var(--muted); margin:10px 0 4px; cursor:default;">Paso 1 &mdash; Crear el archivo de zona en dns-delegado (192.168.10.11)</h2>
+      <pre>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "sudo tee /etc/bind/db.midominio.com &gt; /dev/null" &lt;&lt;'EOF'
+; /etc/bind/db.midominio.com
+; Reemplazar MIDOMINIO.COM y las IPs por los valores reales.
+; Serial: formato AAAAMMDDNN  (ej. 2026051401 = 14 mayo 2026, revision 01)
+
+\$TTL 300
+
+@   IN  SOA  ns1.ti.mimas.net. admin.midominio.com. (
+                2026051401   ; serial  &lt;-- incrementar en cada cambio
+                3600         ; refresh
+                900          ; retry
+                604800       ; expire
+                300 )        ; negative TTL
+
+; Servidor de nombres autoridad
+@   IN  NS   ns1.ti.mimas.net.
+
+; A record del NS (glue record)
+ns1.ti.mimas.net. IN A 192.168.10.11
+
+; ---- Registros del dominio ----
+@       IN  A    192.168.10.20    ; midominio.com -> LB1
+www     IN  A    192.168.10.20    ; www.midominio.com -> LB1
+app1    IN  A    192.168.10.20    ; app1.midominio.com
+; mail  IN  A    X.X.X.X         ; agregar si hay servidor de correo
+EOF</pre>
+
+      <h2 style="font-size:11px; color:var(--muted); margin:14px 0 4px; cursor:default;">Paso 2 &mdash; Declarar la zona en named.conf.local del delegado</h2>
+      <pre>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 "sudo tee -a /etc/bind/named.conf.local" &lt;&lt;'EOF'
+
+// Nueva zona: midominio.com
+zone "midominio.com" {
+    type master;
+    file "/etc/bind/db.midominio.com";
+    allow-query { any; };
+    // allow-transfer { none; };  // descomentar para bloquear AXFR
+};
+EOF</pre>
+
+      <h2 style="font-size:11px; color:var(--muted); margin:14px 0 4px; cursor:default;">Paso 3 &mdash; Verificar sintaxis y recargar BIND en el delegado</h2>
+      <pre># Validar el archivo de zona
+ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 \
+  "sudo named-checkzone midominio.com /etc/bind/db.midominio.com"
+
+# Validar la configuracion global
+ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 \
+  "sudo named-checkconf && echo OK"
+
+# Recargar BIND sin reiniciar (carga la nueva zona)
+ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 \
+  "sudo rndc reconfig && sudo rndc reload midominio.com"
+
+# Verificar que la zona esta activa
+ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.11 \
+  "sudo rndc zonestatus midominio.com"</pre>
+
+      <h2 style="font-size:11px; color:var(--muted); margin:14px 0 4px; cursor:default;">Paso 4 &mdash; (Solo caso A) Delegar desde dns-principal si es subdominio de mimas.net o gepardo.com</h2>
+      <pre># Si el nuevo dominio es un subdominio de uno ya gestionado en dns-principal (10.10),
+# hay que agregar registros NS + glue en el archivo de zona del padre.
+# Ejemplo: nuevo.mimas.net delegado a 192.168.10.11
+
+ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 "sudo nano /etc/bind/db.mimas.net"
+# Agregar al final del archivo:
+#   nuevo.mimas.net.   IN  NS   ns1.ti.mimas.net.
+#   ns1.ti.mimas.net.  IN  A    192.168.10.11      ; glue record (si no existe ya)
+
+# Incrementar el serial del SOA en db.mimas.net, luego:
+ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.10 \
+  "sudo named-checkzone mimas.net /etc/bind/db.mimas.net && sudo rndc reload mimas.net"</pre>
+
+      <h2 style="font-size:11px; color:var(--muted); margin:14px 0 4px; cursor:default;">Paso 5 &mdash; Probar resolucion desde el host</h2>
+      <pre># Probar directamente contra el delegado
+dig @192.168.10.11 midominio.com A +short
+dig @192.168.10.11 www.midominio.com A +short
+
+# Si es subdominio delegado, probar via principal (debe reenviar al delegado)
+dig @192.168.10.10 midominio.com A +short
+
+# Comprobar SOA y NS
+dig @192.168.10.11 midominio.com SOA +short
+dig @192.168.10.11 midominio.com NS +short</pre>
+
+      <!-- TABLA RESUMEN -->
+      <h2 style="font-size:11px; color:var(--muted); margin:14px 0 4px; cursor:default;">Resumen de archivos modificados por caso</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:10%">Paso</th>
+            <th style="width:30%">Archivo</th>
+            <th style="width:15%">Servidor</th>
+            <th style="width:25%">Accion</th>
+            <th style="width:20%">Caso</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><code>/etc/bind/db.midominio.com</code></td>
+            <td>dns-delegado<br>192.168.10.11</td>
+            <td>Crear archivo de zona con SOA, NS y registros A</td>
+            <td>A y B</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><code>/etc/bind/named.conf.local</code></td>
+            <td>dns-delegado<br>192.168.10.11</td>
+            <td>Agregar bloque <code>zone "midominio.com" { type master; ... }</code></td>
+            <td>A y B</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>&mdash;</td>
+            <td>dns-delegado<br>192.168.10.11</td>
+            <td><code>named-checkconf</code> + <code>named-checkzone</code> + <code>rndc reconfig &amp;&amp; rndc reload</code></td>
+            <td>A y B</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><code>/etc/bind/db.mimas.net</code> (o db.gepardo.com)</td>
+            <td>dns-principal<br>192.168.10.10</td>
+            <td>Agregar NS + glue record del nuevo subdominio, incrementar serial, recargar</td>
+            <td>Solo A (subdominio)</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>&mdash;</td>
+            <td>host KVM</td>
+            <td><code>dig @192.168.10.11 midominio.com A +short</code></td>
+            <td>A y B</td>
+          </tr>
+          <tr style="background:#e6f0ea;">
+            <td colspan="5">
+              <strong>Regla del serial:</strong> formato <code>AAAAMMDDNN</code>. Cada vez que modificas un archivo de zona debes incrementarlo o BIND no recargara los cambios aunque hagas <code>rndc reload</code>.<br>
+              <strong>rndc reconfig</strong> = carga zonas nuevas declaradas en named.conf.local sin reiniciar.<br>
+              <strong>rndc reload zona</strong> = recarga registros de una zona ya activa (tras editar el archivo de zona).
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ARCHIVOS COMENTADOS DNS-DELEGADO -->
+    <div class="card grid-full">
+      <h2>Archivos de configuracion comentados &mdash; dns-delegado (192.168.10.11)</h2>
+      <p class="note">Servidor BIND9 delegado. Autoridad para <strong>ti.mimas.net</strong> y <strong>occidente.gepardo.com</strong>. Ruta base: <code>/etc/bind/</code></p>
+
+      <h2 style="font-size:11px; color:var(--muted); margin:10px 0 4px; cursor:default;">1) /etc/bind/named.conf.local &mdash; declaracion de zonas</h2>
+      <pre>// named.conf.local  -  dns-delegado (192.168.10.11)
+// Este archivo declara las zonas de las que este servidor es autoridad (master).
+// El servidor principal (192.168.10.10) delega estas zonas via NS records.
+
+// ---- ZONA: ti.mimas.net ----
+// Subdominio del cluster: app1-3, lb1/lb2, db (maxscale), redis1-7, etc.
+zone "ti.mimas.net" {
+    type master;                              // este servidor es autoridad primaria
+    file "/etc/bind/db.ti.mimas.net";        // archivo de zona con los registros A/CNAME
+    allow-query { any; };                    // permitir consultas desde cualquier cliente
+    // allow-transfer { none; };             // deshabilitar AXFR salvo que haya secundario
+};
+
+// ---- ZONA: occidente.gepardo.com ----
+// Subdominio de gepardo.com delegado tambien a este servidor.
+zone "occidente.gepardo.com" {
+    type master;
+    file "/etc/bind/db.occidente.gepardo.com";
+    allow-query { any; };
+};</pre>
+
+      <h2 style="font-size:11px; color:var(--muted); margin:14px 0 4px; cursor:default;">2) /etc/bind/named.conf.options &mdash; opciones globales</h2>
+      <pre>// named.conf.options  -  dns-delegado (192.168.10.11)
+// Opciones globales de comportamiento del servidor BIND9.
+
+options {
+    directory "/var/cache/bind";             // directorio de trabajo de BIND
+
+    // Escuchar solo en la IP del nodo (evita conflicto con systemd-resolved en 127.0.0.53)
+    listen-on { 192.168.10.11; 127.0.0.1; };
+    listen-on-v6 { none; };                  // deshabilitar IPv6 si no se usa
+
+    // Permitir consultas desde las redes del cluster y el host KVM
+    allow-query { 192.168.0.0/16; 127.0.0.1; };
+
+    // Reenviar consultas no autoritativas al DNS principal o a internet
+    forwarders { 192.168.10.10; 8.8.8.8; };
+    forward only;                            // solo reenviar, no resolver recursivamente
+
+    // Seguridad: deshabilitar transferencias de zona no autorizadas
+    allow-transfer { none; };
+
+    // Validacion DNSSEC (opcional; deshabilitar si no se usa)
+    dnssec-validation auto;
+
+    recursion yes;                           // permitir recursion para clientes en allow-query
+};</pre>
+
+      <h2 style="font-size:11px; color:var(--muted); margin:14px 0 4px; cursor:default;">3) /etc/bind/db.ti.mimas.net &mdash; zona principal del cluster</h2>
+      <pre>; db.ti.mimas.net  -  Zona ti.mimas.net
+; Servidor autoridad: ns1.ti.mimas.net (192.168.10.11)
+; Tras CUALQUIER cambio: incrementar el serial (formato AAAAMMDDNN) y ejecutar:
+;   named-checkzone ti.mimas.net /etc/bind/db.ti.mimas.net
+;   rndc reload ti.mimas.net
+
+$TTL 300                                     ; TTL por defecto: 300 s (5 min) - bajo para lab
+
+; ---- SOA (Start of Authority) ----
+; Primer registro obligatorio. Define el servidor primario y parametros de replicacion.
+@   IN  SOA  ns1.ti.mimas.net. admin.ti.mimas.net. (
+                2026051401   ; serial     &larr; incrementar en cada cambio (AAAAMMDDNN)
+                3600         ; refresh    tiempo que secundarios esperan para pedir actualizacion
+                900          ; retry      si el primario no responde, reintentar cada 15 min
+                604800       ; expire     secundarios expiran la zona tras 7 dias sin contacto
+                300 )        ; negative TTL  tiempo en cache de respuestas NXDOMAIN
+
+; ---- NS (Name Server) ----
+; Indica quien es el servidor autoridad de esta zona.
+@   IN  NS   ns1.ti.mimas.net.
+
+; ---- A Record del propio servidor DNS ----
+ns1 IN  A    192.168.10.11
+
+; ---- Balanceadores de carga (Nginx LB) ----
+; app1/app2/app3 apuntan al LB, NO directamente al backend.
+; El LB (lb1/lb2 via Keepalived VIP 192.168.10.19) reparte entre appWinter1/2/3.
+lb1 IN  A    192.168.10.20                   ; Nginx LB primario
+lb2 IN  A    192.168.10.21                   ; Nginx LB secundario (failover keepalived)
+app1 IN A    192.168.10.20                   ; alias funcional &rarr; LB1
+app2 IN A    192.168.10.20                   ; alias funcional &rarr; LB1
+app3 IN A    192.168.10.20                   ; alias funcional &rarr; LB1
+; Alternativa con VIP keepalived: apuntar app1/2/3 a 192.168.10.19
+
+; ---- Backend WinterCMS (acceso directo, no por LB) ----
+appwinter1 IN A  192.168.20.10
+appwinter2 IN A  192.168.20.11
+appwinter3 IN A  192.168.20.12
+
+; ---- Base de datos (MaxScale proxy) ----
+; Las apps usan este nombre para conectarse; MaxScale enruta a los nodos Galera.
+db IN   A    192.168.30.20                   ; MaxScale-1 (proxy read/write split)
+
+; ---- Nodos MariaDB Galera (acceso directo admin) ----
+mariadb1 IN A  192.168.30.21
+mariadb2 IN A  192.168.30.22
+mariadb3 IN A  192.168.30.23
+
+; ---- Cluster Redis (7 nodos) ----
+redis1 IN A  192.168.30.10
+redis2 IN A  192.168.30.11
+redis3 IN A  192.168.30.12
+redis4 IN A  192.168.30.13
+redis5 IN A  192.168.30.14
+redis6 IN A  192.168.30.15
+redis7 IN A  192.168.30.16
+
+; ---- Ceph storage ----
+ceph1 IN A   192.168.60.11                   ; red interna ceph (192.168.60.0/24)
+
+; ---- Monitoring / Bastion ----
+bastion  IN A  192.168.50.2
+monitor  IN A  192.168.50.3</pre>
+
+      <h2 style="font-size:11px; color:var(--muted); margin:14px 0 4px; cursor:default;">4) /etc/bind/db.occidente.gepardo.com &mdash; zona subdominio gepardo</h2>
+      <pre>; db.occidente.gepardo.com  -  Zona occidente.gepardo.com
+; Servidor autoridad: ns.occidente.gepardo.com (192.168.10.11)
+; La delegacion viene desde db.gepardo.com en dns-principal (192.168.10.10):
+;   occidente.gepardo.com.  IN NS  ns.occidente.gepardo.com.
+;   ns.occidente.gepardo.com. IN A  192.168.10.11
+
+$TTL 300
+
+; ---- SOA ----
+@   IN  SOA  ns.occidente.gepardo.com. admin.occidente.gepardo.com. (
+                2026051401   ; serial  &larr; incrementar en cada cambio
+                3600
+                900
+                604800
+                300 )
+
+; ---- NS ----
+@   IN  NS   ns.occidente.gepardo.com.
+
+; ---- A del servidor NS ----
+ns  IN  A    192.168.10.11
+
+; ---- Registros del subdominio ----
+@           IN  A    192.168.20.12           ; occidente.gepardo.com &rarr; appWinter3
+www         IN  A    192.168.20.12           ; www.occidente.gepardo.com
+; mail      IN  A    &lt;IP_PENDIENTE&gt;         ; PENDIENTE: sin MX definido actualmente
+</pre>
+
+      <p class="note" style="margin-top:8px;">
+        <strong>Flujo de delegacion:</strong> Cliente &rarr; dns-principal (10.10) &rarr; zona gepardo.com tiene NS occidente &rarr; reenvio a dns-delegado (10.11) &rarr; responde desde db.occidente.gepardo.com.<br>
+        <strong>Regla serial:</strong> usar formato <code>AAAAMMDDNN</code> (ej. 2026051401 = 14 mayo 2026, revision 01). Si el serial no aumenta, <code>rndc reload</code> no recarga la zona.
+      </p>
+    </div>
+
+    <!-- CONFIG: LB1 / LB2 -->
+    <div class="card">
+      <h2>Config: lb1 / lb2 (192.168.10.20 / .21)</h2>
+      <table>
+        <thead><tr><th style="width:32%">Archivo / Ruta</th><th style="width:46%">SSH para ver / verificar</th><th style="width:22%">Que controla</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>/etc/nginx/nginx.conf</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "cat /etc/nginx/nginx.conf"</code></td>
+            <td>Config global nginx: worker_processes, events, http block</td>
+          </tr>
+          <tr>
+            <td><code>/etc/nginx/sites-available/ti.mimas.net</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "cat /etc/nginx/sites-available/ti.mimas.net"</code><br><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "test -f /etc/nginx/sites-available/ti.mimas.net && echo EXISTE || echo FALTA"</code></td>
+            <td>Vhost principal: upstream winter_kvm_pool, proxy_pass, headers CSRF</td>
+          </tr>
+          <tr>
+            <td><code>/etc/nginx/sites-enabled/ti.mimas.net</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "ls -la /etc/nginx/sites-enabled/ti.mimas.net"</code></td>
+            <td>Symlink activo hacia sites-available (debe existir para que nginx lo cargue)</td>
+          </tr>
+          <tr>
+            <td><code>/etc/nginx/sites-available/</code> (listado)</td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "ls -la /etc/nginx/sites-available/ && ls -la /etc/nginx/sites-enabled/"</code></td>
+            <td>Inventario de vhosts disponibles y activos</td>
+          </tr>
+          <tr>
+            <td><code>/etc/nginx/conf.d/</code> (listado)</td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "ls /etc/nginx/conf.d/ 2>/dev/null && cat /etc/nginx/conf.d/*.conf 2>/dev/null || echo vacio"</code></td>
+            <td>Snippets adicionales de configuracion nginx</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- KEEPALIVED CONFIG -->
+    <div class="card grid-full">
+      <h2>Keepalived &mdash; Configuracion basica (lb1 MASTER / lb2 BACKUP)</h2>
+      <p class="note">VIP flotante: <strong>192.168.10.19</strong> &mdash; interfaz: <strong>ens3</strong> (ajustar si difiere). Archivo en ambos nodos: <code>/etc/keepalived/keepalived.conf</code></p>
+
+      <h2 style="font-size:11px; color:var(--muted); margin:10px 0 4px; cursor:default;">lb1 (192.168.10.20) &mdash; MASTER</h2>
+      <pre>! /etc/keepalived/keepalived.conf  &mdash;  lb1 (MASTER)
+
+global_defs {
+    router_id lb1
+}
+
+vrrp_script chk_nginx {
+    script "/usr/bin/systemctl is-active nginx"
+    interval 2
+    weight   -20
+    fall     2
+    rise     2
+}
+
+vrrp_instance VI_1 {
+    state            MASTER
+    interface        ens3
+    virtual_router_id 51
+    priority         110          # mayor que BACKUP (100)
+    advert_int       1
+    authentication {
+        auth_type PASS
+        auth_pass keepalived_secret   # igual en lb1 y lb2
+    }
+    virtual_ipaddress {
+        192.168.10.19/24            # VIP compartida
+    }
+    track_script {
+        chk_nginx
+    }
+    notify_master "/etc/keepalived/notify.sh MASTER"
+    notify_backup "/etc/keepalived/notify.sh BACKUP"
+    notify_fault  "/etc/keepalived/notify.sh FAULT"
+}</pre>
+
+      <h2 style="font-size:11px; color:var(--muted); margin:14px 0 4px; cursor:default;">lb2 (192.168.10.21) &mdash; BACKUP</h2>
+      <pre>! /etc/keepalived/keepalived.conf  &mdash;  lb2 (BACKUP)
+
+global_defs {
+    router_id lb2
+}
+
+vrrp_script chk_nginx {
+    script "/usr/bin/systemctl is-active nginx"
+    interval 2
+    weight   -20
+    fall     2
+    rise     2
+}
+
+vrrp_instance VI_1 {
+    state            BACKUP
+    interface        ens3
+    virtual_router_id 51          # igual que MASTER
+    priority         100          # menor que MASTER (110)
+    advert_int       1
+    authentication {
+        auth_type PASS
+        auth_pass keepalived_secret   # igual en lb1 y lb2
+    }
+    virtual_ipaddress {
+        192.168.10.19/24            # VIP compartida
+    }
+    track_script {
+        chk_nginx
+    }
+    notify_master "/etc/keepalived/notify.sh MASTER"
+    notify_backup "/etc/keepalived/notify.sh BACKUP"
+    notify_fault  "/etc/keepalived/notify.sh FAULT"
+}</pre>
+
+      <h2 style="font-size:11px; color:var(--muted); margin:14px 0 4px; cursor:default;">Script de notificacion opcional &mdash; /etc/keepalived/notify.sh (ambos nodos)</h2>
+      <pre>#!/bin/bash
+# /etc/keepalived/notify.sh
+STATE=$1
+logger -t keepalived "VIP 192.168.10.19 transicion a estado: $STATE en $(hostname)"</pre>
+
+      <table style="margin-top:12px;">
+        <thead>
+          <tr>
+            <th style="width:26%">Comando de verificacion</th>
+            <th style="width:38%">Donde ejecutar</th>
+            <th style="width:36%">Que muestra</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>systemctl status keepalived</code></td>
+            <td>ssh lb1 (192.168.10.20) o lb2 (.21)</td>
+            <td>Estado del servicio keepalived (activo/inactivo)</td>
+          </tr>
+          <tr>
+            <td><code>ip addr show ens3 | grep 192.168.10.19</code></td>
+            <td>En lb1 y lb2</td>
+            <td>Confirma cual nodo tiene la VIP asignada en este momento</td>
+          </tr>
+          <tr>
+            <td><code>journalctl -u keepalived -n 30 --no-pager</code></td>
+            <td>En lb1 o lb2</td>
+            <td>Log de transiciones MASTER/BACKUP y deteccion de fallos</td>
+          </tr>
+          <tr>
+            <td><code>ping -c 3 192.168.10.19</code></td>
+            <td>Host KVM (desde fuera)</td>
+            <td>La VIP responde al nodo activo; si no responde, keepalived/nginx caido en ambos</td>
+          </tr>
+          <tr>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.20 "ip addr show ens3 | grep 10.19"</code></td>
+            <td>Host KVM</td>
+            <td>Verificar desde host si lb1 tiene la VIP</td>
+          </tr>
+          <tr>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.10.21 "ip addr show ens3 | grep 10.19"</code></td>
+            <td>Host KVM</td>
+            <td>Verificar desde host si lb2 tiene la VIP (failover activo)</td>
+          </tr>
+          <tr>
+            <td><code>cat /etc/keepalived/keepalived.conf</code></td>
+            <td>lb1 o lb2 via SSH</td>
+            <td>Ver configuracion activa (comparar priority y state entre nodos)</td>
+          </tr>
+          <tr>
+            <td><code>systemctl restart keepalived &amp;&amp; sleep 2 &amp;&amp; ip addr show ens3</code></td>
+            <td>lb1 o lb2 (accion)</td>
+            <td>Reiniciar keepalived y confirmar VIP. Solo usar si keepalived no esta corriendo.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="note" style="margin-top:8px;">
+        <strong>Instalacion:</strong> <code>apt install keepalived</code> en lb1 y lb2. Habilitar con <code>systemctl enable --now keepalived</code>.<br>
+        <strong>Nota net.ipv4.ip_nonlocal_bind:</strong> agregar <code>net.ipv4.ip_nonlocal_bind=1</code> en <code>/etc/sysctl.conf</code> y aplicar con <code>sysctl -p</code> si nginx arranca antes de que la VIP se asigne.<br>
+        <strong>virtual_router_id 51</strong> debe ser unico en la red; cambiar si hay otro VRRP en el mismo segmento.
+      </p>
+    </div>
+
+    <!-- UBICACIONES NGINX LB + MAXSCALE -->
+    <div class="card grid-full">
+      <h2>Ubicaciones (location blocks) Nginx LB y rutas MaxScale</h2>
+
+      <h2 style="font-size:11px; color:var(--muted); margin:10px 0 4px; cursor:default;">Nginx LB &mdash; /etc/nginx/sites-available/ti.mimas.net (lb1: 192.168.10.20 / lb2: 192.168.10.21)</h2>
+      <pre>upstream winter_kvm_pool {
+    server 192.168.20.10;   # appWinter1
+    server 192.168.20.11;   # appWinter2
+    server 192.168.20.12;   # appWinter3
+}
+
+server {
+    listen 80;
+    server_name ti.mimas.net app1.ti.mimas.net app2.ti.mimas.net app3.ti.mimas.net www.ti.mimas.net;
+
+    location / {
+        proxy_pass         http://winter_kvm_pool;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+    }
+
+    # Opcional: corregir doble prefijo /backend/backend/
+    # rewrite ^/backend/(backend.*) /$1 permanent;
+}</pre>
+
+      <table style="margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="width:22%">Location / ruta</th>
+            <th style="width:30%">Destino / upstream</th>
+            <th style="width:48%">Notas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>location /</code></td>
+            <td><code>proxy_pass http://winter_kvm_pool</code><br>(192.168.20.10 / .11 / .12)</td>
+            <td>Todo el trafico HTTP hacia los 3 nodos WinterCMS (round-robin). Archivo: <code>/etc/nginx/sites-available/ti.mimas.net</code></td>
+          </tr>
+          <tr>
+            <td><code>location /backend</code></td>
+            <td>Mismo upstream &rarr; appWinter</td>
+            <td>El admin de WinterCMS (<code>/backend</code>) pasa por el mismo proxy_pass. Si hay doble prefijo, agregar rewrite (ver comentario arriba).</td>
+          </tr>
+          <tr>
+            <td>Nginx config global</td>
+            <td><code>/etc/nginx/nginx.conf</code></td>
+            <td>worker_processes auto; events { worker_connections 1024; }. Include sites-enabled/.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 style="font-size:11px; color:var(--muted); margin:14px 0 4px; cursor:default;">MaxScale &mdash; /etc/maxscale.cnf (maxscale-1: 192.168.30.20)</h2>
+      <pre>[maxscale]
+threads=auto
+
+# ---- SERVERS (backends Galera) ----
+[mariadb-1]
+type=server
+address=192.168.30.21
+port=3306
+protocol=MariaDBBackend
+
+[mariadb-2]
+type=server
+address=192.168.30.22
+port=3306
+protocol=MariaDBBackend
+
+[mariadb-3]
+type=server
+address=192.168.30.23
+port=3306
+protocol=MariaDBBackend
+
+# ---- MONITOR ----
+[galera-monitor]
+type=monitor
+module=galeramon
+servers=mariadb-1,mariadb-2,mariadb-3
+user=maxscale
+password=&lt;password&gt;
+
+# ---- SERVICE (read/write split) ----
+[rw-service]
+type=service
+router=readwritesplit
+servers=mariadb-1,mariadb-2,mariadb-3
+user=maxscale
+password=&lt;password&gt;
+
+# ---- LISTENER ----
+[rw-listener]
+type=listener
+service=rw-service
+protocol=MariaDBClient
+port=3306        # puerto principal (write + read split)
+# port=4008      # alternativo si se configura listener adicional</pre>
+
+      <table style="margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="width:22%">Componente MaxScale</th>
+            <th style="width:30%">IPs / Puertos</th>
+            <th style="width:48%">Notas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Listener entrada apps</td>
+            <td><code>192.168.30.20:3306</code><br>(o :4008 si hay listener extra)</td>
+            <td>Las apps (WinterCMS .env <code>DB_HOST=192.168.30.20</code>) apuntan aqui. MaxScale enruta internamente.</td>
+          </tr>
+          <tr>
+            <td>Backend mariadb-1</td>
+            <td><code>192.168.30.21:3306</code></td>
+            <td>Nodo Galera 1 &mdash; puede ser writer primario.</td>
+          </tr>
+          <tr>
+            <td>Backend mariadb-2</td>
+            <td><code>192.168.30.22:3306</code></td>
+            <td>Nodo Galera 2 &mdash; reader / failover writer.</td>
+          </tr>
+          <tr>
+            <td>Backend mariadb-3</td>
+            <td><code>192.168.30.23:3306</code></td>
+            <td>Nodo Galera 3 &mdash; reader / failover writer.</td>
+          </tr>
+          <tr>
+            <td>Verificar rutas activas</td>
+            <td><code>maxctrl list servers</code><br><code>maxctrl list services</code><br><code>maxctrl list listeners</code></td>
+            <td>Ejecutar en maxscale-1 via SSH. Confirmar que los 3 backends aparecen en estado <strong>Master</strong> o <strong>Slave, Synced</strong>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CONFIG: APPWINTER1/2/3 -->
+    <div class="card">
+      <h2>Config: appWinter1/2/3 (192.168.20.10 / .11 / .12)</h2>
+      <table>
+        <thead><tr><th style="width:32%">Archivo / Ruta</th><th style="width:46%">SSH para ver / verificar (ejemplo en .10)</th><th style="width:22%">Que controla</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>/opt/apps/wintercms/.env</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "cat /opt/apps/wintercms/.env"</code><br><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "test -f /opt/apps/wintercms/.env && echo EXISTE || echo FALTA"</code></td>
+            <td>APP_URL, DB_HOST/PORT, REDIS_HOST, SESSION_DRIVER, CACHE_DRIVER, REDIS_USERNAME/PASSWORD</td>
+          </tr>
+          <tr>
+            <td><code>/etc/nginx/sites-available/wintercms.conf</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "cat /etc/nginx/sites-available/wintercms.conf"</code></td>
+            <td>Nginx backend: root, fastcgi_pass a PHP-FPM, server_name</td>
+          </tr>
+          <tr>
+            <td><code>/opt/apps/wintercms/config/cms.php</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "cat /opt/apps/wintercms/config/cms.php"</code></td>
+            <td>backendUri, trustedHosts, disableCsrf, activeTheme</td>
+          </tr>
+          <tr>
+            <td><code>/opt/apps/wintercms/config/database.php</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "cat /opt/apps/wintercms/config/database.php"</code></td>
+            <td>Conexion a MaxScale/MariaDB: host, port, db, user, password</td>
+          </tr>
+          <tr>
+            <td><code>/opt/apps/wintercms/config/cache.php</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "cat /opt/apps/wintercms/config/cache.php"</code></td>
+            <td>Driver de cache (redis), conexion y prefix</td>
+          </tr>
+          <tr>
+            <td><code>/opt/apps/wintercms/config/session.php</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "cat /opt/apps/wintercms/config/session.php"</code></td>
+            <td>Driver de sesiones (redis), lifetime, cookie, secure</td>
+          </tr>
+          <tr>
+            <td>Verificar todos los nodos</td>
+            <td><code>for ip in 192.168.20.10 192.168.20.11 192.168.20.12; do echo "=== $ip ==="; ssh -i ssh-keys/id_rsa userinfrakv@$ip "grep -E 'APP_URL|DB_HOST|REDIS_HOST|SESSION_DRIVER' /opt/apps/wintercms/.env"; done</code></td>
+            <td>Comparar config critica entre los 3 nodos (deben ser iguales salvo APP_URL)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CONFIG: MARIADB -->
+    <div class="card">
+      <h2>Config: mariadb-1/2/3 (192.168.30.21 / .22 / .23)</h2>
+      <table>
+        <thead><tr><th style="width:32%">Archivo / Ruta</th><th style="width:46%">SSH para ver / verificar (ejemplo en .21)</th><th style="width:22%">Que controla</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>/etc/mysql/mariadb.conf.d/50-server.cnf</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "cat /etc/mysql/mariadb.conf.d/50-server.cnf"</code><br><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "test -f /etc/mysql/mariadb.conf.d/50-server.cnf && echo EXISTE || echo FALTA"</code></td>
+            <td>Parametros principales: bind-address, wsrep_cluster_address, wsrep_node_address, wsrep_provider</td>
+          </tr>
+          <tr>
+            <td><code>/etc/mysql/mariadb.conf.d/60-galera.cnf</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "test -f /etc/mysql/mariadb.conf.d/60-galera.cnf && cat /etc/mysql/mariadb.conf.d/60-galera.cnf || echo NO EXISTE (config en 50-server.cnf)"</code></td>
+            <td>Config Galera separada (wsrep params si se separaron)</td>
+          </tr>
+          <tr>
+            <td><code>/etc/mysql/my.cnf</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "cat /etc/mysql/my.cnf"</code></td>
+            <td>Override o includes de configuracion MariaDB</td>
+          </tr>
+          <tr>
+            <td><code>/var/lib/mysql/grastate.dat</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.21 "sudo cat /var/lib/mysql/grastate.dat"</code></td>
+            <td>Estado Galera: seqno y safe_to_bootstrap (clave para recovery del cluster)</td>
+          </tr>
+          <tr>
+            <td>Verificar wsrep en todos</td>
+            <td><code>for ip in 192.168.30.21 192.168.30.22 192.168.30.23; do echo "=== $ip ==="; ssh -i ssh-keys/id_rsa userinfrakv@$ip "sudo cat /var/lib/mysql/grastate.dat 2>/dev/null"; done</code></td>
+            <td>Ver seqno y safe_to_bootstrap en los 3 nodos para determinar quien tiene los datos mas recientes</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CONFIG: MAXSCALE -->
+    <div class="card">
+      <h2>Config: maxscale-1 (192.168.30.20)</h2>
+      <table>
+        <thead><tr><th style="width:32%">Archivo / Ruta</th><th style="width:46%">SSH para ver / verificar</th><th style="width:22%">Que controla</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>/etc/maxscale.cnf</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "cat /etc/maxscale.cnf"</code><br><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "test -f /etc/maxscale.cnf && echo EXISTE || echo FALTA"</code></td>
+            <td>Config completa: [maxscale], [servers], [monitor], [service], [listener]</td>
+          </tr>
+          <tr>
+            <td><code>/etc/maxscale.cnf.d/</code> (si existe)</td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "ls /etc/maxscale.cnf.d/ 2>/dev/null || echo directorio no existe"</code></td>
+            <td>Fragmentos de config adicionales (split config)</td>
+          </tr>
+          <tr>
+            <td><code>/var/log/maxscale/maxscale.log</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.20 "test -f /var/log/maxscale/maxscale.log && echo EXISTE || echo FALTA"</code></td>
+            <td>Log principal de MaxScale (verificar que existe y tiene permisos)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CONFIG: REDIS -->
+    <div class="card">
+      <h2>Config: redis-1..7 (192.168.30.10-16)</h2>
+      <table>
+        <thead><tr><th style="width:32%">Archivo / Ruta</th><th style="width:46%">SSH para ver / verificar (ejemplo en .10)</th><th style="width:22%">Que controla</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>/etc/redis/redis.conf</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "sudo cat /etc/redis/redis.conf"</code><br><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "test -f /etc/redis/redis.conf && echo EXISTE || echo FALTA"</code></td>
+            <td>bind, port, cluster-enabled, cluster-config-file, requirepass / aclfile, maxmemory</td>
+          </tr>
+          <tr>
+            <td><code>/etc/redis/redis.conf</code> (parametros criticos)</td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "sudo grep -E '^(bind|port|cluster-enabled|requirepass|aclfile|maxmemory|appendonly)' /etc/redis/redis.conf"</code></td>
+            <td>Vista rapida de parametros criticos sin leer el archivo completo</td>
+          </tr>
+          <tr>
+            <td><code>/var/lib/redis/nodes.conf</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "sudo cat /var/lib/redis/nodes.conf"</code></td>
+            <td>Estado auto-generado del cluster: node IDs, slots, roles master/replica (NO editar)</td>
+          </tr>
+          <tr>
+            <td><code>/etc/redis/users.acl</code> (si existe)</td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "sudo test -f /etc/redis/users.acl && sudo cat /etc/redis/users.acl || echo NO EXISTE (ACL puede estar en redis.conf)"</code></td>
+            <td>Archivo ACL: usuarios, passwords y permisos (user default on &gt;password ...)</td>
+          </tr>
+          <tr>
+            <td>Comparar config en todos</td>
+            <td><code>for ip in 192.168.30.10 192.168.30.11 192.168.30.12 192.168.30.13 192.168.30.14 192.168.30.15 192.168.30.16; do echo "=== $ip ==="; ssh -i ssh-keys/id_rsa userinfrakv@$ip "sudo grep -E '^(cluster-enabled|bind|port|requirepass)' /etc/redis/redis.conf 2>/dev/null"; done</code></td>
+            <td>Verificar que cluster-enabled yes esta en todos los nodos</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CONFIG: CEPH -->
+    <div class="card">
+      <h2>Config: ceph1 (192.168.60.11)</h2>
+      <table>
+        <thead><tr><th style="width:32%">Archivo / Ruta</th><th style="width:46%">SSH para ver / verificar</th><th style="width:22%">Que controla</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>/etc/ceph/ceph.conf</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "cat /etc/ceph/ceph.conf"</code><br><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "test -f /etc/ceph/ceph.conf && echo EXISTE || echo FALTA"</code></td>
+            <td>fsid, mon_host, auth_cluster_required, public_network, cluster_network</td>
+          </tr>
+          <tr>
+            <td><code>/etc/ceph/ceph.client.admin.keyring</code></td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "sudo cat /etc/ceph/ceph.client.admin.keyring"</code><br><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "sudo ls -la /etc/ceph/ceph.client.admin.keyring"</code></td>
+            <td>Keyring de administracion Ceph (permisos de acceso al cluster)</td>
+          </tr>
+          <tr>
+            <td><code>/etc/ceph/</code> (listado)</td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "sudo ls -la /etc/ceph/"</code></td>
+            <td>Inventario completo de archivos de config y keyrings disponibles</td>
+          </tr>
+          <tr>
+            <td>Config en tiempo real (ceph config)</td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.60.11 "ceph config dump"</code></td>
+            <td>Config activa del cluster (puede diferir de ceph.conf si se uso ceph config set)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====== CONFIG CEPHFS HOST ANFITRION ====== -->
+    <div class="card">
+      <h2>Config: CephFS host anfitrion (/mnt/cephfs-django)</h2>
+      <table>
+        <thead><tr><th style="width:32%">Archivo / Ruta</th><th style="width:46%">Ver / verificar (local host)</th><th style="width:22%">Que controla</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>/etc/ceph/ceph.conf</code></td>
+            <td><code>cat /etc/ceph/ceph.conf</code></td>
+            <td>fsid y mon_host del cluster Ceph (192.168.60.11 ports 3300/6789)</td>
+          </tr>
+          <tr>
+            <td><code>/etc/ceph/ceph.client.django.keyring</code></td>
+            <td><code>sudo cat /etc/ceph/ceph.client.django.keyring</code></td>
+            <td>Keyring del cliente <code>client.django</code> para acceder a cephfs_django. Permisos 600 (solo root).</td>
+          </tr>
+          <tr>
+            <td><code>/etc/systemd/system/mnt-cephfs-django.service</code></td>
+            <td><code>cat /etc/systemd/system/mnt-cephfs-django.service</code><br><code>systemctl status mnt-cephfs-django</code></td>
+            <td>Servicio que monta CephFS en <code>/mnt/cephfs-django</code> al arrancar. Usa <code>ceph-fuse -n client.django --client_fs cephfs_django -o allow_other</code>.</td>
+          </tr>
+          <tr>
+            <td><code>/mnt/cephfs-django/</code> (punto de montaje)</td>
+            <td><code>ls -la /mnt/cephfs-django/</code><br><code>df -h /mnt/cephfs-django</code></td>
+            <td>Raiz del filesystem CephFS compartido entre los 3 nodos WinterCMS. Subdirectorios: <code>media/</code>, <code>uploads/</code>, <code>resized/</code> (propiedad www-data).</td>
+          </tr>
+          <tr>
+            <td>Symlinks WinterCMS → CephFS (en cada appWinter)</td>
+            <td><code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "ls -la /opt/apps/wintercms/storage/app/ | grep -E 'media|uploads|resized'"</code></td>
+            <td>Los dirs <code>storage/app/{media,uploads,resized}</code> son symlinks a <code>/srv/django-media/{media,uploads,resized}</code> en CephFS. Sin cambios en cms.php ni nginx.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====== DIAGNOSTICO CEPHFS HOST ANFITRION ====== -->
+    <div class="card">
+      <h2>Diag: CephFS host anfitrion (montaje /mnt/cephfs-django)</h2>
+      <table>
+        <thead><tr><th style="width:40%">Comando (host local)</th><th style="width:60%">Que verifica</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>mount | grep cephfs-django</code></td>
+            <td>Confirma si CephFS esta montado. Resultado esperado: <code>ceph-fuse on /mnt/cephfs-django type fuse.ceph-fuse (rw,...,allow_other)</code></td>
+          </tr>
+          <tr>
+            <td><code>df -h /mnt/cephfs-django</code></td>
+            <td>Espacio total/usado/libre del filesystem Ceph. Total ~38 GB en este lab de un solo nodo.</td>
+          </tr>
+          <tr>
+            <td><code>ls -la /mnt/cephfs-django/media/</code></td>
+            <td>Lista archivos de media de WinterCMS almacenados en Ceph. Los archivos los escribe www-data (PHP-FPM) via symlinks en los nodos appWinter.</td>
+          </tr>
+          <tr>
+            <td><code>ls -la /mnt/cephfs-django/uploads/</code></td>
+            <td>Uploads de WinterCMS (archivos subidos via backend admin).</td>
+          </tr>
+          <tr>
+            <td><code>systemctl status mnt-cephfs-django</code></td>
+            <td>Estado del servicio de montaje. Si aparece <code>inactive (dead)</code> pero <code>mount</code> muestra el FS, significa que fue montado manualmente; el servicio arrancara automaticamente en el proximo boot.</td>
+          </tr>
+          <tr>
+            <td><code>sudo systemctl start mnt-cephfs-django</code></td>
+            <td>Remontar CephFS si se desmonto (ej. despues de reinicio de ceph1 o del host). Solo necesario si el servicio no arranco automaticamente.</td>
+          </tr>
+          <tr>
+            <td><code>sudo fusermount -u /mnt/cephfs-django</code></td>
+            <td>Desmontar CephFS limpiamente desde el host. Usar antes de apagar ceph1.</td>
+          </tr>
+          <tr>
+            <td><code>nc -zv 192.168.60.11 3300 -w3 &amp;&amp; nc -zv 192.168.60.11 6789 -w3</code></td>
+            <td>Verifica conectividad host → MON Ceph. Ambos puertos deben estar abiertos para que ceph-fuse funcione.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====== DIAGNOSTICO HOST KVM ====== -->
+    <div class="card">
+      <h2>Diag: Host KVM (hypervisor local)</h2>
+      <table>
+        <thead><tr><th style="width:40%">Comando (solo lectura - host)</th><th style="width:60%">Que verifica</th></tr></thead>
+        <tbody>
+          <tr><td><code>virsh list --all</code></td><td>Estado de todas las VMs (running/shut off)</td></tr>
+          <tr><td><code>virsh list --all | grep -c running</code></td><td>Cuantas VMs estan actualmente running</td></tr>
+          <tr><td><code>virsh dominfo appWinter1; virsh dominfo appWinter2; virsh dominfo appWinter3</code></td><td>Info de VMs backend: CPU, RAM, estado</td></tr>
+          <tr><td><code>virsh domstats --list-running 2>/dev/null | grep -E 'cpu.time|balloon.current|net.0.rx.bytes'</code></td><td>Stats CPU, RAM y red de VMs running</td></tr>
+          <tr><td><code>virsh net-list --all</code></td><td>Redes virtuales definidas y activas</td></tr>
+          <tr><td><code>virsh net-info br-lan10 2>/dev/null || brctl show 2>/dev/null | head -20</code></td><td>Info de redes/bridges KVM</td></tr>
+          <tr><td><code>ip -br a | grep -v "^lo"</code></td><td>Interfaces del host (bridges, bondings)</td></tr>
+          <tr><td><code>virsh pool-list --all</code></td><td>Pools de almacenamiento (donde estan los discos)</td></tr>
+          <tr><td><code>virsh vol-list default 2>/dev/null || ls -lh /var/lib/libvirt/images/ | head -20</code></td><td>Volumenes/imagenes de disco de las VMs</td></tr>
+          <tr><td><code>df -h /var/lib/libvirt/images/ 2>/dev/null || df -h /home/uceda/</code></td><td>Espacio libre para imagenes de VMs</td></tr>
+          <tr><td><code>free -m && uptime && nproc</code></td><td>RAM libre, carga del hypervisor y CPUs</td></tr>
+          <tr><td><code>sudo journalctl -u libvirtd -n 30 --no-pager</code></td><td>Log de libvirt (errores de VMs, arranques)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====== CONFIRMAR QUE WINTER USA REDIS ====== -->
+    <div class="card grid-full">
+      <h2>Confirmar que WinterCMS está usando Redis (sesiones + cache)</h2>
+      <p class="note">Ejecutar desde el host KVM. Los nodos Winter estan en 192.168.20.10/.11/.12. Redis cluster en 192.168.30.10-16 (puerto 6379).</p>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:10%">Paso</th>
+            <th style="width:40%">Comando</th>
+            <th style="width:50%">Que confirma / resultado esperado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1. .env en cada nodo</strong></td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "grep -E 'SESSION_DRIVER|CACHE_DRIVER|REDIS_' /opt/apps/wintercms/.env"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.11 "grep -E 'SESSION_DRIVER|CACHE_DRIVER|REDIS_' /opt/apps/wintercms/.env"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.12 "grep -E 'SESSION_DRIVER|CACHE_DRIVER|REDIS_' /opt/apps/wintercms/.env"</code>
+            </td>
+            <td>
+              Debe contener:<br>
+              <code>SESSION_DRIVER=redis</code><br>
+              <code>CACHE_DRIVER=redis</code><br>
+              <code>REDIS_CLIENT=phpredis</code><br>
+              <code>REDIS_CLUSTER=redis</code><br>
+              <code>REDIS_HOST=192.168.30.10</code><br>
+              <code>REDIS_PORT=6379</code><br>
+              <code>REDIS_PREFIX={k3}_</code><br>
+              <code>REDIS_CLUSTER_NODES=192.168.30.10:6379,...,192.168.30.16:6379</code>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>2. Extension php-redis cargada</strong></td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "php -m | grep -i redis"</code>
+            </td>
+            <td>Debe imprimir <code>redis</code>. Si no aparece, la extension php-redis no esta instalada → <code>apt install php-redis</code> y reiniciar php-fpm.</td>
+          </tr>
+          <tr>
+            <td><strong>3. Conectividad desde nodo Winter a Redis cluster</strong></td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "redis-cli -c -h 192.168.30.10 -p 6379 ping"</code><br>
+              <span class="note"># Con password (si configurado):</span><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "redis-cli -c -h 192.168.30.10 -p 6379 -a \$REDIS_PASSWORD ping"</code>
+            </td>
+            <td>Debe responder <code>PONG</code>. La opcion <code>-c</code> activa modo cluster (sigue redirects MOVED/ASK). Si falla, hay problema de red o ACL.</td>
+          </tr>
+          <tr>
+            <td><strong>4. Claves de sesion activas en Redis</strong></td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "redis-cli -h 127.0.0.1 --cluster call 192.168.30.10:6379 DBSIZE 2>/dev/null"</code><br>
+              <span class="note"># Ver claves con prefijo Winter ({k3}_):</span><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "redis-cli -c -h 127.0.0.1 keys '{k3}_*' 2>/dev/null | head -15"</code>
+            </td>
+            <td>Si hay sesiones activas aparecen claves tipo <code>{k3}_XXXXX</code>. El hash-tag <code>{k3}</code> fuerza que todas las claves del mismo tipo caigan en el mismo slot del cluster, evitando errores CROSSSLOT.</td>
+          </tr>
+          <tr>
+            <td><strong>5. Verificar via Artisan (cache write/read)</strong></td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.20.10 "cd /opt/apps/wintercms && php artisan tinker --execute=\"Cache::put('redis_check','ok',10); echo Cache::get('redis_check');\""</code>
+            </td>
+            <td>Debe imprimir <code>ok</code>. Confirma que el driver de cache configurado (Redis) escribe y lee correctamente desde PHP/WinterCMS.</td>
+          </tr>
+          <tr>
+            <td><strong>6. Verificar sesion activa en Redis tras login</strong></td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "redis-cli -c -h 127.0.0.1 keys '{k3}_*' | wc -l"</code>
+            </td>
+            <td>Despues de hacer login en WinterCMS el contador debe ser &gt; 0. Si sigue en 0 despues de iniciar sesion, las sesiones no estan llegando a Redis (revisar SESSION_CONNECTION y SESSION_DRIVER en .env).</td>
+          </tr>
+          <tr>
+            <td><strong>7. Estado del cluster Redis</strong></td>
+            <td>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "redis-cli -h 127.0.0.1 cluster info | grep -E 'cluster_state|cluster_known_nodes|cluster_size'"</code><br>
+              <code>ssh -i ssh-keys/id_rsa userinfrakv@192.168.30.10 "redis-cli -h 127.0.0.1 cluster nodes | awk '{print \$2,\$3}'"</code>
+            </td>
+            <td>
+              Esperado:<br>
+              <code>cluster_state:ok</code><br>
+              <code>cluster_known_nodes:7</code><br>
+              <code>cluster_size:3</code> (3 masters + 4 replicas)<br>
+              Cada linea de <code>cluster nodes</code> muestra IP:puerto y rol (master/slave).
+            </td>
+          </tr>
+          <tr>
+            <td><strong>8. Resumen rapido (1 liner)</strong></td>
+            <td>
+              <code>for ip in 192.168.20.10 192.168.20.11 192.168.20.12; do echo "=== $ip ==="; ssh -i ssh-keys/id_rsa userinfrakv@$ip "grep -E 'SESSION_DRIVER|CACHE_DRIVER|REDIS_CLIENT' /opt/apps/wintercms/.env; php -m | grep -i redis"; done</code>
+            </td>
+            <td>Muestra en los 3 nodos Winter el driver de sesion/cache y si php-redis esta cargado. Resultado sano: <code>SESSION_DRIVER=redis</code>, <code>CACHE_DRIVER=redis</code>, <code>redis</code> (modulo PHP).</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="note">Nota: si Redis tiene ACL activa con usuario <code>default</code> y password, recordar pasar <code>-u default -a &lt;password&gt;</code> en redis-cli o configurar <code>REDIS_USERNAME=default</code> y <code>REDIS_PASSWORD=...</code> en el .env de Winter.</p>
+    </div>
+
+  </div>
+  <script>
+    document.querySelectorAll('.card h2').forEach(function(h2) {
+      var siblings = [];
+      var next = h2.nextSibling;
+      while (next) {
+        siblings.push(next);
+        next = next.nextSibling;
+      }
+      var wrapper = document.createElement('div');
+      wrapper.className = 'card-content hidden';
+      h2.parentNode.insertBefore(wrapper, h2.nextSibling);
+      siblings.forEach(function(s) { wrapper.appendChild(s); });
+      h2.classList.add('collapsed');
+
+      h2.addEventListener('click', function() {
+        var content = h2.nextElementSibling;
+        if (content && content.classList.contains('card-content')) {
+          content.classList.toggle('hidden');
+          var isHidden = content.classList.contains('hidden');
+          h2.classList.toggle('collapsed', isHidden);
+          h2.closest('.card').classList.toggle('expanded', !isHidden);
+        }
+      });
+    });
+  </script>
+
+  <script>
+    // ===== BUSCADOR DE COMANDOS =====
+    (function () {
+      const input   = document.getElementById('search-input');
+      const counter = document.getElementById('search-count');
+      const clearBtn = document.getElementById('search-clear');
+
+      function escapeRe(s) {
+        return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      }
+
+      function removeHighlights(root) {
+        root.querySelectorAll('.search-highlight').forEach(function(span) {
+          span.replaceWith(document.createTextNode(span.textContent));
+        });
+        root.normalize();
+      }
+
+      function highlightNode(node, re) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent;
+          if (!re.test(text)) return;
+          re.lastIndex = 0;
+          const frag = document.createDocumentFragment();
+          let last = 0, m;
+          re.lastIndex = 0;
+          while ((m = re.exec(text)) !== null) {
+            if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+            const span = document.createElement('span');
+            span.className = 'search-highlight';
+            span.textContent = m[0];
+            frag.appendChild(span);
+            last = re.lastIndex;
+          }
+          if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+          node.parentNode.replaceChild(frag, node);
+          re.lastIndex = 0;
+        } else if (node.nodeType === Node.ELEMENT_NODE && !node.classList.contains('search-highlight')) {
+          Array.from(node.childNodes).forEach(function(child) { highlightNode(child, re); });
+        }
+      }
+
+      function doSearch() {
+        const q = input.value.trim();
+        const cards = document.querySelectorAll('.card');
+
+        // Reset all highlights and visibility
+        cards.forEach(function(card) {
+          removeHighlights(card);
+          card.classList.remove('search-no-match');
+          card.querySelectorAll('tr.search-hidden').forEach(function(r) { r.classList.remove('search-hidden'); });
+        });
+
+        if (!q) {
+          counter.textContent = '';
+          return;
+        }
+
+        const re = new RegExp(escapeRe(q), 'gi');
+        let totalRows = 0;
+
+        cards.forEach(function(card) {
+          const rows = card.querySelectorAll('tbody tr');
+          let cardHits = 0;
+
+          if (rows.length === 0) {
+            // Card with no table rows: check all text
+            const cardText = card.textContent;
+            if (re.test(cardText)) { cardHits++; re.lastIndex = 0; }
+            re.lastIndex = 0;
+          } else {
+            rows.forEach(function(row) {
+              const txt = row.textContent;
+              re.lastIndex = 0;
+              if (re.test(txt)) {
+                cardHits++;
+                re.lastIndex = 0;
+              } else {
+                row.classList.add('search-hidden');
+              }
+            });
+          }
+
+          if (cardHits === 0) {
+            card.classList.add('search-no-match');
+          } else {
+            totalRows += cardHits;
+            // Highlight inside visible rows (or whole card if no rows)
+            if (rows.length === 0) {
+              highlightNode(card, new RegExp(escapeRe(q), 'gi'));
+            } else {
+              rows.forEach(function(row) {
+                if (!row.classList.contains('search-hidden')) {
+                  highlightNode(row, new RegExp(escapeRe(q), 'gi'));
+                }
+              });
+            }
+          }
+        });
+
+        counter.textContent = totalRows > 0
+          ? totalRows + ' resultado' + (totalRows !== 1 ? 's' : '')
+          : 'Sin resultados';
+      }
+
+      input.addEventListener('input', doSearch);
+
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') { input.value = ''; doSearch(); input.blur(); }
+      });
+
+      clearBtn.addEventListener('click', function() {
+        input.value = '';
+        doSearch();
+        input.focus();
+      });
+    })();
+  </script>
+</body>
+</html>

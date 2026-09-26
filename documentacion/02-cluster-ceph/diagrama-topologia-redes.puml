@@ -1,0 +1,3 @@
+@startuml
+!include proyecto-manual-infraestructura/diagrama-topologia-redes.puml
+@enduml

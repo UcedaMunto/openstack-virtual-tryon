@@ -1,0 +1,75 @@
+# 2026-04-28 21:45:04 -----------------------------------
+bash /home/uceda/Documents/cluster-ceph/kvm-generic/create-kvm-vm.sh \
+  --name ceph-admin \
+  --hostname ceph-admin \
+  --user admin \
+  --password admin123 \
+  --ram 2048 \
+  --vcpus 2 \
+  --system-disk 20 \
+  --data-disk 0 \
+  --libvirt-nets net-192-168-3 \
+  --ifaces enp1s0\,192.168.3.10/24\,192.168.3.1\,8.8.8.8\,8.8.4.4 \
+  --extra-hosts 192.168.3.10\ ceph-admin\;192.168.3.11\ ceph-mon\;192.168.3.12\ ceph-osd1\;192.168.3.13\ ceph-osd2\;192.168.3.14\ ceph-osd3 \
+  --primary-mac 52:54:00:cc:dd:10
+
+# 2026-04-28 21:45:04 -----------------------------------
+bash /home/uceda/Documents/cluster-ceph/kvm-generic/create-kvm-vm.sh \
+  --name ceph-mon \
+  --hostname ceph-mon \
+  --user admin \
+  --password admin123 \
+  --ram 2048 \
+  --vcpus 2 \
+  --system-disk 20 \
+  --data-disk 0 \
+  --libvirt-nets net-192-168-3 \
+  --ifaces enp1s0\,192.168.3.11/24\,192.168.3.1\,8.8.8.8\,8.8.4.4 \
+  --extra-hosts 192.168.3.10\ ceph-admin\;192.168.3.11\ ceph-mon\;192.168.3.12\ ceph-osd1\;192.168.3.13\ ceph-osd2\;192.168.3.14\ ceph-osd3 \
+  --primary-mac 52:54:00:cc:dd:11
+
+# 2026-04-28 21:45:04 -----------------------------------
+bash /home/uceda/Documents/cluster-ceph/kvm-generic/create-kvm-vm.sh \
+  --name ceph-osd1 \
+  --hostname ceph-osd1 \
+  --user admin \
+  --password admin123 \
+  --ram 2048 \
+  --vcpus 2 \
+  --system-disk 20 \
+  --data-disk 50 \
+  --libvirt-nets net-192-168-3 \
+  --ifaces enp1s0\,192.168.3.12/24\,192.168.3.1\,8.8.8.8\,8.8.4.4 \
+  --extra-hosts 192.168.3.10\ ceph-admin\;192.168.3.11\ ceph-mon\;192.168.3.12\ ceph-osd1\;192.168.3.13\ ceph-osd2\;192.168.3.14\ ceph-osd3 \
+  --primary-mac 52:54:00:cc:dd:12
+
+# 2026-04-28 21:45:04 -----------------------------------
+bash /home/uceda/Documents/cluster-ceph/kvm-generic/create-kvm-vm.sh \
+  --name ceph-osd2 \
+  --hostname ceph-osd2 \
+  --user admin \
+  --password admin123 \
+  --ram 2048 \
+  --vcpus 2 \
+  --system-disk 20 \
+  --data-disk 50 \
+  --libvirt-nets net-192-168-3 \
+  --ifaces enp1s0\,192.168.3.13/24\,192.168.3.1\,8.8.8.8\,8.8.4.4 \
+  --extra-hosts 192.168.3.10\ ceph-admin\;192.168.3.11\ ceph-mon\;192.168.3.12\ ceph-osd1\;192.168.3.13\ ceph-osd2\;192.168.3.14\ ceph-osd3 \
+  --primary-mac 52:54:00:cc:dd:13
+
+# 2026-04-28 21:45:05 -----------------------------------
+bash /home/uceda/Documents/cluster-ceph/kvm-generic/create-kvm-vm.sh \
+  --name ceph-osd3 \
+  --hostname ceph-osd3 \
+  --user admin \
+  --password admin123 \
+  --ram 2048 \
+  --vcpus 2 \
+  --system-disk 20 \
+  --data-disk 50 \
+  --libvirt-nets net-192-168-3 \
+  --ifaces enp1s0\,192.168.3.14/24\,192.168.3.1\,8.8.8.8\,8.8.4.4 \
+  --extra-hosts 192.168.3.10\ ceph-admin\;192.168.3.11\ ceph-mon\;192.168.3.12\ ceph-osd1\;192.168.3.13\ ceph-osd2\;192.168.3.14\ ceph-osd3 \
+  --primary-mac 52:54:00:cc:dd:14
+

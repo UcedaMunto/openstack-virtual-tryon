@@ -1,0 +1,46 @@
+<!--
+  Red "os-tunnel" (OpenStack-Ansible): red de overlay/tunel (equivalente a
+  br-vxlan). Es una red aislada (sin <forward>, sin DHCP), solo con
+  direccionamiento IP estatico para el trafico VXLAN/GRE entre nodos.
+-->
+<network>
+    <!-- Nombre logico de la red en libvirt -->
+    <name>os-tunnel</name>
+
+    <!--
+      Bridge software "virbr-os-tunel" con STP activado y sin retardo.
+      Nota: se corrige el typo original <brige> -> <bridge>.
+    -->
+    <bridge name='virbr-os-tunel' stp='on' delay='0'/>
+
+    <!--
+      Rango IP 10.10.20.0/24 con gateway 10.10.20.1 en el host. Al no tener
+      <dhcp>, las VMs deben configurar su IP de forma estatica (o mediante
+      Ansible/netplan) dentro de este rango.
+    -->
+    <ip address='10.10.20.1' netmask='255.255.255.0'>
+    </ip>
+</network>
+
+<!--
+  Siguientes pasos para implementarla:
+    1. virsh net-define os-tunnel.xml
+    2. virsh net-autostart os-tunnel
+    3. virsh net-start os-tunnel
+    4. Conectar los nodos compute/network/controller a esta red como su
+       interfaz de tunel (br-vxlan) en create-kvm-vm.sh / virt-install
+       --network network=os-tunnel.
+    5. Configurar IP estatica en cada VM dentro de 10.10.20.0/24 (netplan),
+       recordando usar mascara /32 en la interfaz br-vxlan del nodo si hay
+       mas de una NIC, para evitar que el kernel elija la ruta equivocada
+       frente a br-mgmt (ver notas de troubleshooting del lab).
+    6. En openstack_user_config.yml, declarar este rango como
+       "tunnel_bridge"/"container_tunnel_address" segun corresponda.
+
+  Uso estandar de este tipo de red (tunnel/overlay):
+    Se usa exclusivamente para el trafico interno de red overlay entre
+    hipervisores (VXLAN/GRE de Neutron ML2), transportando el trafico L2 de
+    las redes de los tenants encapsulado. No necesita salida a Internet ni
+    DHCP: solo conectividad L3 punto a punto entre los nodos que participan
+    en la red de datos.
+-->

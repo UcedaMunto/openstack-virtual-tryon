@@ -1,0 +1,94 @@
+@startuml 02-workers
+title Nodos del cluster Kubernetes: control-plane y workers
+
+skinparam componentStyle rectangle
+
+node "k8-master (192.168.90.1)\nControl Plane" as master {
+  component "kube-apiserver" as apiserver
+  component "etcd\n(/var/lib/etcd)" as etcd
+  component "kube-controller-manager" as ctrlmgr
+  component "kube-scheduler" as scheduler
+  component "kubelet" as kubelet_m
+  component "containerd" as containerd_m
+  component "calico-node" as calico_m
+  component "kube-proxy" as proxy_m
+}
+
+node "k8-worker1 (192.168.90.2)" as w1 {
+  component "kubelet" as kubelet_1
+  component "containerd" as containerd_1
+  component "calico-node" as calico_1
+  component "kube-proxy" as proxy_1
+  component "rook-ceph-mon-a" as mon_a
+  component "rook-ceph-osd-0" as osd_0
+  component "rook-ceph-mds-myfs-a" as mds_a
+  component "CSI cephfs/rbd\nctrlplugin + nodeplugin" as csi_1
+  database "disco vdb\n(OSD Ceph, 20G)" as vdb1
+  osd_0 --> vdb1
+}
+
+node "k8-worker2 (192.168.90.3)" as w2 {
+  component "kubelet" as kubelet_2
+  component "containerd" as containerd_2
+  component "calico-node" as calico_2
+  component "kube-proxy" as proxy_2
+  component "rook-ceph-mon-b" as mon_b
+  component "rook-ceph-osd-1" as osd_1
+  component "CSI cephfs/rbd\nnodeplugin" as csi_2
+  database "disco vdb\n(OSD Ceph, 20G)" as vdb2
+  osd_1 --> vdb2
+}
+
+node "k8-worker3 (192.168.90.4)" as w3 {
+  component "kubelet" as kubelet_3
+  component "containerd" as containerd_3
+  component "calico-node" as calico_3
+  component "kube-proxy" as proxy_3
+  component "rook-ceph-mon-c" as mon_c
+  component "rook-ceph-osd-2" as osd_2
+  component "rook-ceph-mgr-a\n(ubicacion puede\nmigrar tras reinicio)" as mgr_a
+  component "CSI cephfs/rbd\nctrlplugin + nodeplugin" as csi_3
+  database "disco vdb\n(OSD Ceph, 20G)" as vdb3
+  osd_2 --> vdb3
+}
+
+master -[hidden]-> w1
+w1 -[hidden]-> w2
+w2 -[hidden]-> w3
+
+mon_a -- mon_b : quorum Ceph (3 mons)
+mon_b -- mon_c
+mon_a -- mon_c
+
+note bottom of master
+  Requisito de kernel en los 4 nodos (master + 3 workers):
+  modprobe ceph
+  /etc/modules-load.d/ceph.conf
+  (necesario para el cliente kernel de CephFS del CSI)
+end note
+
+note bottom of w1
+  Cada worker aporta 1 solo disco crudo "vdb"
+  (qemu-img create + virsh attach-disk desde el anfitrion),
+  nunca el disco de sistema operativo.
+end note
+
+legend right
+  |= Termino / Tecnologia |= Que es |
+  | kube-apiserver | Puerta de entrada del control plane: recibe todas las peticiones de kubectl y demas componentes, y las persiste en etcd |
+  | etcd | Base de datos clave-valor distribuida donde Kubernetes guarda todo su estado (Pods, Secrets, CRDs, etc.) |
+  | kube-controller-manager | Ejecuta los "controladores" que reconcilian el estado deseado vs el real (Deployments, ReplicaSets, etc.) |
+  | kube-scheduler | Decide en que nodo se ejecuta cada Pod nuevo segun recursos disponibles y reglas de afinidad |
+  | kubelet | Agente que corre en cada nodo; recibe ordenes del API server y gestiona los contenedores locales |
+  | containerd | Runtime de contenedores (CRI) que efectivamente descarga imagenes y ejecuta los procesos de cada contenedor |
+  | calico-node | Agente de red por nodo del CNI Calico; programa las rutas e iptables para la red de Pods |
+  | kube-proxy | Componente que programa las reglas de red (iptables/IPVS) para que los Services de Kubernetes enruten trafico a los Pods correctos |
+  | Rook | Operador de Kubernetes que despliega y gestiona un cluster Ceph completo dentro del propio cluster K8s |
+  | rook-ceph-mon | Monitor Ceph: mantiene el mapa del cluster y el quorum (se necesitan al menos 2 de 3 para tener quorum) |
+  | rook-ceph-osd | Object Storage Daemon: proceso que gestiona un disco fisico (vdb) y guarda los datos reales |
+  | rook-ceph-mds | Metadata Server: gestiona los metadatos del filesystem CephFS (necesario para que CephFS funcione) |
+  | CSI (Container Storage Interface) | Estandar que usa Kubernetes para hablar con proveedores de almacenamiento externos (aqui, Ceph) sin logica especifica en el core de K8s |
+  | vdb | Disco virtual crudo (sin particiones/FS) anadido a cada worker exclusivamente para ser un OSD de Ceph |
+endlegend
+
+@enduml

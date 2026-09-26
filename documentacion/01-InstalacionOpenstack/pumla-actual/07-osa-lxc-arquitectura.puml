@@ -1,0 +1,83 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam linetype ortho
+
+title Arquitectura real actual - OpenStack sin LXC (servicios en hosts)
+
+node "controller\nserverocontroller" as CTRL {
+  rectangle "Servicios control plane\nKeystone, Glance, Nova API/Scheduler/Conductor,\nNeutron server + L3 + DHCP + OVS agent" as Csvc
+  rectangle "OVS: br-provider, br-int, br-tun" as Covs
+  rectangle "Linux bridges: br-mgmt, br-vlan, br-vxlan(/32)" as Cbr
+}
+
+node "compute1" as C1 {
+  rectangle "nova-compute: INACTIVE" as C1nova
+  rectangle "neutron-openvswitch-agent: ACTIVE" as C1ntr
+  rectangle "OVS: br-provider, br-int, br-tun" as C1ovs
+}
+
+node "compute2" as C2 {
+  rectangle "nova-compute: ACTIVE" as C2nova
+  rectangle "neutron-openvswitch-agent: ACTIVE" as C2ntr
+  rectangle "OVS: br-provider, br-int, br-tun" as C2ovs
+  rectangle "VMs WordPress" as C2wp
+}
+
+node "compute3" as C3 {
+  rectangle "nova-compute: ACTIVE" as C3nova
+  rectangle "neutron-openvswitch-agent: ACTIVE" as C3ntr
+  rectangle "OVS: br-provider, br-int, br-tun" as C3ovs
+}
+
+node "compute4" as C4 {
+  rectangle "nova-compute: ACTIVE" as C4nova
+  rectangle "neutron-openvswitch-agent: ACTIVE" as C4ntr
+  rectangle "OVS: br-provider, br-int, br-tun" as C4ovs
+}
+
+node "storage1" as ST1 {
+  rectangle "Cinder volume: ACTIVE" as STsvc1
+  rectangle "Ceph: HEALTH_WARN\n(mon low space)" as STsvc2
+}
+
+node "object1" as O1 {
+  rectangle "swift-object: ACTIVE" as O1svc
+}
+node "object2" as O2 {
+  rectangle "swift-object: ACTIVE" as O2svc
+}
+
+cloud "Red mgmt 10.0.0.0/24" as MGMT
+cloud "Red provider 192.168.122.0/24" as PROVIDER
+cloud "Red tenant 10.10.10.0/24" as TENANT
+
+CTRL -- MGMT
+C1 -- MGMT
+C2 -- MGMT
+C3 -- MGMT
+C4 -- MGMT
+ST1 -- MGMT
+O1 -- MGMT
+O2 -- MGMT
+
+CTRL -- PROVIDER
+C1 -- PROVIDER
+C2 -- PROVIDER
+C3 -- PROVIDER
+C4 -- PROVIDER
+
+CTRL -- TENANT
+C1 -- TENANT
+C2 -- TENANT
+C3 -- TENANT
+C4 -- TENANT
+
+note bottom
+Este diagrama reemplaza el modelo OSA con LXC por el estado real del laboratorio:
+servicios OpenStack desplegados directamente en nodos, sin contenedores LXC.
+end note
+
+@enduml

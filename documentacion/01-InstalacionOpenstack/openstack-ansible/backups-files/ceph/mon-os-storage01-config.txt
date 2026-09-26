@@ -1,0 +1,7 @@
+# minimal ceph.conf for 97af58d1-9efd-11f1-bbf1-52540063e430
+[global]
+	fsid = 97af58d1-9efd-11f1-bbf1-52540063e430
+	mon_host = [v2:192.168.90.40:3300/0,v1:192.168.90.40:6789/0]
+[mon.os-storage01]
+public network = 192.168.90.0/24
+        mon_auth_emergency_allowed_ciphers = aes, aes256k

@@ -1,0 +1,17 @@
+<network>
+  <name>openstack-public</name>
+  <uuid>7de127bb-2fc3-44fb-9468-c182e8ca7c20</uuid>
+  <forward mode='nat'>
+    <nat>
+      <port start='1024' end='65535'/>
+    </nat>
+  </forward>
+  <bridge name='virbr113' stp='on' delay='0'/>
+  <mac address='52:54:00:e2:b5:2e'/>
+  <ip address='203.0.113.1' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='203.0.113.100' end='203.0.113.250'/>
+    </dhcp>
+  </ip>
+</network>
+

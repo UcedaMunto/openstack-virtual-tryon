@@ -1,0 +1,279 @@
+#_________________________________________________________________________
+# conectar a los servers
+#_________________________________________________________________________
+ssh uceda@203.0.113.239 # controller / APIs OpenStack / Horizon / Neutron L3-DHCP-OVS / NAT-DNAT
+ssh uceda@203.0.113.240 # compute1 / Nova compute / KVM-libvirt / OVS
+ssh uceda@203.0.113.241 # compute2 / Nova compute / KVM-libvirt / OVS / VMs WordPress
+ssh uceda@203.0.113.242 # compute3 / Nova compute / KVM-libvirt / OVS
+ssh uceda@203.0.113.243 # compute4 / Nova compute / KVM-libvirt / OVS
+ssh uceda@203.0.113.244 # storage1 / Cinder volume / Ceph MON-MGR-OSD-RBD
+ssh uceda@203.0.113.245 # object1 / Swift object node
+ssh uceda@203.0.113.246 # object2 / Swift object node
+
+# CHRONYC
+ssh uceda@203.0.113.239 "hostname; systemctl is-active chrony; chronyc tracking | head -n 6"
+ssh uceda@203.0.113.240 "hostname; systemctl is-active chrony; chronyc tracking | head -n 6" # compute1
+#/etc/chrony/chrony.conf
+
+
+#_________________________________________________________________________
+# preparar sesion en controller para usar CLI OpenStack
+#_________________________________________________________________________
+echo asdfghjkl | sudo -S -i # entrar como root en el nodo controller
+source /root/admin-openrc # cargar variables OS_AUTH_URL, OS_USERNAME, OS_PASSWORD, OS_PROJECT_NAME para la CLI openstack
+env | grep '^OS_' # comprobar variables de autenticacion cargadas
+openstack token issue # verificar Keystone y autenticacion de la CLI
+
+#_________________________________________________________________________
+# comandos generales para controller
+#_________________________________________________________________________
+hostnamectl # ver hostname, sistema operativo y kernel del controller
+
+ip -br addr # ver interfaces e IPs del controller
+# enp7s0, enp8s0 en UP sin IP: normal si son puertos esclavos de OVS/bridges.
+
+
+
+ip route # ver rutas del controller
+df -h # ver uso de disco del controller
+free -h # ver memoria disponible del controller
+uptime # ver carga y tiempo encendido del controller
+getent hosts controller compute1 compute2 compute3 compute4 storage1 object1 object2 object3 # validar resolucion de nombres del cluster
+openstack service list # ver catalogo de servicios registrados en Keystone
+openstack endpoint list # ver endpoints public, internal y admin de las APIs
+openstack project list # ver proyectos/tenants disponibles
+openstack user list # ver usuarios registrados en Keystone
+openstack role list # ver roles disponibles en Keystone
+openstack catalog list # ver catalogo de APIs desde la sesion autenticada
+
+#_________________________________________________________________________
+# APIs y servicios base del controller
+#_________________________________________________________________________
+systemctl is-active apache2 mariadb rabbitmq-server memcached etcd # ver estado rapido de servicios base
+systemctl status apache2 --no-pager # ver estado de Apache/Keystone/Horizon
+systemctl status mariadb --no-pager # ver estado de base de datos de control
+systemctl status rabbitmq-server --no-pager # ver estado de cola de mensajes RabbitMQ
+systemctl status memcached --no-pager # ver estado de cache usada por Keystone
+systemctl status etcd --no-pager # ver estado de etcd usado por servicios de OpenStack
+curl -sS -o /dev/null -w '%{http_code}\n' http://controller:5000/v3/ # probar API Keystone
+curl -sS -o /dev/null -w '%{http_code}\n' http://controller:8774/v2.1 # probar API Nova
+curl -sS -o /dev/null -w '%{http_code}\n' http://controller:9696 # probar API Neutron
+curl -sS -o /dev/null -w '%{http_code}\n' http://controller:9292 # probar API Glance
+curl -sS -o /dev/null -w '%{http_code}\n' http://controller:8776/v3/ # probar API Cinder
+curl -sS -o /dev/null -w '%{http_code}\n' http://controller:8778 # probar API Placement
+curl -sS -o /dev/null -w '%{http_code}\n' http://controller:8080 # probar API Swift proxy
+
+#_________________________________________________________________________
+# ruta de acceso al portal Horizon
+#_________________________________________________________________________
+echo http://203.0.113.239/horizon # URL de Horizon desde la maquina anfitrion
+echo http://controller/horizon/project/ # URL interna de Horizon si resuelve controller
+
+#_________________________________________________________________________
+# Nova / Computes
+#_________________________________________________________________________
+openstack compute service list # ver servicios Nova scheduler, conductor y nova-compute
+openstack hypervisor list # ver listado de hypervisores compute
+openstack hypervisor stats show # ver resumen de vCPU, RAM y disco de los hypervisores
+openstack hypervisor show compute1 # ver detalle del hypervisor compute1
+openstack hypervisor show compute2 # ver detalle del hypervisor compute2
+openstack hypervisor show compute3 # ver detalle del hypervisor compute3
+openstack hypervisor show compute4 # ver detalle del hypervisor compute4
+openstack server list --all-projects # ver todas las instancias de todos los proyectos
+openstack server list --name wp- # ver instancias del proyecto WordPress
+openstack server show wp-web-01 # ver detalle de la VM web WordPress
+openstack server show wp-db-01 # ver detalle de la VM DB WordPress
+openstack console log show wp-web-01 --lines 80 # ver ultimas lineas de consola de la VM web
+openstack console log show wp-db-01 --lines 80 # ver ultimas lineas de consola de la VM DB
+openstack flavor list # ver sabores/flavors disponibles
+openstack flavor show wp.small # ver detalle del flavor usado por WordPress
+openstack keypair list # ver llaves SSH registradas en Nova
+
+#_________________________________________________________________________
+# Neutron / Redes
+#_________________________________________________________________________
+openstack network agent list # ver agentes Neutron L3, DHCP y OVS
+openstack network list # ver redes Neutron
+openstack network show selfservice-net # ver detalle de red tenant usada por WordPress
+openstack network show provider-net # ver detalle de red externa/provider
+openstack subnet list # ver subredes configuradas
+openstack subnet show selfservice-subnet # ver detalle de subred tenant si existe con ese nombre
+openstack router list # ver routers configurados
+openstack router show router1 # ver detalle del router principal
+openstack port list # ver puertos Neutron
+openstack port list --server wp-web-01 # ver puertos de la VM web
+openstack port list --server wp-db-01 # ver puertos de la VM DB
+openstack floating ip list # ver floating IPs asignadas
+openstack security group list # ver security groups
+openstack security group rule list sg-wordpress-web # ver reglas del security group web
+openstack security group rule list sg-wordpress-db # ver reglas del security group DB
+ip netns list # ver namespaces de red creados por Neutron
+ip netns list | grep qrouter # obtener namespace del router Neutron
+ROUTER_NS=$(ip netns list | awk '/qrouter/ {print $1; exit}') # guardar namespace qrouter en variable para comandos de consulta
+ip netns exec "$ROUTER_NS" ip -br addr # ver interfaces dentro del router namespace
+ip netns exec "$ROUTER_NS" ip route # ver rutas dentro del router namespace
+ip netns exec "$ROUTER_NS" ping -c 2 10.10.10.76 # probar conectividad hacia VM web desde router namespace
+ip netns exec "$ROUTER_NS" ping -c 2 10.10.10.152 # probar conectividad hacia VM DB desde router namespace
+iptables -t nat -S PREROUTING | grep 8080 # ver regla DNAT que publica WordPress en puerto 8080
+iptables -t nat -S POSTROUTING # ver reglas NAT/MASQUERADE
+
+#_________________________________________________________________________
+# Glance / Imagenes
+#_________________________________________________________________________
+openstack image list # ver imagenes disponibles
+openstack image show ubuntu-22.04 # ver detalle de imagen Ubuntu usada por WordPress
+openstack image show cirros-rbd # ver detalle de imagen Cirros en RBD si existe
+openstack image show cirros # ver detalle de imagen Cirros si existe
+
+#_________________________________________________________________________
+# Cinder / Volumenes / RBD
+#_________________________________________________________________________
+openstack volume service list # ver servicios cinder-scheduler y cinder-volume
+openstack volume backend pool list --long # ver pools/backend de Cinder y capacidades
+openstack volume type list --long # ver tipos de volumen y propiedades
+openstack volume list --all-projects # ver volumenes de todos los proyectos
+openstack volume show wp-db-data # ver detalle del volumen de base de datos WordPress
+openstack server volume list wp-db-01 # ver volumenes adjuntos a la VM DB
+openstack volume transfer request list # ver solicitudes de transferencia de volumenes
+openstack volume snapshot list --all-projects # ver snapshots de volumenes
+
+#_________________________________________________________________________
+# Ceph en storage1
+#_________________________________________________________________________
+ssh uceda@203.0.113.244 "hostnamectl" # ver sistema operativo y hostname de storage1
+ssh uceda@203.0.113.244 "echo asdfghjkl | sudo -S ceph health" # ver salud rapida de Ceph
+ssh uceda@203.0.113.244 "echo asdfghjkl | sudo -S ceph status" # ver estado general de Ceph
+ssh uceda@203.0.113.244 "echo asdfghjkl | sudo -S ceph osd status" # ver estado de OSDs
+ssh uceda@203.0.113.244 "echo asdfghjkl | sudo -S ceph osd tree" # ver arbol CRUSH/OSD
+ssh uceda@203.0.113.244 "echo asdfghjkl | sudo -S ceph df" # ver uso de pools Ceph
+ssh uceda@203.0.113.244 "echo asdfghjkl | sudo -S ceph osd pool ls detail" # ver pools y configuracion
+ssh uceda@203.0.113.244 "echo asdfghjkl | sudo -S rbd pool ls" # ver pools RBD disponibles
+ssh uceda@203.0.113.244 "echo asdfghjkl | sudo -S rbd ls -l volumes" # ver volumenes RBD de Cinder
+ssh uceda@203.0.113.244 "echo asdfghjkl | sudo -S rbd ls -l images" # ver imagenes RBD de Glance
+ssh uceda@203.0.113.244 "echo asdfghjkl | sudo -S rbd ls -l vms" # ver discos ephemeral RBD de Nova
+
+#_________________________________________________________________________
+# Swift / Object Storage
+#_________________________________________________________________________
+openstack container list # ver contenedores Swift del proyecto actual
+openstack object store account show # ver informacion de cuenta Swift
+swift stat # ver estado/cuenta Swift usando cliente swift si esta instalado
+systemctl status swift-proxy --no-pager # ver estado del proxy Swift en controller
+ssh uceda@203.0.113.245 "echo asdfghjkl | sudo -S systemctl status swift-object --no-pager" # ver servicio swift-object en object1
+ssh uceda@203.0.113.246 "echo asdfghjkl | sudo -S systemctl status swift-object --no-pager" # ver servicio swift-object en object2
+ssh uceda@203.0.113.245 "echo asdfghjkl | sudo -S swift-ring-builder /etc/swift/object.builder" # ver ring object desde object1 si existe builder
+ssh uceda@203.0.113.246 "echo asdfghjkl | sudo -S swift-ring-builder /etc/swift/object.builder" # ver ring object desde object2 si existe builder
+
+#_________________________________________________________________________
+# comandos de informacion en cada compute
+#_________________________________________________________________________
+ssh uceda@203.0.113.240 "hostname; ip -br addr; echo asdfghjkl | sudo -S systemctl is-active nova-compute neutron-openvswitch-agent libvirtd virtlogd openvswitch-switch" # estado rapido compute1
+ssh uceda@203.0.113.241 "hostname; ip -br addr; echo asdfghjkl | sudo -S systemctl is-active nova-compute neutron-openvswitch-agent libvirtd virtlogd openvswitch-switch" # estado rapido compute2
+ssh uceda@203.0.113.242 "hostname; ip -br addr; echo asdfghjkl | sudo -S systemctl is-active nova-compute neutron-openvswitch-agent libvirtd virtlogd openvswitch-switch" # estado rapido compute3
+ssh uceda@203.0.113.243 "hostname; ip -br addr; echo asdfghjkl | sudo -S systemctl is-active nova-compute neutron-openvswitch-agent libvirtd virtlogd openvswitch-switch" # estado rapido compute4
+ssh uceda@203.0.113.240 "echo asdfghjkl | sudo -S virsh list --all" # ver dominios/libvirt en compute1
+ssh uceda@203.0.113.241 "echo asdfghjkl | sudo -S virsh list --all" # ver dominios/libvirt en compute2
+ssh uceda@203.0.113.242 "echo asdfghjkl | sudo -S virsh list --all" # ver dominios/libvirt en compute3
+ssh uceda@203.0.113.243 "echo asdfghjkl | sudo -S virsh list --all" # ver dominios/libvirt en compute4
+ssh uceda@203.0.113.240 "echo asdfghjkl | sudo -S ovs-vsctl show" # ver bridges OVS en compute1
+ssh uceda@203.0.113.241 "echo asdfghjkl | sudo -S ovs-vsctl show" # ver bridges OVS en compute2
+ssh uceda@203.0.113.242 "echo asdfghjkl | sudo -S ovs-vsctl show" # ver bridges OVS en compute3
+ssh uceda@203.0.113.243 "echo asdfghjkl | sudo -S ovs-vsctl show" # ver bridges OVS en compute4
+
+#_________________________________________________________________________
+# WordPress desplegado sobre OpenStack - solo informacion
+#_________________________________________________________________________
+curl -I http://203.0.113.239:8080/ # validar acceso publico a WordPress
+curl -I 'http://203.0.113.239:8080/?page_id=2' # validar pagina de prueba WordPress
+curl -I http://203.0.113.239:8080/wp-login.php # validar login WordPress
+ROUTER_NS=$(ip netns list | awk '/qrouter/ {print $1; exit}') # obtener namespace para consultar VMs internas
+ip netns exec "$ROUTER_NS" ssh -i /root/.ssh/wp-key ubuntu@10.10.10.76 "hostname; systemctl is-active nginx php8.1-fpm; df -h" # consultar estado web WordPress
+ip netns exec "$ROUTER_NS" ssh -i /root/.ssh/wp-key ubuntu@10.10.10.152 "hostname; systemctl is-active mariadb; df -h /var/lib/mysql" # consultar estado DB WordPress
+
+#_________________________________________________________________________
+# archivos de configuracion importantes en controller
+#_________________________________________________________________________
+ls -l /root/admin-openrc # archivo de credenciales admin para CLI OpenStack
+ls -l /etc/hosts # resolucion local de nombres controller/compute/storage/object
+ls -l /etc/keystone/keystone.conf # configuracion Keystone
+ls -l /etc/apache2/sites-enabled/ # virtualhosts Apache para Keystone/Horizon
+ls -l /etc/openstack-dashboard/local_settings.py # configuracion Horizon
+ls -l /etc/glance/glance-api.conf # configuracion Glance API y backend de imagenes
+ls -l /etc/nova/nova.conf # configuracion Nova en controller
+ls -l /etc/neutron/neutron.conf # configuracion principal Neutron
+ls -l /etc/neutron/plugins/ml2/ml2_conf.ini # configuracion ML2 de Neutron
+ls -l /etc/neutron/plugins/ml2/openvswitch_agent.ini # configuracion agente OVS en controller
+ls -l /etc/neutron/l3_agent.ini # configuracion Neutron L3 agent
+ls -l /etc/neutron/dhcp_agent.ini # configuracion Neutron DHCP agent
+ls -l /etc/neutron/metadata_agent.ini # configuracion metadata agent
+ls -l /etc/cinder/cinder.conf # configuracion Cinder controller/backend
+ls -l /etc/swift/proxy-server.conf # configuracion Swift proxy
+ls -l /etc/ceph/ceph.conf # configuracion Ceph cliente usada por servicios OpenStack
+
+#_________________________________________________________________________
+# logs importantes en controller
+#_________________________________________________________________________
+tail -n 80 /var/log/apache2/error.log # ultimos errores Apache/Keystone/Horizon
+tail -n 80 /var/log/keystone/keystone.log # ultimos logs Keystone si existe archivo dedicado
+tail -n 80 /var/log/glance/glance-api.log # ultimos logs Glance API
+tail -n 80 /var/log/nova/nova-api.log # ultimos logs Nova API
+tail -n 80 /var/log/nova/nova-scheduler.log # ultimos logs Nova scheduler
+tail -n 80 /var/log/nova/nova-conductor.log # ultimos logs Nova conductor
+tail -n 80 /var/log/neutron/server.log # ultimos logs Neutron server
+tail -n 80 /var/log/neutron/openvswitch-agent.log # ultimos logs Neutron OVS agent controller
+tail -n 80 /var/log/neutron/l3-agent.log # ultimos logs Neutron L3 agent
+tail -n 80 /var/log/neutron/dhcp-agent.log # ultimos logs Neutron DHCP agent
+tail -n 80 /var/log/neutron/metadata-agent.log # ultimos logs Neutron metadata agent
+tail -n 80 /var/log/cinder/cinder-scheduler.log # ultimos logs Cinder scheduler
+tail -n 80 /var/log/cinder/cinder-volume.log # ultimos logs Cinder volume si aplica en controller
+tail -n 80 /var/log/syslog # ultimos eventos generales del sistema
+
+#_________________________________________________________________________
+# archivos de configuracion importantes en computes
+#_________________________________________________________________________
+ssh uceda@203.0.113.240 "echo asdfghjkl | sudo -S ls -l /etc/nova/nova.conf /etc/neutron/neutron.conf /etc/neutron/plugins/ml2/openvswitch_agent.ini /etc/ceph/ceph.conf" # configs compute1
+ssh uceda@203.0.113.241 "echo asdfghjkl | sudo -S ls -l /etc/nova/nova.conf /etc/neutron/neutron.conf /etc/neutron/plugins/ml2/openvswitch_agent.ini /etc/ceph/ceph.conf" # configs compute2
+ssh uceda@203.0.113.242 "echo asdfghjkl | sudo -S ls -l /etc/nova/nova.conf /etc/neutron/neutron.conf /etc/neutron/plugins/ml2/openvswitch_agent.ini /etc/ceph/ceph.conf" # configs compute3
+ssh uceda@203.0.113.243 "echo asdfghjkl | sudo -S ls -l /etc/nova/nova.conf /etc/neutron/neutron.conf /etc/neutron/plugins/ml2/openvswitch_agent.ini /etc/ceph/ceph.conf" # configs compute4
+
+#_________________________________________________________________________
+# logs importantes en computes
+#_________________________________________________________________________
+ssh uceda@203.0.113.240 "echo asdfghjkl | sudo -S tail -n 80 /var/log/nova/nova-compute.log" # log nova-compute compute1
+ssh uceda@203.0.113.241 "echo asdfghjkl | sudo -S tail -n 80 /var/log/nova/nova-compute.log" # log nova-compute compute2
+ssh uceda@203.0.113.242 "echo asdfghjkl | sudo -S tail -n 80 /var/log/nova/nova-compute.log" # log nova-compute compute3
+ssh uceda@203.0.113.243 "echo asdfghjkl | sudo -S tail -n 80 /var/log/nova/nova-compute.log" # log nova-compute compute4
+ssh uceda@203.0.113.240 "echo asdfghjkl | sudo -S tail -n 80 /var/log/neutron/openvswitch-agent.log" # log OVS agent compute1
+ssh uceda@203.0.113.241 "echo asdfghjkl | sudo -S tail -n 80 /var/log/neutron/openvswitch-agent.log" # log OVS agent compute2
+ssh uceda@203.0.113.242 "echo asdfghjkl | sudo -S tail -n 80 /var/log/neutron/openvswitch-agent.log" # log OVS agent compute3
+ssh uceda@203.0.113.243 "echo asdfghjkl | sudo -S tail -n 80 /var/log/neutron/openvswitch-agent.log" # log OVS agent compute4
+
+#_________________________________________________________________________
+# archivos de configuracion y logs en storage1 / Ceph / Cinder
+#_________________________________________________________________________
+ssh uceda@203.0.113.244 "echo asdfghjkl | sudo -S ls -l /etc/ceph/ceph.conf /etc/ceph/ceph.client.cinder.keyring /etc/cinder/cinder.conf" # configs Ceph/Cinder storage1
+ssh uceda@203.0.113.244 "echo asdfghjkl | sudo -S tail -n 80 /var/log/ceph/ceph.log" # log general Ceph
+ssh uceda@203.0.113.244 "echo asdfghjkl | sudo -S tail -n 80 /var/log/cinder/cinder-volume.log" # log Cinder volume storage1
+ssh uceda@203.0.113.244 "echo asdfghjkl | sudo -S journalctl -u ceph-mon@storage1 -n 80 --no-pager" # journal Ceph MON storage1
+ssh uceda@203.0.113.244 "echo asdfghjkl | sudo -S journalctl -u ceph-mgr@storage1 -n 80 --no-pager" # journal Ceph MGR storage1
+ssh uceda@203.0.113.244 "echo asdfghjkl | sudo -S journalctl -u ceph-osd@0 -n 80 --no-pager" # journal Ceph OSD 0
+
+#_________________________________________________________________________
+# archivos de configuracion y logs en object nodes / Swift
+#_________________________________________________________________________
+ssh uceda@203.0.113.245 "echo asdfghjkl | sudo -S ls -l /etc/swift/account-server.conf /etc/swift/container-server.conf /etc/swift/object-server.conf /etc/swift/*.ring.gz" # configs Swift object1
+ssh uceda@203.0.113.246 "echo asdfghjkl | sudo -S ls -l /etc/swift/account-server.conf /etc/swift/container-server.conf /etc/swift/object-server.conf /etc/swift/*.ring.gz" # configs Swift object2
+ssh uceda@203.0.113.245 "echo asdfghjkl | sudo -S tail -n 80 /var/log/syslog | grep -i swift" # logs Swift object1 desde syslog
+ssh uceda@203.0.113.246 "echo asdfghjkl | sudo -S tail -n 80 /var/log/syslog | grep -i swift" # logs Swift object2 desde syslog
+
+#_________________________________________________________________________
+# comandos rapidos para saber si algo esta caido
+#_________________________________________________________________________
+openstack token issue # si falla, revisar Keystone/admin-openrc/Apache
+openstack compute service list # si nova-compute esta down, revisar compute afectado
+openstack network agent list # si L3/DHCP/OVS esta down, revisar Neutron
+openstack volume service list # si storage1@ceph esta down, revisar Cinder/Ceph
+openstack server list --name wp- # si WordPress no carga, validar que wp-web-01 y wp-db-01 esten ACTIVE
+curl -I http://203.0.113.239:8080/ # si no responde 200, revisar DNAT, Nginx y estado de VMs
+iptables -t nat -S PREROUTING | grep 8080 # si no aparece, falta la regla DNAT de publicacion WordPress
+ssh uceda@203.0.113.244 "echo asdfghjkl | sudo -S ceph health" # si no es HEALTH_OK, revisar Ceph antes de Cinder

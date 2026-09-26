@@ -1,0 +1,19 @@
+ Name                 State      Autostart   Persistent
+---------------------------------------------------------
+ ansible-lab          active     yes         yes
+ ceph-admin-net       inactive   no          yes
+ ceph-data-net        inactive   no          yes
+ ceph-net             inactive   no          yes
+ default              inactive   no          yes
+ nat-internet         inactive   no          yes
+ net-192-168-3        inactive   no          yes
+ openstack-admin      active     yes         yes
+ openstack-provider   active     yes         yes
+ openstack-public     active     yes         yes
+ red-admin            inactive   no          yes
+ red-backend          inactive   no          yes
+ red-ceph-cluster     inactive   no          yes
+ red-db-redis         inactive   no          yes
+ red-principal        inactive   no          yes
+ red-storage          inactive   no          yes
+

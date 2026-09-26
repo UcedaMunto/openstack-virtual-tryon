@@ -1,0 +1,161 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontSize 11
+skinparam defaultFontName "Arial"
+skinparam nodeBorderColor #6A1B9A
+skinparam nodeBorderThickness 1.8
+skinparam rectangleBorderColor #6A1B9A
+skinparam rectangleBorderThickness 1.2
+skinparam cloudBorderColor #6A1B9A
+skinparam arrowColor #6A1B9A
+skinparam arrowThickness 1.5
+
+top to bottom direction
+
+title <b>Red de Instancias — VXLAN Overlay (br-vxlan + OVS br-tun)</b>\n<size:10>Bridge software: br-vxlan (10.0.0.x/32)  ·  OVS: br-tun  ·  Encapsulado: VXLAN UDP 4789\nEquivalente imagen: eth2 (VXLAN/Overlay) → br-vxlan → Red de Instancias</size>
+
+' ============================================================
+'  UNDERLAY NETWORK
+' ============================================================
+cloud "<b>openstack-admin</b>  [virbr10]\n10.0.0.0/24  (underlay físico)\nTransporta los túneles VXLAN encapsulados\nUDP dst 4789" as UNDERLAY #EDE7F6
+
+' ============================================================
+'  SELF-SERVICE NETWORK (virtual, solo OpenStack)
+' ============================================================
+cloud "<b>Red tenant self-service</b>\n10.10.10.0/24  (VXLAN VNI 640)\nRed privada de instancias\n— solo visible dentro de OpenStack —" as TENANT #E8EAF6
+
+' ============================================================
+'  CONTROLLER
+' ============================================================
+node "<b>controller</b>  (10.0.0.11)" as CTRL #FFF9C4 {
+  rectangle "<b>br-vxlan</b>  10.0.0.11/32 ★\nBridge software (sin NIC física)\nTunnel bridge para OSA\nTráfico real: vía br-mgmt → enp7s0" as CVXLAN #CE93D8
+  rectangle "<b>OVS br-tun</b>  local_ip: 10.0.0.11\nVXLAN endpoint del controller\npatch-int ↔ patch-tun" as CTUN #BA68C8
+  rectangle "<b>OVS br-int</b>\ntap DHCP · qr/qg ports\npatch-tun (← br-tun)" as CINT #CE93D8
+  rectangle "<b>qdhcp namespace</b>\nDHCP server 10.10.10.0/24\nasigna IPs 10.10.10.X a instancias" as DHCP #FFCC80
+}
+
+' ============================================================
+'  COMPUTE1
+' ============================================================
+node "<b>compute1</b>  (10.0.0.10)" as C1 #F3E5F5 {
+  rectangle "<b>br-vxlan</b>  10.0.0.10/32 ★\nBridge software (sin NIC física)" as C1VX #CE93D8
+  rectangle "<b>OVS br-tun</b>  local_ip: 10.0.0.10\nvxlan-0a00000b → ctrl (10.0.0.11)\npatch-int ↔ patch-tun" as C1TUN #BA68C8
+  rectangle "<b>OVS br-int</b>\ntap-XXXX instancias\npatch-tun" as C1INT #CE93D8
+  node "<b>VM test-vm1</b>\n10.10.10.X\nFloating: 192.168.122.115" as VM1 #FFFDE7
+}
+
+' ============================================================
+'  COMPUTE2
+' ============================================================
+node "<b>compute2</b>  (10.0.0.12)" as C2 #F3E5F5 {
+  rectangle "<b>br-vxlan</b>  10.0.0.12/32 ★" as C2VX #CE93D8
+  rectangle "<b>OVS br-tun</b>  local_ip: 10.0.0.12\n(túneles creados on-demand)" as C2TUN #BA68C8
+  rectangle "<b>OVS br-int</b>" as C2INT #CE93D8
+}
+
+' ============================================================
+'  COMPUTE3
+' ============================================================
+node "<b>compute3</b>  (10.0.0.13)" as C3 #F3E5F5 {
+  rectangle "<b>br-vxlan</b>  10.0.0.13/32 ★" as C3VX #CE93D8
+  rectangle "<b>OVS br-tun</b>  local_ip: 10.0.0.13" as C3TUN #BA68C8
+  rectangle "<b>OVS br-int</b>" as C3INT #CE93D8
+}
+
+' ============================================================
+'  COMPUTE4
+' ============================================================
+node "<b>compute4</b>  (10.0.0.14)" as C4 #F3E5F5 {
+  rectangle "<b>br-vxlan</b>  10.0.0.14/32 ★" as C4VX #CE93D8
+  rectangle "<b>OVS br-tun</b>  local_ip: 10.0.0.14" as C4TUN #BA68C8
+  rectangle "<b>OVS br-int</b>" as C4INT #CE93D8
+}
+
+' ============================================================
+'  FLUJO INTERNO DE DATOS EN COMPUTES
+' ============================================================
+VM1      -up->  C1INT  : "tap (virtio NIC)"
+C1INT    <-->   C1TUN  : "patch-int / patch-tun"
+
+DHCP     <-->   CINT   : "dhcp tap"
+CINT     <-->   CTUN   : "patch-int / patch-tun"
+
+' ============================================================
+'  TÚNELES VXLAN (encapsulados en underlay 10.0.0.0/24)
+' ============================================================
+CTUN  <..>  C1TUN : "<color:#4A148C><b>VXLAN VNI 640</b>\nUDP 4789\n10.0.0.11 ↔ 10.0.0.10</color>"
+CTUN  <..>  C2TUN : "<color:#4A148C>VXLAN\n10.0.0.11 ↔ 10.0.0.12\n(on-demand)</color>"
+CTUN  <..>  C3TUN : "<color:#4A148C>VXLAN\n10.0.0.11 ↔ 10.0.0.13</color>"
+CTUN  <..>  C4TUN : "<color:#4A148C>VXLAN\n10.0.0.11 ↔ 10.0.0.14</color>"
+
+' ============================================================
+'  UNDERLAY (los túneles viajan por virbr10)
+' ============================================================
+CTUN  -up->  UNDERLAY : "<size:9>local_ip 10.0.0.11\nvía br-mgmt/enp7s0</size>"
+C1TUN -up->  UNDERLAY : "<size:9>local_ip 10.0.0.10</size>"
+C2TUN -up->  UNDERLAY : "<size:9>10.0.0.12</size>"
+C3TUN -up->  UNDERLAY : "<size:9>10.0.0.13</size>"
+C4TUN -up->  UNDERLAY : "<size:9>10.0.0.14</size>"
+
+' ============================================================
+'  RED TENANT (lógica, transportada en VXLAN)
+' ============================================================
+CINT  -right->  TENANT : "<size:9>10.10.10.0/24\nVXLAN encapsulado</size>"
+C1INT -right->  TENANT
+C2INT -right->  TENANT
+C3INT -right->  TENANT
+C4INT -right->  TENANT
+
+note bottom of CTRL
+  <b>★ br-vxlan con /32 (no /24):</b>
+  — Si se asignara /24, el kernel crearía dos rutas para 10.0.0.0/24
+    (una por br-vxlan, otra por br-mgmt), causando que el tráfico
+    mgmt se enrute por br-vxlan (sin NIC) y se pierda.
+  — Con /32 solo existe una ruta de host; br-mgmt mantiene
+    la ruta 10.0.0.0/24 exclusivamente.
+  — En un despliegue real con 3 NICs: br-vxlan ← eth2 (dedicada).
+end note
+
+note right of C1
+  Los túneles VXLAN (vxlan-0a00000b, etc.)
+  son creados automáticamente por
+  neutron-openvswitch-agent cuando
+  hay VMs activas en ese compute.
+  Computes sin VMs pueden no tener
+  entradas en OVS br-tun hasta
+  que se programe una instancia.
+end note
+
+' layout vertical -- apila nodos en columna
+CTRL -[hidden]down- C1
+C1   -[hidden]down- C2
+C2   -[hidden]down- C3
+C3   -[hidden]down- C4
+
+note as CMDS #E8F5E9
+  <b>Comandos de verificacion -- Red VXLAN Overlay (br-vxlan + OVS br-tun)</b>
+
+  En cada nodo (SSH a 203.0.113.x):
+    ovs-vsctl show                              -- buscar vxlan-XXXXXXXX en br-tun
+    ovs-vsctl list-ports br-tun                 -- tuneles VXLAN activos
+    ip addr show br-vxlan                       -- confirmar /32 y estado UP/DOWN
+    ip route | grep 10.0.0                      -- UNA sola ruta /24 via br-mgmt
+
+  Verificar configuracion local_ip del agente neutron:
+    grep local_ip /etc/neutron/plugins/ml2/openvswitch_agent.ini
+    -- debe ser la IP de br-vxlan: 10.0.0.X
+
+  Ver tuneles y VNIs activos:
+    ovs-ofctl dump-flows br-tun | grep tun_id   -- VNIs en uso por red tenant
+    ovs-appctl fdb/show br-tun                  -- tabla FDB del bridge de tuneles
+    ovs-vsctl get bridge br-tun fail_mode       -- debe ser: secure
+
+  En el controller (instancias y redes):
+    openstack server list                       -- instancias y sus IPs tenant
+    openstack network list                      -- redes con VNIs (segmentation_id)
+    openstack network show <red> | grep vni     -- VNI especifico de una red
+    openstack port list --server <vm>           -- puertos de una instancia
+end note
+
+@enduml

@@ -1,0 +1,17 @@
+---
+# playbooks/computes.yml
+# ─────────────────────────────────────────────────────────────────────────────
+# Fase 3: Configurar servicios OpenStack en los computes.
+# Prerequisito: Los bridges (bridges.yml) deben estar configurados.
+# ─────────────────────────────────────────────────────────────────────────────
+
+- name: Configurar servicios OpenStack en los computes
+  hosts: compute
+  become: true
+  roles:
+    - role: nova-compute
+      tags: [compute, nova]
+    - role: neutron-ovs-agent
+      tags: [compute, neutron]
+    - role: ovs-bridges
+      tags: [compute, ovs]

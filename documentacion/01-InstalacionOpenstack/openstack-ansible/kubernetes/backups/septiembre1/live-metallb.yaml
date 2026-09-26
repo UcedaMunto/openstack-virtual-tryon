@@ -1,0 +1,42 @@
+apiVersion: v1
+items:
+- apiVersion: metallb.io/v1beta1
+  kind: IPAddressPool
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"metallb.io/v1beta1","kind":"IPAddressPool","metadata":{"annotations":{},"name":"k8s-lab-pool","namespace":"metallb-system"},"spec":{"addresses":["192.168.90.50-192.168.90.50"]}}
+    creationTimestamp: "2026-08-26T02:35:47Z"
+    generation: 1
+    name: k8s-lab-pool
+    namespace: metallb-system
+    resourceVersion: "506019"
+    uid: 38812256-eedf-4647-87e0-dea4d4626720
+  spec:
+    addresses:
+    - 192.168.90.50-192.168.90.50
+    autoAssign: true
+    avoidBuggyIPs: false
+  status:
+    assignedIPv4: 1
+    assignedIPv6: 0
+    availableIPv4: 0
+    availableIPv6: 0
+- apiVersion: metallb.io/v1beta1
+  kind: L2Advertisement
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"metallb.io/v1beta1","kind":"L2Advertisement","metadata":{"annotations":{},"name":"k8s-lab-advertisement","namespace":"metallb-system"},"spec":{"ipAddressPools":["k8s-lab-pool"]}}
+    creationTimestamp: "2026-08-26T02:35:47Z"
+    generation: 1
+    name: k8s-lab-advertisement
+    namespace: metallb-system
+    resourceVersion: "72032"
+    uid: 590bbc46-2e6a-4349-9a7e-fa3bb0de3830
+  spec:
+    ipAddressPools:
+    - k8s-lab-pool
+kind: List
+metadata:
+  resourceVersion: ""

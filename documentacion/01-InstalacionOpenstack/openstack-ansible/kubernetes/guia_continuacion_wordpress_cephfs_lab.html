@@ -1,0 +1,2554 @@
+<!DOCTYPE html><html><head>
+      <title>guia_continuacion_wordpress_cephfs_lab</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      
+      <link rel="stylesheet" href="file:////home/uceda/.vscode/extensions/shd101wyy.markdown-preview-enhanced-0.8.30/crossnote/dependencies/katex/katex.min.css">
+      
+      
+      
+      
+      
+      
+      
+      <style>
+      code[class*=language-],pre[class*=language-]{color:#333;background:0 0;font-family:Consolas,"Liberation Mono",Menlo,Courier,monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.4;-moz-tab-size:8;-o-tab-size:8;tab-size:8;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:.8em;overflow:auto;border-radius:3px;background:#f5f5f5}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal;background:#f5f5f5}.token.blockquote,.token.comment{color:#969896}.token.cdata{color:#183691}.token.doctype,.token.macro.property,.token.punctuation,.token.variable{color:#333}.token.builtin,.token.important,.token.keyword,.token.operator,.token.rule{color:#a71d5d}.token.attr-value,.token.regex,.token.string,.token.url{color:#183691}.token.atrule,.token.boolean,.token.code,.token.command,.token.constant,.token.entity,.token.number,.token.property,.token.symbol{color:#0086b3}.token.prolog,.token.selector,.token.tag{color:#63a35c}.token.attr-name,.token.class,.token.class-name,.token.function,.token.id,.token.namespace,.token.pseudo-class,.token.pseudo-element,.token.url-reference .token.variable{color:#795da3}.token.entity{cursor:help}.token.title,.token.title .token.punctuation{font-weight:700;color:#1d3e81}.token.list{color:#ed6a43}.token.inserted{background-color:#eaffea;color:#55a532}.token.deleted{background-color:#ffecec;color:#bd2c00}.token.bold{font-weight:700}.token.italic{font-style:italic}.language-json .token.property{color:#183691}.language-markup .token.tag .token.punctuation{color:#333}.language-css .token.function,code.language-css{color:#0086b3}.language-yaml .token.atrule{color:#63a35c}code.language-yaml{color:#183691}.language-ruby .token.function{color:#333}.language-markdown .token.url{color:#795da3}.language-makefile .token.symbol{color:#795da3}.language-makefile .token.variable{color:#183691}.language-makefile .token.builtin{color:#0086b3}.language-bash .token.keyword{color:#0086b3}pre[data-line]{position:relative;padding:1em 0 1em 3em}pre[data-line] .line-highlight-wrapper{position:absolute;top:0;left:0;background-color:transparent;display:block;width:100%}pre[data-line] .line-highlight{position:absolute;left:0;right:0;padding:inherit 0;margin-top:1em;background:hsla(24,20%,50%,.08);background:linear-gradient(to right,hsla(24,20%,50%,.1) 70%,hsla(24,20%,50%,0));pointer-events:none;line-height:inherit;white-space:pre}pre[data-line] .line-highlight:before,pre[data-line] .line-highlight[data-end]:after{content:attr(data-start);position:absolute;top:.4em;left:.6em;min-width:1em;padding:0 .5em;background-color:hsla(24,20%,50%,.4);color:#f4f1ef;font:bold 65%/1.5 sans-serif;text-align:center;vertical-align:.3em;border-radius:999px;text-shadow:none;box-shadow:0 1px #fff}pre[data-line] .line-highlight[data-end]:after{content:attr(data-end);top:auto;bottom:.4em}html body{font-family:'Helvetica Neue',Helvetica,'Segoe UI',Arial,freesans,sans-serif;font-size:16px;line-height:1.6;color:#333;background-color:#fff;overflow:initial;box-sizing:border-box;word-wrap:break-word}html body>:first-child{margin-top:0}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{line-height:1.2;margin-top:1em;margin-bottom:16px;color:#000}html body h1{font-size:2.25em;font-weight:300;padding-bottom:.3em}html body h2{font-size:1.75em;font-weight:400;padding-bottom:.3em}html body h3{font-size:1.5em;font-weight:500}html body h4{font-size:1.25em;font-weight:600}html body h5{font-size:1.1em;font-weight:600}html body h6{font-size:1em;font-weight:600}html body h1,html body h2,html body h3,html body h4,html body h5{font-weight:600}html body h5{font-size:1em}html body h6{color:#5c5c5c}html body strong{color:#000}html body del{color:#5c5c5c}html body a:not([href]){color:inherit;text-decoration:none}html body a{color:#08c;text-decoration:none}html body a:hover{color:#00a3f5;text-decoration:none}html body img{max-width:100%}html body>p{margin-top:0;margin-bottom:16px;word-wrap:break-word}html body>ol,html body>ul{margin-bottom:16px}html body ol,html body ul{padding-left:2em}html body ol.no-list,html body ul.no-list{padding:0;list-style-type:none}html body ol ol,html body ol ul,html body ul ol,html body ul ul{margin-top:0;margin-bottom:0}html body li{margin-bottom:0}html body li.task-list-item{list-style:none}html body li>p{margin-top:0;margin-bottom:0}html body .task-list-item-checkbox{margin:0 .2em .25em -1.8em;vertical-align:middle}html body .task-list-item-checkbox:hover{cursor:pointer}html body blockquote{margin:16px 0;font-size:inherit;padding:0 15px;color:#5c5c5c;background-color:#f0f0f0;border-left:4px solid #d6d6d6}html body blockquote>:first-child{margin-top:0}html body blockquote>:last-child{margin-bottom:0}html body hr{height:4px;margin:32px 0;background-color:#d6d6d6;border:0 none}html body table{margin:10px 0 15px 0;border-collapse:collapse;border-spacing:0;display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}html body table th{font-weight:700;color:#000}html body table td,html body table th{border:1px solid #d6d6d6;padding:6px 13px}html body dl{padding:0}html body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:700}html body dl dd{padding:0 16px;margin-bottom:16px}html body code{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;font-size:.85em;color:#000;background-color:#f0f0f0;border-radius:3px;padding:.2em 0}html body code::after,html body code::before{letter-spacing:-.2em;content:'\00a0'}html body pre>code{padding:0;margin:0;word-break:normal;white-space:pre;background:0 0;border:0}html body .highlight{margin-bottom:16px}html body .highlight pre,html body pre{padding:1em;overflow:auto;line-height:1.45;border:#d6d6d6;border-radius:3px}html body .highlight pre{margin-bottom:0;word-break:normal}html body pre code,html body pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}html body pre code:after,html body pre code:before,html body pre tt:after,html body pre tt:before{content:normal}html body blockquote,html body dl,html body ol,html body p,html body pre,html body ul{margin-top:0;margin-bottom:16px}html body kbd{color:#000;border:1px solid #d6d6d6;border-bottom:2px solid #c7c7c7;padding:2px 4px;background-color:#f0f0f0;border-radius:3px}@media print{html body{background-color:#fff}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{color:#000;page-break-after:avoid}html body blockquote{color:#5c5c5c}html body pre{page-break-inside:avoid}html body table{display:table}html body img{display:block;max-width:100%;max-height:100%}html body code,html body pre{word-wrap:break-word;white-space:pre}}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview ul{list-style:disc}.markdown-preview ul ul{list-style:circle}.markdown-preview ul ul ul{list-style:square}.markdown-preview ol{list-style:decimal}.markdown-preview ol ol,.markdown-preview ul ol{list-style-type:lower-roman}.markdown-preview ol ol ol,.markdown-preview ol ul ol,.markdown-preview ul ol ol,.markdown-preview ul ul ol{list-style-type:lower-alpha}.markdown-preview .newpage,.markdown-preview .pagebreak{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center!important}.markdown-preview:not([data-for=preview]) .code-chunk .code-chunk-btn-group{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .status{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .output-div{margin-bottom:16px}.markdown-preview .md-toc{padding:0}.markdown-preview .md-toc .md-toc-details{margin:0;padding:0;border:none}.markdown-preview .md-toc summary.md-toc-link-wrapper{cursor:pointer;list-style-position:outside}.markdown-preview .md-toc summary.md-toc-link-wrapper::marker{font-size:.85em}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link div,.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}.markdown-preview .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='0']{margin-left:12px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='1']{margin-left:28px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='2']{margin-left:44px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='3']{margin-left:60px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='4']{margin-left:76px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='5']{margin-left:80px}.markdown-preview a.tag,.markdown-preview a.tag:active,.markdown-preview a.tag:link,.markdown-preview a.tag:visited,.markdown-preview span.tag:not(.token){display:inline-block;background-color:var(--vscode-badge-background,rgba(127,127,127,.18));color:var(--vscode-badge-foreground,currentColor);border-radius:2em;font-size:.85em;font-weight:500;padding:.05em .55em;line-height:1.5;white-space:nowrap;text-decoration:none;text-shadow:none;box-shadow:none;transition:background-color .12s ease,opacity .12s ease}.markdown-preview a.tag{cursor:pointer}.markdown-preview a.tag:focus,.markdown-preview a.tag:hover{background-color:var(--vscode-badge-background,rgba(127,127,127,.32));color:var(--vscode-badge-foreground,currentColor);opacity:.85;text-decoration:none;outline:0}.markdown-preview .wikilink-embed-content{border-left:3px solid var(--vscode-textBlockQuote-border,rgba(128,128,128,.3));background:var(--vscode-textBlockQuote-background,rgba(128,128,128,.05));margin:.5em 0;padding:.5em .75em;border-radius:0 3px 3px 0}.markdown-preview .wikilink-embed-content.wikilink-embed-error{border-left-color:var(--vscode-errorForeground,#cf222e);color:var(--vscode-errorForeground,#cf222e);font-style:italic;opacity:.8}.markdown-preview .wikilink-embed-content h1:first-child,.markdown-preview .wikilink-embed-content h2:first-child,.markdown-preview .wikilink-embed-content h3:first-child,.markdown-preview .wikilink-embed-content h4:first-child,.markdown-preview .wikilink-embed-content h5:first-child,.markdown-preview .wikilink-embed-content h6:first-child{margin-top:.25em}.markdown-preview .wikilink-embed-content .wikilink-embed-content{margin:.25em 0;padding:.25em .5em}.markdown-preview .block-id{display:none}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:var(--vscode-scrollbarSlider-background,rgba(150,150,150,.66));border:4px solid var(--vscode-scrollbarSlider-background,rgba(150,150,150,.66));background-clip:content-box}.scrollbar-style::-webkit-scrollbar-thumb:hover{background-color:var(--vscode-scrollbarSlider-hoverBackground,rgba(120,120,120,.66))}html body[for=html-export]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0;min-height:100vh}@media screen and (min-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px + 2em)}}@media screen and (max-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{font-size:14px!important;padding:1em}}@media print{html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:var(--vscode-scrollbarSlider-background,rgba(150,150,150,.66));border:4px solid var(--vscode-scrollbarSlider-background,rgba(150,150,150,.66));background-clip:content-box}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb:hover{background-color:var(--vscode-scrollbarSlider-hoverBackground,rgba(120,120,120,.66))}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc{padding:0 16px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-details{margin:0;padding:0;border:none}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link div,html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='0']{padding-left:0}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='1']{padding-left:16px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='2']{padding-left:32px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='3']{padding-left:48px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='4']{padding-left:64px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='5']{padding-left:80px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% - 300px);padding:2em calc(50% - 457px - 300px / 2);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}
+/* Please visit the URL below for more information: */
+/*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
+
+      </style>
+      <!-- The content below will be included at the end of the <head> element. -->
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function () {
+    // your code here
+  });
+</script>
+    </head>
+    <body for="html-export">
+      <div class="crossnote markdown-preview  ">
+      
+<h1 id="guia-2-continuacion-del-laboratorio-kubernetes---wordpress-con-cephfs-y-acceso-http">Guia 2: Continuacion del laboratorio Kubernetes - WordPress con CephFS y acceso HTTP </h1>
+<blockquote>
+<p><strong>Punto de partida:</strong> esta guia continua despues de la guia principal, en el punto donde el laboratorio quedo detenido: <strong>25.2 Preparar almacenamiento temporal</strong>.<br>
+<strong>No reemplaza</strong> la guia principal. Esta guia es una continuacion operativa para cerrar los requerimientos restantes del PDF usando el entorno actual.</p>
+</blockquote>
+<h2 id="0-objetivo-de-esta-segunda-guia">0. Objetivo de esta segunda guia </h2>
+<p>Completar la fase final del laboratorio con una ruta simple y adecuada para practica academica:</p>
+<ol>
+<li>Validar que el cluster Kubernetes base sigue sano.</li>
+<li>Instalar Ceph desde cero con Rook, directamente sobre los nodos del clúster Kubernetes (sin crear una VM adicional).</li>
+<li>Crear el CephFilesystem y la StorageClass para que Kubernetes pueda pedir volúmenes CephFS.</li>
+<li>Validar almacenamiento persistente con un PVC y un Pod de prueba.</li>
+<li>Crear almacenamiento persistente para WordPress usando <code>StorageClass cephfs-storage</code>.</li>
+<li>Desplegar WordPress, MariaDB y Redis en <strong>un mismo Pod</strong>, como pide el PDF.</li>
+<li>Exponer WordPress desde el anfitrion usando una IP diferente a la del master.</li>
+<li>Evitar SSL/HTTPS, certificados, Ingress y recursos extra innecesarios.</li>
+</ol>
+<p>La exposicion final recomendada para este laboratorio sera:</p>
+<pre data-role="codeBlock" data-info="text" class="language-text text"><code>http://192.168.90.50/
+</code></pre><p>La IP <code>192.168.90.50</code> sera entregada por MetalLB como IP flotante de laboratorio.</p>
+<h2 id="1-fuentes-revisadas-y-criterios-usados">1. Fuentes revisadas y criterios usados </h2>
+<p>Fuentes principales:</p>
+<table>
+<thead>
+<tr>
+<th>Tema</th>
+<th>Fuente</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PersistentVolumes y PersistentVolumeClaims</td>
+<td><a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/">https://kubernetes.io/docs/concepts/storage/persistent-volumes/</a></td>
+</tr>
+<tr>
+<td>Stateful apps con volumen persistente</td>
+<td><a href="https://kubernetes.io/docs/tasks/run-application/run-single-instance-stateful-application/">https://kubernetes.io/docs/tasks/run-application/run-single-instance-stateful-application/</a></td>
+</tr>
+<tr>
+<td>Services <code>ClusterIP</code>, <code>NodePort</code>, <code>LoadBalancer</code></td>
+<td><a href="https://kubernetes.io/docs/concepts/services-networking/service/">https://kubernetes.io/docs/concepts/services-networking/service/</a></td>
+</tr>
+<tr>
+<td>Secrets en Kubernetes</td>
+<td><a href="https://kubernetes.io/docs/concepts/configuration/secret/">https://kubernetes.io/docs/concepts/configuration/secret/</a></td>
+</tr>
+<tr>
+<td>MetalLB IPAddressPool y L2Advertisement</td>
+<td><a href="https://metallb.io/configuration/">https://metallb.io/configuration/</a></td>
+</tr>
+<tr>
+<td>Rook Ceph - Quickstart</td>
+<td><a href="https://rook.io/docs/rook/latest-release/Getting-Started/quickstart/">https://rook.io/docs/rook/latest-release/Getting-Started/quickstart/</a></td>
+</tr>
+<tr>
+<td>Rook Ceph - Example configurations</td>
+<td><a href="https://rook.io/docs/rook/latest-release/Getting-Started/example-configurations/">https://rook.io/docs/rook/latest-release/Getting-Started/example-configurations/</a></td>
+</tr>
+<tr>
+<td>Rook Ceph - CephFilesystem CRD</td>
+<td><a href="https://rook.io/docs/rook/latest-release/CRDs/Shared-Filesystem/ceph-filesystem-crd/">https://rook.io/docs/rook/latest-release/CRDs/Shared-Filesystem/ceph-filesystem-crd/</a></td>
+</tr>
+<tr>
+<td>Guia PDF del laboratorio</td>
+<td>Requerimientos de la guia UES, revision 2026</td>
+</tr>
+</tbody>
+</table>
+<p>Criterios de diseno para esta practica:</p>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Motivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Usar CephFS antes de WordPress</td>
+<td>Evita migrar datos despues y cumple el requisito de disco persistente.</td>
+</tr>
+<tr>
+<td>Instalar Ceph con Rook dentro del mismo clúster Kubernetes</td>
+<td>Evita crear y mantener una VM Ceph aparte; sigue la documentación oficial de Kubernetes/Rook y reutiliza los 4 nodos que ya existen.</td>
+</tr>
+<tr>
+<td>Usar PVCs dinamicos</td>
+<td>Kubernetes recomienda que las aplicaciones consuman almacenamiento mediante PVC.</td>
+</tr>
+<tr>
+<td>Usar WordPress, MariaDB y Redis en un solo Pod</td>
+<td>Cumple literalmente el requerimiento del PDF.</td>
+</tr>
+<tr>
+<td>Usar <code>replicas: 1</code> y estrategia <code>Recreate</code></td>
+<td>MariaDB y Redis son stateful; no queremos dos Pods escribiendo al mismo tiempo durante updates.</td>
+</tr>
+<tr>
+<td>Usar MetalLB <code>LoadBalancer</code></td>
+<td>Permite IP flotante diferente al master sin Ingress ni TLS.</td>
+</tr>
+<tr>
+<td>Usar HTTP puerto 80</td>
+<td>El usuario indico que no se requiere SSL/HTTPS para esta practica.</td>
+</tr>
+<tr>
+<td>Mantener recursos bajos</td>
+<td>Es laboratorio local con VMs; no se requieren replicas ni alta disponibilidad.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Nota sobre la base de datos:</strong> el PDF pide WordPress con una base de<br>
+datos y Redis. En esta guia se usa <strong>MariaDB</strong>, que es compatible con<br>
+WordPress de forma nativa. <strong>PostgreSQL no se usa</strong> en este flujo porque<br>
+WordPress no lo soporta oficialmente sin capas/plugins adicionales, lo<br>
+cual agregaria complejidad innecesaria para la practica.</p>
+</blockquote>
+<h2 id="2-estado-actual-esperado-del-entorno">2. Estado actual esperado del entorno </h2>
+<p>Segun la validacion actual del laboratorio:</p>
+<table>
+<thead>
+<tr>
+<th>Componente</th>
+<th>Estado esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>k8-master</code></td>
+<td><code>Ready</code></td>
+</tr>
+<tr>
+<td><code>k8-worker1</code></td>
+<td><code>Ready</code></td>
+</tr>
+<tr>
+<td><code>k8-worker2</code></td>
+<td><code>Ready</code></td>
+</tr>
+<tr>
+<td><code>k8-worker3</code></td>
+<td><code>Ready</code></td>
+</tr>
+<tr>
+<td>Kubernetes</td>
+<td><code>v1.36.4</code></td>
+</tr>
+<tr>
+<td>CNI</td>
+<td>Calico <code>v3.32.1</code>, Pods <code>Running</code></td>
+</tr>
+<tr>
+<td>Dashboard</td>
+<td>Instalado por Helm, expuesto por NodePort <code>32000</code></td>
+</tr>
+<tr>
+<td>NGINX prueba</td>
+<td>Funcionando por NodePort <code>30885</code></td>
+</tr>
+<tr>
+<td>WordPress</td>
+<td>Aun no desplegado en esta ejecucion actual</td>
+</tr>
+<tr>
+<td>Ceph / CephFS</td>
+<td>No instalado todavia; se despliega desde cero con Rook en esta guia (sin VM adicional)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>No existe ningun cluster Ceph previo en esta ejecucion: se instala Ceph con Rook directamente sobre los 3 nodos worker de este mismo cluster Kubernetes. Por eso esta guia <strong>no asume</strong> nada de Ceph: lo instala y luego lo valida antes de usarlo con WordPress.</p>
+</blockquote>
+<h2 id="3-tabla-de-ips-credenciales-y-servicios-para-esta-fase">3. Tabla de IPs, credenciales y servicios para esta fase </h2>
+<h3 id="31-ips">3.1. IPs </h3>
+<table>
+<thead>
+<tr>
+<th>Equipo / servicio</th>
+<th style="text-align:right">IP</th>
+<th>Uso</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>anfitrion</code></td>
+<td style="text-align:right"><code>192.168.90.254</code></td>
+<td>Host fisico con navegador y KVM/libvirt</td>
+</tr>
+<tr>
+<td><code>k8-master</code></td>
+<td style="text-align:right"><code>192.168.90.1</code></td>
+<td>Control Plane y ejecucion de <code>kubectl</code></td>
+</tr>
+<tr>
+<td><code>k8-worker1</code></td>
+<td style="text-align:right"><code>192.168.90.2</code></td>
+<td>Worker</td>
+</tr>
+<tr>
+<td><code>k8-worker2</code></td>
+<td style="text-align:right"><code>192.168.90.3</code></td>
+<td>Worker</td>
+</tr>
+<tr>
+<td><code>k8-worker3</code></td>
+<td style="text-align:right"><code>192.168.90.4</code></td>
+<td>Worker (aporta un OSD Ceph via Rook)</td>
+</tr>
+<tr>
+<td><code>wordpress-lb</code></td>
+<td style="text-align:right"><code>192.168.90.50</code></td>
+<td>IP flotante MetalLB para WordPress</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-credenciales-de-laboratorio">3.2. Credenciales de laboratorio </h3>
+<table>
+<thead>
+<tr>
+<th>Recurso</th>
+<th>Usuario</th>
+<th>Credencial / password</th>
+<th>Uso</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SSH VMs</td>
+<td><code>uceda</code></td>
+<td>Llave <code>~/.ssh/id_ed25519</code></td>
+<td>Acceso SSH a <code>k8-master</code> y workers</td>
+</tr>
+<tr>
+<td>Kubernetes</td>
+<td><code>uceda</code></td>
+<td><code>/home/uceda/.kube/config</code></td>
+<td>Administracion con <code>kubectl</code> en <code>k8-master</code></td>
+</tr>
+<tr>
+<td>MariaDB root</td>
+<td><code>root</code></td>
+<td><code>RootK8sLab2026!</code></td>
+<td>Administracion local de MariaDB</td>
+</tr>
+<tr>
+<td>MariaDB WordPress</td>
+<td><code>wordpress</code></td>
+<td><code>MariaDbK8sLab2026!</code></td>
+<td>Conexion de WordPress a la BD</td>
+</tr>
+<tr>
+<td>WordPress admin</td>
+<td><code>uceda</code> (recomendado <code>admin</code>, ver nota)</td>
+<td><code>WordPressK8sLab2026!</code></td>
+<td>Usar en el asistente web inicial de WordPress</td>
+</tr>
+<tr>
+<td>Dashboard</td>
+<td><code>admin-user</code></td>
+<td>Token temporal</td>
+<td>Se genera con <code>kubectl -n kubernetes-dashboard create token admin-user</code></td>
+</tr>
+<tr>
+<td>Ceph Dashboard</td>
+<td><code>admin</code></td>
+<td><code>13tAxYZaHbq0ujaxTkmU</code></td>
+<td><code>http://192.168.90.1:32174/</code> (seccion 18.1)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Nota (2026-08-26):</strong> el password autogenerado por Rook traia caracteres especiales (backtick) que se perdian al copiar desde el chat. Se reemplazo por uno solo con letras y numeros usando <code>ceph dashboard ac-user-set-password admin -i &lt;archivo&gt;</code> desde el toolbox, para evitar ese problema. Ver seccion 18.2.</p>
+</blockquote>
+<blockquote>
+<p><strong>Nota (2026-08-26):</strong> el Secret <code>wordpress-admin-password</code> solo guarda el password sugerido; el <strong>usuario</strong> real lo define quien completa el asistente web. En esta ejecucion del laboratorio se instalo con usuario <code>uceda</code> en vez de <code>admin</code>. Verificar siempre el usuario real con <code>kubectl -n wordpress exec deploy/wordpress -c mariadb -- mariadb -uroot -p'RootK8sLab2026!' -e "SELECT user_login FROM wp_users;" wordpress</code>.</p>
+</blockquote>
+<blockquote>
+<p>Estas credenciales son de laboratorio. No usarlas en produccion ni subirlas a repositorios publicos. Las credenciales CSI de Ceph (<code>rook-csi-cephfs-provisioner</code>/<code>rook-csi-cephfs-node</code>) las genera y gestiona Rook automaticamente en el namespace <code>rook-ceph</code>; no hay que crearlas a mano.</p>
+</blockquote>
+<h3 id="33-servicios-finales-esperados">3.3. Servicios finales esperados </h3>
+<table>
+<thead>
+<tr>
+<th>Servicio</th>
+<th>Namespace</th>
+<th>Tipo</th>
+<th style="text-align:right">Puerto</th>
+<th>Acceso desde anfitrion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dashboard</td>
+<td><code>kubernetes-dashboard</code></td>
+<td><code>NodePort</code></td>
+<td style="text-align:right"><code>32000</code></td>
+<td><code>https://192.168.90.1:32000</code></td>
+</tr>
+<tr>
+<td>NGINX prueba</td>
+<td><code>default</code></td>
+<td><code>NodePort</code></td>
+<td style="text-align:right"><code>30885</code> en esta ejecucion</td>
+<td><code>http://192.168.90.1:30885</code> o cualquier nodo</td>
+</tr>
+<tr>
+<td>Ceph (Rook)</td>
+<td><code>rook-ceph</code></td>
+<td>CSI interno + <code>NodePort</code> (seccion 18.1)</td>
+<td style="text-align:right"><code>32174</code></td>
+<td><code>http://192.168.90.1:32174/</code> (dashboard web); tambien con toolbox <code>ceph -s</code></td>
+</tr>
+<tr>
+<td>WordPress</td>
+<td><code>wordpress</code></td>
+<td><code>LoadBalancer</code></td>
+<td style="text-align:right"><code>80</code></td>
+<td><code>http://192.168.90.50/</code></td>
+</tr>
+<tr>
+<td>MariaDB</td>
+<td>Dentro del Pod WordPress</td>
+<td>Interno</td>
+<td style="text-align:right"><code>3306</code></td>
+<td><code>127.0.0.1:3306</code> dentro del Pod</td>
+</tr>
+<tr>
+<td>Redis</td>
+<td>Dentro del Pod WordPress</td>
+<td>Interno</td>
+<td style="text-align:right"><code>6379</code></td>
+<td><code>127.0.0.1:6379</code> dentro del Pod</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-plan-de-ejecucion">4. Plan de ejecucion </h2>
+<table>
+<thead>
+<tr>
+<th>Fase</th>
+<th>Resultado esperado</th>
+<th>Se continua si...</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4.1 Validar cluster</td>
+<td>Nodos y Pods base sanos</td>
+<td>Todos los nodos estan <code>Ready</code></td>
+</tr>
+<tr>
+<td>4.2 Instalar Ceph con Rook</td>
+<td>Operador Rook, mons/mgr/osd <code>Running</code>, <code>ceph -s</code> sano</td>
+<td><code>kubectl -n rook-ceph get cephcluster</code> en <code>Ready</code></td>
+</tr>
+<tr>
+<td>4.3 Crear CephFilesystem y StorageClass</td>
+<td>MDS activo y <code>cephfs-storage</code> creada</td>
+<td><code>cephfs-storage</code> existe</td>
+</tr>
+<tr>
+<td>4.4 Probar PVC CephFS</td>
+<td><code>cephfs-test</code> queda <code>Bound</code></td>
+<td>Un Pod escribe y lee un archivo</td>
+</tr>
+<tr>
+<td>4.5 Crear WordPress</td>
+<td>Pod <code>wordpress</code> <code>3/3 Running</code></td>
+<td>WordPress, MariaDB y Redis estan listos</td>
+</tr>
+<tr>
+<td>4.6 Exponer WordPress</td>
+<td>MetalLB asigna <code>192.168.90.50</code></td>
+<td><code>curl http://192.168.90.50/</code> responde</td>
+</tr>
+</tbody>
+</table>
+<p>Si una fase falla, no continuar a la siguiente.</p>
+<hr>
+<h1 id="5-validacion-inicial-del-cluster-kubernetes">5. Validacion inicial del cluster Kubernetes </h1>
+<p>Ejecutar desde <code>k8-master</code>:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token keyword keyword-if">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token operator">!</span> <span class="token parameter variable">-s</span> <span class="token string">"/home/uceda/.kube/config"</span> <span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword keyword-then">then</span>
+  <span class="token builtin class-name">echo</span> <span class="token string">"ERROR: falta /home/uceda/.kube/config"</span>
+  <span class="token builtin class-name">echo</span> <span class="token string">"Regresa a la guia principal y completa la configuracion de kubectl."</span>
+  <span class="token builtin class-name">exit</span> <span class="token number">1</span>
+<span class="token keyword keyword-fi">fi</span>
+
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+kubectl get nodes <span class="token parameter variable">-o</span> wide
+kubectl get pods <span class="token parameter variable">-A</span>
+kubectl get svc <span class="token parameter variable">-A</span>
+</code></pre><p>Punto de control:</p>
+<table>
+<thead>
+<tr>
+<th>Comando</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>kubectl get nodes</code></td>
+<td><code>k8-master</code>, <code>k8-worker1</code>, <code>k8-worker2</code>, <code>k8-worker3</code> en <code>Ready</code></td>
+</tr>
+<tr>
+<td><code>kubectl get pods -A</code></td>
+<td>Sin <code>CrashLoopBackOff</code>, <code>ImagePullBackOff</code> ni <code>Pending</code> persistente</td>
+</tr>
+<tr>
+<td><code>kubectl get svc -A</code></td>
+<td>Dashboard <code>NodePort 443:32000/TCP</code> y NGINX <code>NodePort</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h1 id="6-instalar-ceph-con-rook-directamente-en-el-clúster-kubernetes-sin-vm-adicional">6. Instalar Ceph con Rook directamente en el clúster Kubernetes (sin VM adicional) </h1>
+<p>A diferencia de un intento anterior de este laboratorio, aquí <strong>no se crea<br>
+ninguna VM <code>ceph-admin</code> aparte</strong>. Partimos de cero: no hay ningún Ceph<br>
+instalado todavía, solo el clúster Kubernetes ya desplegado. Ceph se<br>
+instala <strong>dentro</strong> del propio clúster (<code>k8-master</code> + <code>k8-worker1/2/3</code>)<br>
+usando <a href="https://rook.io/docs/rook/latest-release/Getting-Started/intro/">Rook</a>,<br>
+el operador oficial de Ceph para Kubernetes recomendado por la<br>
+documentación de Kubernetes para exponer almacenamiento persistente. Esto<br>
+cumple el requerimiento 4 del PDF ("Desplegar un disco persistente<br>
+asociado al Cluster de Cephfs") reutilizando la infraestructura que ya<br>
+existe, sin levantar servidores adicionales.</p>
+<p>Requisito de Rook (documentación oficial de la <a href="https://rook.io/docs/rook/latest-release/Getting-Started/quickstart/">Quickstart</a>):<br>
+cada nodo que aporte almacenamiento necesita al menos un <strong>dispositivo de<br>
+bloques crudo</strong> (sin particiones ni sistema de archivos). Como las VMs<br>
+<code>k8-worker1/2/3</code> solo tienen el disco de sistema, se le agrega un segundo<br>
+disco pequeño a cada una para usarlo exclusivamente como OSD.</p>
+<blockquote>
+<p>Versión usada en esta guía: Rook <code>v1.20.6</code> (release estable más<br>
+reciente al momento de escribir esta guía, soporta Kubernetes<br>
+v1.31–v1.36, que cubre la <code>v1.36.4</code> de este laboratorio).</p>
+</blockquote>
+<h2 id="61-agregar-un-disco-crudo-dedicado-a-cada-worker-osd">6.1. Agregar un disco crudo dedicado a cada worker (OSD) </h2>
+<p>Ejecutar desde el anfitrion (host KVM). Se crea un disco qcow2 pequeño<br>
+por worker y se conecta en caliente como <code>vdb</code>, sin apagar las VMs.</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: anfitrion</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token assign-left variable">VM_DIR</span><span class="token operator">=</span><span class="token string">"/var/lib/libvirt/images/k8s-lab"</span>
+
+<span class="token keyword keyword-for">for</span> <span class="token for-or-select variable">w</span> <span class="token keyword keyword-in">in</span> k8-worker1 k8-worker2 k8-worker3<span class="token punctuation">;</span> <span class="token keyword keyword-do">do</span>
+  <span class="token function">sudo</span> qemu-img create <span class="token parameter variable">-f</span> qcow2 <span class="token string">"<span class="token variable">${VM_DIR}</span>/<span class="token variable">${w}</span>-ceph-osd.qcow2"</span> 20G
+  <span class="token function">sudo</span> <span class="token function">virsh</span> attach-disk <span class="token string">"<span class="token variable">${w}</span>"</span> <span class="token punctuation">\</span>
+    <span class="token parameter variable">--source</span> <span class="token string">"<span class="token variable">${VM_DIR}</span>/<span class="token variable">${w}</span>-ceph-osd.qcow2"</span> <span class="token punctuation">\</span>
+    <span class="token parameter variable">--target</span> vdb <span class="token parameter variable">--subdriver</span> qcow2 <span class="token parameter variable">--targetbus</span> virtio <span class="token punctuation">\</span>
+    <span class="token parameter variable">--live</span> <span class="token parameter variable">--config</span> <span class="token parameter variable">--persistent</span>
+<span class="token keyword keyword-done">done</span>
+
+<span class="token function">sudo</span> <span class="token function">virsh</span> domblklist k8-worker1
+<span class="token function">sudo</span> <span class="token function">virsh</span> domblklist k8-worker2
+<span class="token function">sudo</span> <span class="token function">virsh</span> domblklist k8-worker3
+</code></pre><p>Punto de control: cada <code>domblklist</code> debe mostrar <code>vdb</code> apuntando al<br>
+archivo <code>-ceph-osd.qcow2</code> recien creado.</p>
+<p>Verificar desde dentro de cada worker que <code>vdb</code> aparece como disco crudo,<br>
+sin particiones ni sistema de archivos:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: anfitrion</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token keyword keyword-for">for</span> <span class="token for-or-select variable">ip</span> <span class="token keyword keyword-in">in</span> <span class="token number">192.168</span>.90.2 <span class="token number">192.168</span>.90.3 <span class="token number">192.168</span>.90.4<span class="token punctuation">;</span> <span class="token keyword keyword-do">do</span>
+  <span class="token function">ssh</span> <span class="token parameter variable">-o</span> <span class="token assign-left variable">IdentitiesOnly</span><span class="token operator">=</span>yes <span class="token parameter variable">-o</span> <span class="token assign-left variable">ConnectTimeout</span><span class="token operator">=</span><span class="token number">10</span> uceda@<span class="token string">"<span class="token variable">${ip}</span>"</span> <span class="token string">'hostname; lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINTS /dev/vdb'</span>
+<span class="token keyword keyword-done">done</span>
+</code></pre><p>Punto de control: <code>FSTYPE</code> debe salir vacío para <code>vdb</code> en los 3 workers.<br>
+Si <code>vdb</code> no aparece, revisa <code>virsh domblklist</code> y confirma que el disco se<br>
+creó con <code>qemu-img create</code> antes del <code>attach-disk</code>.</p>
+<blockquote>
+<p>Si <code>vdb</code> ya tuviera datos de un intento anterior (por ejemplo restos de<br>
+un OSD viejo), Rook rechazará el disco. Límpialo con <code>wipefs -a /dev/vdb</code><br>
+<strong>solo si estás seguro de que no tiene datos que quieras conservar</strong>.</p>
+</blockquote>
+<h2 id="62-cargar-el-módulo-de-kernel-ceph-en-los-4-nodos-kubernetes">6.2. Cargar el módulo de kernel <code>ceph</code> en los 4 nodos Kubernetes </h2>
+<p>El cliente kernel de CephFS (usado por el nodeplugin del CSI) requiere el<br>
+módulo <code>ceph</code> cargado en el sistema operativo de cada nodo, no solo dentro<br>
+de los contenedores.</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: anfitrion</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token keyword keyword-for">for</span> <span class="token for-or-select variable">ip</span> <span class="token keyword keyword-in">in</span> <span class="token number">192.168</span>.90.1 <span class="token number">192.168</span>.90.2 <span class="token number">192.168</span>.90.3 <span class="token number">192.168</span>.90.4<span class="token punctuation">;</span> <span class="token keyword keyword-do">do</span>
+  <span class="token function">ssh</span> <span class="token parameter variable">-o</span> <span class="token assign-left variable">IdentitiesOnly</span><span class="token operator">=</span>yes <span class="token parameter variable">-o</span> <span class="token assign-left variable">ConnectTimeout</span><span class="token operator">=</span><span class="token number">10</span> uceda@<span class="token string">"<span class="token variable">${ip}</span>"</span> <span class="token string">'
+    sudo modprobe ceph
+    echo "ceph" | sudo tee /etc/modules-load.d/ceph.conf
+    lsmod | grep -q "^ceph " &amp;&amp; echo "OK: modulo ceph cargado" || echo "ERROR: modulo ceph no cargado"
+  '</span>
+<span class="token keyword keyword-done">done</span>
+</code></pre><p>Punto de control: los 4 nodos deben responder <code>OK: modulo ceph cargado</code>.</p>
+<h2 id="63-instalar-los-crds-recursos-comunes-y-el-operador-de-rook">6.3. Instalar los CRDs, recursos comunes y el operador de Rook </h2>
+<p>Ejecutar desde <code>k8-master</code>, usando directamente los manifiestos oficiales<br>
+de la release fijada (sin clonar el repositorio completo), siguiendo el<br>
+<a href="https://rook.io/docs/rook/latest-release/Getting-Started/quickstart/">Quickstart oficial de Rook</a>:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+<span class="token assign-left variable">ROOK_VERSION</span><span class="token operator">=</span><span class="token string">"v1.20.6"</span>
+<span class="token assign-left variable">BASE_URL</span><span class="token operator">=</span><span class="token string">"https://raw.githubusercontent.com/rook/rook/<span class="token variable">${ROOK_VERSION}</span>/deploy/examples"</span>
+
+kubectl create <span class="token parameter variable">-f</span> <span class="token string">"<span class="token variable">${BASE_URL}</span>/crds.yaml"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-f</span> <span class="token string">"<span class="token variable">${BASE_URL}</span>/common.yaml"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-f</span> <span class="token string">"<span class="token variable">${BASE_URL}</span>/csi-operator.yaml"</span>
+
+kubectl create <span class="token parameter variable">-f</span> <span class="token string">"<span class="token variable">${BASE_URL}</span>/operator.yaml"</span>
+
+kubectl <span class="token parameter variable">-n</span> rook-ceph get pod
+</code></pre><p>Punto de control: <code>rook-ceph-operator-...</code> debe llegar a <code>1/1 Running</code><br>
+antes de continuar (puede tardar uno o dos minutos mientras descarga la<br>
+imagen).</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph rollout status deployment/rook-ceph-operator <span class="token parameter variable">--timeout</span><span class="token operator">=</span>180s
+</code></pre><h2 id="64-crear-el-cephcluster-usando-los-discos-vdb-de-los-3-workers">6.4. Crear el CephCluster usando los discos <code>vdb</code> de los 3 workers </h2>
+<p>Este <code>CephCluster</code> está adaptado al mínimo de recursos de este<br>
+laboratorio: 3 monitores (uno por worker, uno menos que el default no<br>
+tendría sentido con solo 3 nodos disponibles), 1 solo mgr (en vez de 2),<br>
+sin dashboard de Ceph (el requerimiento 2 del PDF ya lo cumple el<br>
+Dashboard de Kubernetes), sin recolector de crashes ni de logs, y usando<br>
+explícitamente solo el disco <code>vdb</code> de cada worker (nunca el disco del<br>
+sistema operativo).</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: /tmp</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">'EOF'<span class="token bash punctuation"> <span class="token operator">&gt;</span> /tmp/rook-cluster.yaml</span>
+apiVersion: ceph.rook.io/v1
+kind: CephCluster
+metadata:
+  name: rook-ceph
+  namespace: rook-ceph
+spec:
+  cephVersion:
+    image: quay.io/ceph/ceph:v20.2.4
+    allowUnsupported: false
+  dataDirHostPath: /var/lib/rook
+  mon:
+    count: 3
+    allowMultiplePerNode: false
+  mgr:
+    count: 1
+    allowMultiplePerNode: false
+  dashboard:
+    enabled: false
+  monitoring:
+    enabled: false
+  crashCollector:
+    disable: true
+  logCollector:
+    enabled: false
+  security:
+    cephx:
+      csi:
+        keyType: aes
+  storage:
+    useAllNodes: false
+    useAllDevices: false
+    nodes:
+      - name: "k8-worker1"
+        devices:
+          - name: "vdb"
+      - name: "k8-worker2"
+        devices:
+          - name: "vdb"
+      - name: "k8-worker3"
+        devices:
+          - name: "vdb"
+EOF</span>
+
+kubectl apply <span class="token parameter variable">-f</span> /tmp/rook-cluster.yaml
+kubectl <span class="token parameter variable">-n</span> rook-ceph get cephcluster
+</code></pre><blockquote>
+<p><code>security.cephx.csi.keyType: aes</code> es el valor por defecto que trae el<br>
+<code>cluster.yaml</code> oficial para kernels de Linux menores a 7.0 (es el caso de<br>
+Ubuntu 24.04, kernel <code>6.8</code>); evita el problema histórico de llaves CephX<br>
+de 32 bytes (<code>aes256k</code>) que ningún cliente puede decodificar.</p>
+</blockquote>
+<p>Punto de control inicial: el <code>CephCluster</code> debe pasar de <code>Progressing</code> a<br>
+<code>Ready</code> en unos minutos. Sigue el progreso con:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph get pods <span class="token parameter variable">-o</span> wide <span class="token parameter variable">-w</span>
+</code></pre><p>Presiona <code>Ctrl+C</code> cuando veas 3 pods <code>rook-ceph-mon-*</code>, 1 <code>rook-ceph-mgr-*</code><br>
+y 3 <code>rook-ceph-osd-*</code> en estado <code>Running</code> (más los <code>rook-ceph-osd-prepare-*</code><br>
+en <code>Completed</code>).</p>
+<blockquote>
+<p>Si algún <code>rook-ceph-osd-prepare-*</code> no llega a <code>Completed</code>, revisa sus<br>
+logs con <code>kubectl -n rook-ceph logs job/rook-ceph-osd-prepare-&lt;nodo&gt;</code> y<br>
+confirma en 6.1 que el disco <code>vdb</code> de ese nodo está realmente vacío.</p>
+</blockquote>
+<h2 id="65-instalar-el-toolbox-y-verificar-la-salud-de-ceph">6.5. Instalar el toolbox y verificar la salud de Ceph </h2>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+<span class="token assign-left variable">ROOK_VERSION</span><span class="token operator">=</span><span class="token string">"v1.20.6"</span>
+
+kubectl create <span class="token parameter variable">-f</span> <span class="token string">"https://raw.githubusercontent.com/rook/rook/<span class="token variable">${ROOK_VERSION}</span>/deploy/examples/toolbox.yaml"</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph rollout status deployment/rook-ceph-tools <span class="token parameter variable">--timeout</span><span class="token operator">=</span>120s
+
+kubectl <span class="token parameter variable">-n</span> rook-ceph <span class="token builtin class-name">exec</span> deploy/rook-ceph-tools -- ceph <span class="token parameter variable">-s</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph <span class="token builtin class-name">exec</span> deploy/rook-ceph-tools -- ceph osd tree
+</code></pre><p>Punto de control:</p>
+<table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th>Esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>health</code></td>
+<td><code>HEALTH_OK</code> (o <code>HEALTH_WARN</code> aceptable en laboratorio, ej. por pocos OSD)</td>
+</tr>
+<tr>
+<td><code>mon</code></td>
+<td><code>3 daemons, quorum ...</code></td>
+</tr>
+<tr>
+<td><code>mgr</code></td>
+<td><code>... active</code></td>
+</tr>
+<tr>
+<td><code>osd</code></td>
+<td><code>3 osds: 3 up, 3 in</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="66-resumen-todos-los-comandos-de-la-seccion-6-listos-para-copiar-y-pegar">6.6. Resumen: todos los comandos de la seccion 6, listos para copiar y pegar </h2>
+<p>Este bloque no agrega nada nuevo: es el mismo contenido de 6.1 a 6.5, sin<br>
+la explicacion, en el orden exacto en que hay que ejecutarlo. Usalo solo<br>
+si ya leiste las secciones anteriores; si algo falla, vuelve al numeral<br>
+correspondiente (6.1-6.5) para ver el punto de control y el detalle.</p>
+<p>Primero, todo lo que se ejecuta desde el <strong>anfitrion</strong> (6.1 y 6.2):</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: /tmp</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+<span class="token comment"># ===== 6.3 - CRDs, recursos comunes y operador de Rook =====</span>
+
+<span class="token comment"># Version estable de Rook fijada para esta guia (soporta Kubernetes v1.31-v1.36)</span>
+<span class="token assign-left variable">ROOK_VERSION</span><span class="token operator">=</span><span class="token string">"v1.20.6"</span>
+<span class="token comment"># URL base de los manifiestos oficiales de esa release, sin clonar el repo completo</span>
+<span class="token assign-left variable">BASE_URL</span><span class="token operator">=</span><span class="token string">"https://raw.githubusercontent.com/rook/rook/<span class="token variable">${ROOK_VERSION}</span>/deploy/examples"</span>
+
+<span class="token comment"># Crea los CRDs de Ceph, los recursos comunes (namespace/RBAC) y el operador CSI</span>
+kubectl create <span class="token parameter variable">-f</span> <span class="token string">"<span class="token variable">${BASE_URL}</span>/crds.yaml"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-f</span> <span class="token string">"<span class="token variable">${BASE_URL}</span>/common.yaml"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-f</span> <span class="token string">"<span class="token variable">${BASE_URL}</span>/csi-operator.yaml"</span>
+
+<span class="token comment"># Despliega el operador de Rook, que es quien gestiona todo el ciclo de vida de Ceph</span>
+kubectl create <span class="token parameter variable">-f</span> <span class="token string">"<span class="token variable">${BASE_URL}</span>/operator.yaml"</span>
+
+<span class="token comment"># Espera a que el operador quede en Running antes de continuar</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph rollout status deployment/rook-ceph-operator <span class="token parameter variable">--timeout</span><span class="token operator">=</span>180s
+
+<span class="token comment"># ===== 6.4 - CephCluster usando el disco vdb de cada worker =====</span>
+
+<span class="token comment"># Escribe el manifiesto del CephCluster minimo (3 mon, 1 mgr, sin dashboard/monitoring)</span>
+<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">'EOF'<span class="token bash punctuation"> <span class="token operator">&gt;</span> /tmp/rook-cluster.yaml</span>
+apiVersion: ceph.rook.io/v1
+kind: CephCluster
+metadata:
+  name: rook-ceph
+  namespace: rook-ceph
+spec:
+  cephVersion:
+    image: quay.io/ceph/ceph:v20.2.4
+    allowUnsupported: false
+  dataDirHostPath: /var/lib/rook
+  mon:
+    count: 3
+    allowMultiplePerNode: false
+  mgr:
+    count: 1
+    allowMultiplePerNode: false
+  dashboard:
+    enabled: false
+  monitoring:
+    enabled: false
+  crashCollector:
+    disable: true
+  logCollector:
+    enabled: false
+  security:
+    cephx:
+      csi:
+        keyType: aes
+  storage:
+    useAllNodes: false
+    useAllDevices: false
+    nodes:
+      - name: "k8-worker1"
+        devices:
+          - name: "vdb"
+      - name: "k8-worker2"
+        devices:
+          - name: "vdb"
+      - name: "k8-worker3"
+        devices:
+          - name: "vdb"
+EOF</span>
+
+<span class="token comment"># Aplica el CephCluster; a partir de aqui el operador crea mons, mgr y OSDs</span>
+kubectl apply <span class="token parameter variable">-f</span> /tmp/rook-cluster.yaml
+<span class="token comment"># Consulta el estado general del CephCluster (debe llegar a Ready)</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph get cephcluster
+
+<span class="token comment"># Sigue el progreso en vivo: espera 3 mon + 1 mgr + 3 osd en Running (Ctrl+C para salir)</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph get pods <span class="token parameter variable">-o</span> wide <span class="token parameter variable">-w</span>
+</code></pre><pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+<span class="token assign-left variable">ROOK_VERSION</span><span class="token operator">=</span><span class="token string">"v1.20.6"</span>
+
+<span class="token comment"># ===== 6.5 - toolbox y verificacion de salud =====</span>
+
+<span class="token comment"># Despliega el pod toolbox (cliente ceph -s/-w listo para usar dentro del cluster)</span>
+kubectl create <span class="token parameter variable">-f</span> <span class="token string">"https://raw.githubusercontent.com/rook/rook/<span class="token variable">${ROOK_VERSION}</span>/deploy/examples/toolbox.yaml"</span>
+<span class="token comment"># Espera a que el toolbox quede Running</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph rollout status deployment/rook-ceph-tools <span class="token parameter variable">--timeout</span><span class="token operator">=</span>120s
+
+<span class="token comment"># Estado general de salud del cluster Ceph (mon/mgr/osd, health OK o WARN)</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph <span class="token builtin class-name">exec</span> deploy/rook-ceph-tools -- ceph <span class="token parameter variable">-s</span>
+<span class="token comment"># Arbol de OSDs: confirma que los 3 discos vdb quedaron up/in</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph <span class="token builtin class-name">exec</span> deploy/rook-ceph-tools -- ceph osd tree
+</code></pre><hr>
+<h1 id="7-crear-el-cephfilesystem-y-la-storageclass-para-kubernetes">7. Crear el CephFilesystem y la StorageClass para Kubernetes </h1>
+<p>A diferencia del flujo manual con <code>cephadm</code> + Ceph CSI upstream que se<br>
+usó en un intento anterior de este laboratorio, aquí Rook ya instaló y<br>
+configuró el driver CSI de CephFS como parte del operador (sección 6.3).<br>
+Aquí solo falta crear el filesystem y la <code>StorageClass</code>; Rook genera<br>
+automáticamente los Secrets que el CSI necesita<br>
+(<code>rook-csi-cephfs-provisioner</code> y <code>rook-csi-cephfs-node</code>, en el namespace<br>
+<code>rook-ceph</code>), por lo que no hay que manipular llaves CephX a mano ni<br>
+crear ConfigMaps de <code>ceph.conf</code>/<code>keyring</code> como antes.</p>
+<h2 id="71-crear-el-cephfilesystem-myfs">7.1. Crear el CephFilesystem <code>myfs</code> </h2>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: /tmp</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">'EOF'<span class="token bash punctuation"> <span class="token operator">&gt;</span> /tmp/rook-filesystem.yaml</span>
+apiVersion: ceph.rook.io/v1
+kind: CephFilesystem
+metadata:
+  name: myfs
+  namespace: rook-ceph
+spec:
+  metadataPool:
+    replicated:
+      size: 3
+  dataPools:
+    - name: replicated
+      failureDomain: host
+      replicated:
+        size: 3
+  preserveFilesystemOnDelete: true
+  metadataServer:
+    activeCount: 1
+    activeStandby: false
+---
+apiVersion: ceph.rook.io/v1
+kind: CephFilesystemSubVolumeGroup
+metadata:
+  name: myfs-csi
+  namespace: rook-ceph
+spec:
+  name: csi
+  filesystemName: myfs
+EOF</span>
+
+kubectl apply <span class="token parameter variable">-f</span> /tmp/rook-filesystem.yaml
+kubectl <span class="token parameter variable">-n</span> rook-ceph get cephfilesystem myfs
+kubectl <span class="token parameter variable">-n</span> rook-ceph get pod <span class="token parameter variable">-l</span> <span class="token assign-left variable">app</span><span class="token operator">=</span>rook-ceph-mds
+</code></pre><p>Punto de control: al menos un pod <code>rook-ceph-mds-myfs-...</code> en <code>Running</code>.<br>
+Con <code>activeStandby: false</code> solo se crea 1 MDS (sin standby-replay), para<br>
+mantener el mínimo de recursos del laboratorio; con 3 OSDs en 3 hosts<br>
+distintos, <code>replicated.size: 3</code> da redundancia real sin necesidad de<br>
+bajar el tamaño de réplica como en el intento anterior con un solo OSD.</p>
+<h2 id="72-crear-la-storageclass-cephfs-storage">7.2. Crear la StorageClass <code>cephfs-storage</code> </h2>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: /tmp</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">'EOF'<span class="token bash punctuation"> <span class="token operator">&gt;</span> /tmp/cephfs-storageclass.yaml</span>
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: cephfs-storage
+provisioner: rook-ceph.cephfs.csi.ceph.com
+parameters:
+  clusterID: rook-ceph
+  fsName: myfs
+  pool: myfs-replicated
+  csi.storage.k8s.io/provisioner-secret-name: rook-csi-cephfs-provisioner
+  csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
+  csi.storage.k8s.io/controller-expand-secret-name: rook-csi-cephfs-provisioner
+  csi.storage.k8s.io/controller-expand-secret-namespace: rook-ceph
+  csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
+  csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+EOF</span>
+
+kubectl apply <span class="token parameter variable">-f</span> /tmp/cephfs-storageclass.yaml
+kubectl get storageclass cephfs-storage
+</code></pre><blockquote>
+<p>El nombre de la <code>StorageClass</code> (<code>cephfs-storage</code>) se mantiene igual al<br>
+resto de esta guía para no tener que cambiar los PVC de las secciones<br>
+siguientes; lo que cambia es el <code>provisioner</code> (ahora es el CSI que<br>
+instala Rook: <code>rook-ceph.cephfs.csi.ceph.com</code>) y el namespace de los<br>
+Secrets (<code>rook-ceph</code> en vez de <code>default</code>).</p>
+</blockquote>
+<h2 id="73-verificar-los-pods-csi-que-instaló-rook">7.3. Verificar los pods CSI que instaló Rook </h2>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph get pods
+</code></pre><p>Punto de control: deben aparecer, además de <code>rook-ceph-mon/mgr/osd/mds</code>,<br>
+pods del driver CSI de CephFS (nombres típicos en Rook <code>v1.20</code>:<br>
+<code>rook-ceph.cephfs.csi.ceph.com-ctrlplugin-...</code> y<br>
+<code>rook-ceph.cephfs.csi.ceph.com-nodeplugin-...</code>), todos en <code>Running</code>.</p>
+<p>Si alguno falla, revisa primero el operador (más estable entre versiones<br>
+que los nombres internos del CSI):</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph logs deploy/rook-ceph-operator <span class="token parameter variable">--tail</span><span class="token operator">=</span><span class="token number">200</span>
+</code></pre><hr>
+<h1 id="8-prueba-obligatoria-de-cephfs-antes-de-wordpress">8. Prueba obligatoria de CephFS antes de WordPress </h1>
+<h2 id="81-crear-pvc-de-prueba">8.1. Crear PVC de prueba </h2>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: /tmp</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+kubectl delete pod cephfs-test-pod --ignore-not-found
+kubectl delete pvc cephfs-test --ignore-not-found
+
+<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">'EOF'<span class="token bash punctuation"> <span class="token operator">&gt;</span> /tmp/cephfs-test-pvc.yaml</span>
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cephfs-test
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: cephfs-storage
+  resources:
+    requests:
+      storage: 1Gi
+EOF</span>
+
+kubectl apply <span class="token parameter variable">-f</span> /tmp/cephfs-test-pvc.yaml
+kubectl get pvc cephfs-test
+</code></pre><p>Esperado:</p>
+<pre data-role="codeBlock" data-info="text" class="language-text text"><code>cephfs-test   Bound
+</code></pre><p>Si queda <code>Pending</code>, no continues a WordPress. Ejecuta:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+kubectl describe pvc cephfs-test
+kubectl get events --sort-by<span class="token operator">=</span>.lastTimestamp <span class="token operator">|</span> <span class="token function">tail</span> <span class="token parameter variable">-n</span> <span class="token number">80</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph get pods
+kubectl <span class="token parameter variable">-n</span> rook-ceph logs deploy/rook-ceph-operator <span class="token parameter variable">--tail</span><span class="token operator">=</span><span class="token number">200</span>
+</code></pre><h2 id="82-crear-pod-que-escriba-y-lea-en-cephfs">8.2. Crear Pod que escriba y lea en CephFS </h2>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: /tmp</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">'EOF'<span class="token bash punctuation"> <span class="token operator">&gt;</span> /tmp/cephfs-test-pod.yaml</span>
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cephfs-test-pod
+spec:
+  restartPolicy: Never
+  containers:
+    - name: tester
+      image: busybox:1.36
+      command:
+        - sh
+        - -c
+        - "echo hola-cephfs-$(date +%s) &gt; /mnt/test.txt &amp;&amp; cat /mnt/test.txt &amp;&amp; sleep 30"
+      volumeMounts:
+        - name: data
+          mountPath: /mnt
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: cephfs-test
+EOF</span>
+
+kubectl apply <span class="token parameter variable">-f</span> /tmp/cephfs-test-pod.yaml
+kubectl <span class="token function">wait</span> <span class="token parameter variable">--for</span><span class="token operator">=</span>condition<span class="token operator">=</span>Ready pod/cephfs-test-pod <span class="token parameter variable">--timeout</span><span class="token operator">=</span>120s
+kubectl logs cephfs-test-pod
+</code></pre><p>Punto de control: la salida debe contener <code>hola-cephfs-...</code>.</p>
+<p>Limpiar la prueba:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+kubectl delete pod cephfs-test-pod --ignore-not-found
+kubectl delete pvc cephfs-test --ignore-not-found
+</code></pre><hr>
+<h1 id="9-crear-namespace-y-credenciales-de-wordpress">9. Crear namespace y credenciales de WordPress </h1>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+kubectl create namespace wordpress --dry-run<span class="token operator">=</span>client <span class="token parameter variable">-o</span> yaml <span class="token operator">|</span> kubectl apply <span class="token parameter variable">-f</span> -
+
+kubectl <span class="token parameter variable">-n</span> wordpress create secret generic wordpress-secrets <span class="token punctuation">\</span>
+  --from-literal<span class="token operator">=</span>mariadb-root-password<span class="token operator">=</span><span class="token string">'RootK8sLab2026!'</span> <span class="token punctuation">\</span>
+  --from-literal<span class="token operator">=</span>mariadb-password<span class="token operator">=</span><span class="token string">'MariaDbK8sLab2026!'</span> <span class="token punctuation">\</span>
+  --from-literal<span class="token operator">=</span>wordpress-admin-password<span class="token operator">=</span><span class="token string">'WordPressK8sLab2026!'</span> <span class="token punctuation">\</span>
+  --dry-run<span class="token operator">=</span>client <span class="token parameter variable">-o</span> yaml <span class="token operator">|</span> kubectl apply <span class="token parameter variable">-f</span> -
+
+kubectl <span class="token parameter variable">-n</span> wordpress get secret wordpress-secrets
+</code></pre><p>Punto de control:</p>
+<pre data-role="codeBlock" data-info="text" class="language-text text"><code>wordpress-secrets   Opaque   3
+</code></pre><hr>
+<h1 id="10-crear-pvcs-cephfs-para-wordpress">10. Crear PVCs CephFS para WordPress </h1>
+<p>Se usaran tres PVCs pequenos para laboratorio:</p>
+<table>
+<thead>
+<tr>
+<th>PVC</th>
+<th style="text-align:right">Tamano</th>
+<th>AccessMode</th>
+<th>Montaje</th>
+<th>Motivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>wordpress-content</code></td>
+<td style="text-align:right"><code>5Gi</code></td>
+<td><code>ReadWriteMany</code></td>
+<td><code>/var/www/html</code></td>
+<td>Archivos, plugins, temas y uploads</td>
+</tr>
+<tr>
+<td><code>wordpress-db</code></td>
+<td style="text-align:right"><code>5Gi</code></td>
+<td><code>ReadWriteOnce</code></td>
+<td><code>/var/lib/mysql</code></td>
+<td>Datos de MariaDB</td>
+</tr>
+<tr>
+<td><code>wordpress-redis</code></td>
+<td style="text-align:right"><code>1Gi</code></td>
+<td><code>ReadWriteOnce</code></td>
+<td><code>/data</code></td>
+<td>AOF de Redis</td>
+</tr>
+</tbody>
+</table>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: /tmp</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">'EOF'<span class="token bash punctuation"> <span class="token operator">&gt;</span> /tmp/wordpress-pvcs.yaml</span>
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wordpress-content
+  namespace: wordpress
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: cephfs-storage
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wordpress-db
+  namespace: wordpress
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: cephfs-storage
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wordpress-redis
+  namespace: wordpress
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: cephfs-storage
+  resources:
+    requests:
+      storage: 1Gi
+EOF</span>
+
+kubectl apply <span class="token parameter variable">-f</span> /tmp/wordpress-pvcs.yaml
+kubectl <span class="token parameter variable">-n</span> wordpress get pvc
+</code></pre><p>Punto de control: los tres PVCs deben quedar <code>Bound</code>.</p>
+<p>Si alguno queda <code>Pending</code>, detenerse y revisar:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+kubectl <span class="token parameter variable">-n</span> wordpress describe pvc wordpress-content
+kubectl <span class="token parameter variable">-n</span> wordpress describe pvc wordpress-db
+kubectl <span class="token parameter variable">-n</span> wordpress describe pvc wordpress-redis
+kubectl get events <span class="token parameter variable">-A</span> --sort-by<span class="token operator">=</span>.lastTimestamp <span class="token operator">|</span> <span class="token function">tail</span> <span class="token parameter variable">-n</span> <span class="token number">100</span>
+</code></pre><h2 id="101-comprobación-de-progreso-y-configuración-antes-de-continuar">10.1. Comprobación de progreso y configuración antes de continuar </h2>
+<p>Antes de desplegar WordPress (seccion 11), verifica en un solo paso que<br>
+todo lo anterior (cluster, Ceph/Rook, CephFilesystem, StorageClass y los<br>
+PVCs) sigue sano. Si algo de esto falla, no continues a la seccion 11.</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+<span class="token builtin class-name">echo</span> <span class="token string">"== 5. Nodos del cluster =="</span>
+kubectl get nodes
+
+<span class="token builtin class-name">echo</span> <span class="token string">"== 6. Pods de Rook/Ceph =="</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph get pods
+
+<span class="token builtin class-name">echo</span> <span class="token string">"== 6. Estado del CephCluster =="</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph get cephcluster
+
+<span class="token builtin class-name">echo</span> <span class="token string">"== 6. Salud de Ceph (mon/mgr/osd) =="</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph <span class="token builtin class-name">exec</span> deploy/rook-ceph-tools -- ceph <span class="token parameter variable">-s</span>
+
+<span class="token builtin class-name">echo</span> <span class="token string">"== 7. CephFilesystem y MDS =="</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph get cephfilesystem myfs
+kubectl <span class="token parameter variable">-n</span> rook-ceph get pod <span class="token parameter variable">-l</span> <span class="token assign-left variable">app</span><span class="token operator">=</span>rook-ceph-mds
+
+<span class="token builtin class-name">echo</span> <span class="token string">"== 7. StorageClass =="</span>
+kubectl get storageclass cephfs-storage
+
+<span class="token builtin class-name">echo</span> <span class="token string">"== 9. Namespace y Secret de WordPress =="</span>
+kubectl get namespace wordpress
+kubectl <span class="token parameter variable">-n</span> wordpress get secret wordpress-secrets
+
+<span class="token builtin class-name">echo</span> <span class="token string">"== 10. PVCs de WordPress =="</span>
+kubectl <span class="token parameter variable">-n</span> wordpress get pvc
+</code></pre><p>Punto de control (todo debe cumplirse antes de pasar a la seccion 11):</p>
+<table>
+<thead>
+<tr>
+<th>Verificacion</th>
+<th>Esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nodos</td>
+<td><code>k8-master</code>, <code>k8-worker1/2/3</code> en <code>Ready</code></td>
+</tr>
+<tr>
+<td>Pods <code>rook-ceph</code></td>
+<td><code>mon-a/b/c</code>, <code>mgr-a</code>, <code>osd-0/1/2</code>, <code>mds-myfs-a</code>, CSI ctrlplugin/nodeplugin, <code>rook-ceph-tools</code> en <code>Running</code></td>
+</tr>
+<tr>
+<td><code>CephCluster</code></td>
+<td><code>PHASE Ready</code></td>
+</tr>
+<tr>
+<td><code>ceph -s</code></td>
+<td><code>health: HEALTH_OK</code> (o <code>HEALTH_WARN</code> por <code>keyType: aes</code>, aceptable) y <code>mon: 3</code>, <code>mgr: ... active</code>, <code>osd: 3 up, 3 in</code></td>
+</tr>
+<tr>
+<td><code>CephFilesystem myfs</code></td>
+<td><code>PHASE Ready</code> (o <code>Progressing</code> justo tras crearlo), MDS <code>Running</code></td>
+</tr>
+<tr>
+<td><code>StorageClass cephfs-storage</code></td>
+<td>Existe, <code>PROVISIONER rook-ceph.cephfs.csi.ceph.com</code></td>
+</tr>
+<tr>
+<td><code>Secret wordpress-secrets</code></td>
+<td><code>Opaque</code> con <code>3</code> claves</td>
+</tr>
+<tr>
+<td>PVCs <code>wordpress-content/db/redis</code></td>
+<td>Los 3 en <code>Bound</code></td>
+</tr>
+</tbody>
+</table>
+<p>Si algun PVC de WordPress sigue en <code>Pending</code> a pesar de que <code>myfs</code> y la<br>
+<code>StorageClass</code> ya existen, repite el PVC de prueba de la seccion 8 antes<br>
+de seguir, para descartar un problema mas general del CSI:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+kubectl get pvc cephfs-test
+</code></pre><hr>
+<h1 id="11-desplegar-wordpress-mariadb-y-redis-en-un-mismo-pod">11. Desplegar WordPress, MariaDB y Redis en un mismo Pod </h1>
+<p>Este manifiesto cumple el requerimiento del PDF: tres contenedores agrupados en un Pod.</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: /tmp</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">'EOF'<span class="token bash punctuation"> <span class="token operator">&gt;</span> /tmp/wordpress-cephfs.yaml</span>
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress
+  namespace: wordpress
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: wordpress
+  template:
+    metadata:
+      labels:
+        app: wordpress
+    spec:
+      containers:
+        - name: wordpress
+          image: wordpress:6.8-apache
+          ports:
+            - name: http
+              containerPort: 80
+          env:
+            - name: WORDPRESS_DB_HOST
+              value: 127.0.0.1:3306
+            - name: WORDPRESS_DB_USER
+              value: wordpress
+            - name: WORDPRESS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: wordpress-secrets
+                  key: mariadb-password
+            - name: WORDPRESS_DB_NAME
+              value: wordpress
+            - name: WORDPRESS_CONFIG_EXTRA
+              value: |
+                define('WP_REDIS_HOST', '127.0.0.1');
+                define('WP_REDIS_PORT', 6379);
+                define('WP_CACHE', true);
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: wordpress-content
+              mountPath: /var/www/html
+        - name: mariadb
+          image: mariadb:11.4
+          env:
+            - name: MARIADB_DATABASE
+              value: wordpress
+            - name: MARIADB_USER
+              value: wordpress
+            - name: MARIADB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: wordpress-secrets
+                  key: mariadb-password
+            - name: MARIADB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: wordpress-secrets
+                  key: mariadb-root-password
+          ports:
+            - name: mysql
+              containerPort: 3306
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: 700m
+              memory: 1Gi
+          volumeMounts:
+            - name: wordpress-db
+              mountPath: /var/lib/mysql
+        - name: redis
+          image: redis:7.4
+          args:
+            - redis-server
+            - --appendonly
+            - "yes"
+            - --dir
+            - /data
+          ports:
+            - name: redis
+              containerPort: 6379
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          volumeMounts:
+            - name: wordpress-redis
+              mountPath: /data
+      volumes:
+        - name: wordpress-content
+          persistentVolumeClaim:
+            claimName: wordpress-content
+        - name: wordpress-db
+          persistentVolumeClaim:
+            claimName: wordpress-db
+        - name: wordpress-redis
+          persistentVolumeClaim:
+            claimName: wordpress-redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress
+  namespace: wordpress
+spec:
+  selector:
+    app: wordpress
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+  type: ClusterIP
+EOF</span>
+
+kubectl apply <span class="token parameter variable">-f</span> /tmp/wordpress-cephfs.yaml
+kubectl rollout status deployment/wordpress <span class="token parameter variable">-n</span> wordpress <span class="token parameter variable">--timeout</span><span class="token operator">=</span>300s
+kubectl <span class="token parameter variable">-n</span> wordpress get pods <span class="token parameter variable">-o</span> wide
+kubectl <span class="token parameter variable">-n</span> wordpress get svc wordpress
+</code></pre><h2 id="111-validar-los-tres-contenedores">11.1. Validar los tres contenedores </h2>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+kubectl <span class="token parameter variable">-n</span> wordpress get pod <span class="token parameter variable">-l</span> <span class="token assign-left variable">app</span><span class="token operator">=</span>wordpress <span class="token punctuation">\</span>
+  <span class="token parameter variable">-o</span> <span class="token assign-left variable">jsonpath</span><span class="token operator">=</span><span class="token string">'{range .items[0].status.containerStatuses[*]}{.name}{"="}{.ready}{"\n"}{end}'</span>
+</code></pre><p>Esperado:</p>
+<pre data-role="codeBlock" data-info="text" class="language-text text"><code>wordpress=true
+mariadb=true
+redis=true
+</code></pre><h2 id="112-validar-mariadb-y-redis-dentro-del-pod">11.2. Validar MariaDB y Redis dentro del Pod </h2>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+<span class="token assign-left variable">POD</span><span class="token operator">=</span><span class="token string">"<span class="token variable"><span class="token variable">$(</span>kubectl <span class="token parameter variable">-n</span> wordpress get pod <span class="token parameter variable">-l</span> <span class="token assign-left variable">app</span><span class="token operator">=</span>wordpress <span class="token parameter variable">-o</span> <span class="token assign-left variable">jsonpath</span><span class="token operator">=</span><span class="token string">'{.items[0].metadata.name}'</span><span class="token variable">)</span></span>"</span>
+
+kubectl <span class="token parameter variable">-n</span> wordpress <span class="token builtin class-name">exec</span> <span class="token string">"<span class="token variable">${POD}</span>"</span> <span class="token parameter variable">-c</span> mariadb -- <span class="token punctuation">\</span>
+  mariadb-admin <span class="token function">ping</span> <span class="token parameter variable">-h</span> <span class="token number">127.0</span>.0.1 <span class="token parameter variable">-uroot</span> -p<span class="token string">'RootK8sLab2026!'</span>
+
+kubectl <span class="token parameter variable">-n</span> wordpress <span class="token builtin class-name">exec</span> <span class="token string">"<span class="token variable">${POD}</span>"</span> <span class="token parameter variable">-c</span> redis -- redis-cli <span class="token function">ping</span>
+</code></pre><p>Esperado:</p>
+<pre data-role="codeBlock" data-info="text" class="language-text text"><code>mysqld is alive
+PONG
+</code></pre><hr>
+<h1 id="12-instalar-o-validar-metallb-para-ip-flotante-http">12. Instalar o validar MetalLB para IP flotante HTTP </h1>
+<blockquote>
+<p>Si MetalLB ya esta instalado, estos comandos solo verifican y re-aplican configuracion.<br>
+Para este laboratorio se usa una sola IP: <code>192.168.90.50</code>.</p>
+</blockquote>
+<h2 id="121-instalar-metallb">12.1. Instalar MetalLB </h2>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+<span class="token assign-left variable">METALLB_VERSION</span><span class="token operator">=</span><span class="token string">"v0.16.1"</span>
+
+kubectl apply <span class="token parameter variable">-f</span> <span class="token string">"https://raw.githubusercontent.com/metallb/metallb/<span class="token variable">${METALLB_VERSION}</span>/config/manifests/metallb-native.yaml"</span>
+kubectl <span class="token function">wait</span> <span class="token parameter variable">--namespace</span> metallb-system <span class="token punctuation">\</span>
+  <span class="token parameter variable">--for</span><span class="token operator">=</span>condition<span class="token operator">=</span>Available deployment/controller <span class="token punctuation">\</span>
+  <span class="token parameter variable">--timeout</span><span class="token operator">=</span>180s
+kubectl <span class="token parameter variable">-n</span> metallb-system get pods <span class="token parameter variable">-o</span> wide
+</code></pre><h2 id="122-configurar-ipaddresspool-y-l2advertisement">12.2. Configurar IPAddressPool y L2Advertisement </h2>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: /tmp</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">'EOF'<span class="token bash punctuation"> <span class="token operator">&gt;</span> /tmp/metallb-k8s-lab-pool.yaml</span>
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: k8s-lab-pool
+  namespace: metallb-system
+spec:
+  addresses:
+    - 192.168.90.50-192.168.90.50
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: k8s-lab-advertisement
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+    - k8s-lab-pool
+EOF</span>
+
+kubectl apply <span class="token parameter variable">-f</span> /tmp/metallb-k8s-lab-pool.yaml
+kubectl <span class="token parameter variable">-n</span> metallb-system get ipaddresspool,l2advertisement
+</code></pre><p>Punto de control: deben existir <code>k8s-lab-pool</code> y <code>k8s-lab-advertisement</code>.</p>
+<hr>
+<h1 id="13-exponer-wordpress-por-ip-flotante-http">13. Exponer WordPress por IP flotante HTTP </h1>
+<p>No se usa Ingress, SSL ni HTTPS. El Service sera <code>LoadBalancer</code> y MetalLB asignara <code>192.168.90.50</code>.</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: /tmp</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">'EOF'<span class="token bash punctuation"> <span class="token operator">&gt;</span> /tmp/wordpress-lb-http.yaml</span>
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress-lb
+  namespace: wordpress
+  annotations:
+    metallb.io/loadBalancerIPs: 192.168.90.50
+spec:
+  type: LoadBalancer
+  selector:
+    app: wordpress
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: http
+EOF</span>
+
+kubectl apply <span class="token parameter variable">-f</span> /tmp/wordpress-lb-http.yaml
+kubectl <span class="token parameter variable">-n</span> wordpress get svc wordpress wordpress-lb <span class="token parameter variable">-o</span> wide
+</code></pre><p>Punto de control:</p>
+<pre data-role="codeBlock" data-info="text" class="language-text text"><code>wordpress-lb   LoadBalancer   ...   192.168.90.50   80:xxxxx/TCP
+</code></pre><p>Si <code>EXTERNAL-IP</code> queda en <code>pending</code>, revisar:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+kubectl <span class="token parameter variable">-n</span> metallb-system get pods <span class="token parameter variable">-o</span> wide
+kubectl <span class="token parameter variable">-n</span> metallb-system describe ipaddresspool k8s-lab-pool
+kubectl <span class="token parameter variable">-n</span> metallb-system logs deployment/controller <span class="token parameter variable">--tail</span><span class="token operator">=</span><span class="token number">100</span>
+kubectl <span class="token parameter variable">-n</span> wordpress describe svc wordpress-lb
+</code></pre><hr>
+<h1 id="14-probar-acceso-desde-el-anfitrion">14. Probar acceso desde el anfitrion </h1>
+<p>Ejecutar desde el anfitrion:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: anfitrion</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token function">curl</span> <span class="token parameter variable">-I</span> http://192.168.90.50/
+<span class="token function">curl</span> <span class="token parameter variable">-L</span> http://192.168.90.50/ <span class="token operator">|</span> <span class="token function">head</span> <span class="token parameter variable">-n</span> <span class="token number">20</span>
+</code></pre><p>Abrir en el navegador del anfitrion:</p>
+<pre data-role="codeBlock" data-info="text" class="language-text text"><code>http://192.168.90.50/
+</code></pre><p>En el asistente web de WordPress usar:</p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Valor recomendado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Site Title</td>
+<td><code>Kubernetes Lab</code></td>
+</tr>
+<tr>
+<td>Username</td>
+<td><code>admin</code></td>
+</tr>
+<tr>
+<td>Password</td>
+<td><code>WordPressK8sLab2026!</code></td>
+</tr>
+<tr>
+<td>Email</td>
+<td><code>admin@k8s.lab</code></td>
+</tr>
+<tr>
+<td>Search engine visibility</td>
+<td>Indiferente para laboratorio</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>El password del admin web no lo crea automaticamente Kubernetes. Se define en el asistente inicial de WordPress. El Secret <code>wordpress-admin-password</code> queda como referencia de laboratorio. En esta ejecucion del lab el usuario real quedo como <code>uceda</code> (ver nota en seccion 3.2) — comprobar siempre el usuario real antes de intentar iniciar sesion.</p>
+</blockquote>
+<h2 id="141-troubleshooting-resetear-el-password-del-admin-si-el-login-falla">14.1. [Troubleshooting] Resetear el password del admin si el login falla </h2>
+<p>Solo aplica si el login en <code>/wp-login.php</code> falla con "The password you entered ... is incorrect" pese a usar la password de la seccion 3.2. Causas mas comunes: el usuario real no es <code>admin</code> (ver nota 3.2), o el hash quedo desincronizado.</p>
+<p><strong>Importante:</strong> WordPress &gt;= 6.8 no aplica bcrypt directo sobre el password. Primero calcula <code>base64_encode(hash_hmac('sha384', trim($password), 'wp-sha384', true))</code> y luego <code>'$wp' . password_hash(ese_valor, PASSWORD_BCRYPT)</code>. Generar el hash con <code>password_hash($password, PASSWORD_BCRYPT)</code> a secas produce un hash valido mal formado que <strong>nunca</strong> valida contra el password real.</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># 1. Verificar el usuario real</span>
+kubectl <span class="token parameter variable">-n</span> wordpress <span class="token builtin class-name">exec</span> deploy/wordpress <span class="token parameter variable">-c</span> mariadb -- <span class="token punctuation">\</span>
+  mariadb <span class="token parameter variable">-uroot</span> -p<span class="token string">'RootK8sLab2026!'</span> <span class="token parameter variable">-e</span> <span class="token string">"SELECT ID,user_login FROM wp_users;"</span> wordpress
+
+<span class="token comment"># 2. Generar el hash correcto (evitar escribir el password con "!" literal en la</span>
+<span class="token comment">#    terminal: puede corromperse por expansion de historial de bash). Mejor</span>
+<span class="token comment">#    escribirlo a un archivo y verificar sus bytes con xxd antes de usarlo.</span>
+<span class="token builtin class-name">printf</span> <span class="token string">'%s'</span> <span class="token string">'WordPressK8sLab2026!'</span> <span class="token operator">&gt;</span> /tmp/pwdfile
+xxd /tmp/pwdfile <span class="token operator">|</span> <span class="token function">tail</span> <span class="token parameter variable">-1</span>   <span class="token comment"># confirmar que termina en ...21 (0x21 = '!')</span>
+
+<span class="token assign-left variable">PODNAME</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span>kubectl get pod <span class="token parameter variable">-n</span> wordpress <span class="token parameter variable">-l</span> <span class="token assign-left variable">app</span><span class="token operator">=</span>wordpress <span class="token parameter variable">-o</span> <span class="token assign-left variable">jsonpath</span><span class="token operator">=</span><span class="token string">'{.items[0].metadata.name}'</span><span class="token variable">)</span></span>
+kubectl <span class="token function">cp</span> /tmp/pwdfile wordpress/<span class="token variable">$PODNAME</span>:/tmp/pwdfile <span class="token parameter variable">-c</span> wordpress
+kubectl <span class="token builtin class-name">exec</span> <span class="token parameter variable">-i</span> <span class="token parameter variable">-n</span> wordpress deploy/wordpress <span class="token parameter variable">-c</span> wordpress -- php <span class="token operator">&lt;&lt;</span><span class="token string">'PHP'
+&lt;?php
+$password = file_get_contents('/tmp/pwdfile');
+$password_to_hash = base64_encode( hash_hmac( 'sha384', trim( $password ), 'wp-sha384', true ) );
+$hash = '$wp' . password_hash( $password_to_hash, PASSWORD_BCRYPT );
+file_put_contents('/tmp/newhash.txt', $hash);
+echo "HASH=$hash\n";
+PHP</span>
+kubectl <span class="token function">cp</span> wordpress/<span class="token variable">$PODNAME</span>:/tmp/newhash.txt /tmp/newhash.txt <span class="token parameter variable">-c</span> wordpress
+
+<span class="token comment"># 3. Actualizar la BD con el hash generado (reemplazar USUARIO por el user_login real)</span>
+<span class="token assign-left variable">NEWHASH</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">cat</span> /tmp/newhash.txt<span class="token variable">)</span></span>
+kubectl <span class="token builtin class-name">exec</span> <span class="token parameter variable">-i</span> <span class="token parameter variable">-n</span> wordpress deploy/wordpress <span class="token parameter variable">-c</span> mariadb -- mariadb <span class="token parameter variable">-uroot</span> -p<span class="token string">'RootK8sLab2026!'</span> wordpress <span class="token operator">&lt;&lt;</span><span class="token string">SQL
+UPDATE wp_users SET user_pass='<span class="token variable">$NEWHASH</span>' WHERE user_login='USUARIO';
+SQL</span>
+
+<span class="token comment"># 4. Vaciar cache de Redis (si no, el login sigue fallando con datos cacheados)</span>
+kubectl <span class="token builtin class-name">exec</span> <span class="token parameter variable">-n</span> wordpress deploy/wordpress <span class="token parameter variable">-c</span> redis -- redis-cli FLUSHALL
+</code></pre><p><strong>Punto de control:</strong> iniciar sesion en <code>http://192.168.90.50/wp-login.php</code> con el <code>user_login</code> real y el password usado en el paso 2; debe redirigir a <code>/wp-admin/</code>.</p>
+<hr>
+<h1 id="15-validar-persistencia-real">15. Validar persistencia real </h1>
+<h2 id="151-crear-un-archivo-dentro-del-volumen-de-wordpress">15.1. Crear un archivo dentro del volumen de WordPress </h2>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+<span class="token assign-left variable">POD</span><span class="token operator">=</span><span class="token string">"<span class="token variable"><span class="token variable">$(</span>kubectl <span class="token parameter variable">-n</span> wordpress get pod <span class="token parameter variable">-l</span> <span class="token assign-left variable">app</span><span class="token operator">=</span>wordpress <span class="token parameter variable">-o</span> <span class="token assign-left variable">jsonpath</span><span class="token operator">=</span><span class="token string">'{.items[0].metadata.name}'</span><span class="token variable">)</span></span>"</span>
+
+kubectl <span class="token parameter variable">-n</span> wordpress <span class="token builtin class-name">exec</span> <span class="token string">"<span class="token variable">${POD}</span>"</span> <span class="token parameter variable">-c</span> wordpress -- <span class="token punctuation">\</span>
+  <span class="token function">sh</span> <span class="token parameter variable">-c</span> <span class="token string">'echo persistencia-cephfs &gt; /var/www/html/cephfs-check.txt &amp;&amp; cat /var/www/html/cephfs-check.txt'</span>
+</code></pre><h2 id="152-reiniciar-el-deployment-y-comprobar-que-el-archivo-sigue">15.2. Reiniciar el Deployment y comprobar que el archivo sigue </h2>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+kubectl <span class="token parameter variable">-n</span> wordpress rollout restart deployment/wordpress
+kubectl <span class="token parameter variable">-n</span> wordpress rollout status deployment/wordpress <span class="token parameter variable">--timeout</span><span class="token operator">=</span>300s
+
+<span class="token assign-left variable">POD</span><span class="token operator">=</span><span class="token string">"<span class="token variable"><span class="token variable">$(</span>kubectl <span class="token parameter variable">-n</span> wordpress get pod <span class="token parameter variable">-l</span> <span class="token assign-left variable">app</span><span class="token operator">=</span>wordpress <span class="token parameter variable">-o</span> <span class="token assign-left variable">jsonpath</span><span class="token operator">=</span><span class="token string">'{.items[0].metadata.name}'</span><span class="token variable">)</span></span>"</span>
+kubectl <span class="token parameter variable">-n</span> wordpress <span class="token builtin class-name">exec</span> <span class="token string">"<span class="token variable">${POD}</span>"</span> <span class="token parameter variable">-c</span> wordpress -- <span class="token function">cat</span> /var/www/html/cephfs-check.txt
+</code></pre><p>Esperado:</p>
+<pre data-role="codeBlock" data-info="text" class="language-text text"><code>persistencia-cephfs
+</code></pre><h2 id="153-validar-pvcs-despues-del-reinicio">15.3. Validar PVCs despues del reinicio </h2>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+kubectl <span class="token parameter variable">-n</span> wordpress get pvc
+kubectl <span class="token parameter variable">-n</span> wordpress get pods <span class="token parameter variable">-o</span> wide
+kubectl <span class="token parameter variable">-n</span> wordpress get svc wordpress-lb
+</code></pre><hr>
+<h1 id="16-checklist-final-de-esta-guia">16. Checklist final de esta guia </h1>
+<table>
+<thead>
+<tr>
+<th>Requisito PDF</th>
+<th>Estado esperado con esta guia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 master + 3 workers</td>
+<td>Ya cumplido en la guia principal</td>
+</tr>
+<tr>
+<td>Dashboard web</td>
+<td>Ya cumplido por Dashboard NodePort <code>32000</code></td>
+</tr>
+<tr>
+<td>WordPress + BD + Redis en un Pod</td>
+<td>Cumplido por Deployment <code>wordpress</code> con 3 contenedores</td>
+</tr>
+<tr>
+<td>Disco persistente CephFS</td>
+<td>Cumplido por PVCs <code>wordpress-content</code>, <code>wordpress-db</code>, <code>wordpress-redis</code></td>
+</tr>
+<tr>
+<td>IP diferente a la del master</td>
+<td>Cumplido por MetalLB <code>192.168.90.50</code></td>
+</tr>
+<tr>
+<td>Acceso web</td>
+<td>Para esta practica: <code>http://192.168.90.50/</code> sin SSL/HTTPS</td>
+</tr>
+</tbody>
+</table>
+<p>Validacion resumida:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+kubectl get nodes
+kubectl <span class="token parameter variable">-n</span> wordpress get pods
+kubectl <span class="token parameter variable">-n</span> wordpress get pvc
+kubectl <span class="token parameter variable">-n</span> wordpress get svc wordpress-lb
+kubectl <span class="token parameter variable">-n</span> metallb-system get ipaddresspool,l2advertisement
+</code></pre><p>Validacion desde anfitrion:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: anfitrion</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token function">curl</span> <span class="token parameter variable">-I</span> http://192.168.90.50/
+</code></pre><hr>
+<h1 id="17-troubleshooting-rapido">17. Troubleshooting rapido </h1>
+<h2 id="171-pvc-queda-en-pending">17.1. PVC queda en <code>Pending</code> </h2>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+kubectl describe pvc cephfs-test
+kubectl <span class="token parameter variable">-n</span> wordpress describe pvc wordpress-content
+kubectl get events <span class="token parameter variable">-A</span> --sort-by<span class="token operator">=</span>.lastTimestamp <span class="token operator">|</span> <span class="token function">tail</span> <span class="token parameter variable">-n</span> <span class="token number">100</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph get pods
+kubectl <span class="token parameter variable">-n</span> rook-ceph logs deploy/rook-ceph-operator <span class="token parameter variable">--tail</span><span class="token operator">=</span><span class="token number">200</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph <span class="token builtin class-name">exec</span> deploy/rook-ceph-tools -- ceph <span class="token parameter variable">-s</span>
+</code></pre><p>Causas probables:</p>
+<table>
+<thead>
+<tr>
+<th>Sintoma</th>
+<th>Causa probable</th>
+<th>Accion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rook-ceph-osd-prepare-*</code> no llega a <code>Completed</code></td>
+<td>El disco <code>vdb</code> no esta vacio o no llego a la VM</td>
+<td>Revisar 6.1 (<code>virsh domblklist</code>, <code>lsblk</code>), limpiar con <code>wipefs -a /dev/vdb</code> si no tiene datos utiles</td>
+</tr>
+<tr>
+<td><code>no mds is up</code></td>
+<td>CephFilesystem/MDS no sano</td>
+<td>Validar <code>kubectl -n rook-ceph get pod -l app=rook-ceph-mds</code> y <code>ceph fs status myfs</code> desde el toolbox</td>
+</tr>
+<tr>
+<td>PVC sigue en <code>Pending</code> tras corregir el CephCluster</td>
+<td>El operador de Rook o el CSI mantienen estado viejo</td>
+<td><code>kubectl -n rook-ceph rollout restart deployment/rook-ceph-operator</code> y reintentar</td>
+</tr>
+<tr>
+<td><code>CephCluster</code> no llega a <code>Ready</code></td>
+<td>Falta el modulo de kernel <code>ceph</code> en algun nodo</td>
+<td>Repetir 6.2 en los 4 nodos y revisar <code>kubectl -n rook-ceph get pods -o wide</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="172-wordpress-queda-en-containercreating">17.2. WordPress queda en <code>ContainerCreating</code> </h2>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+kubectl <span class="token parameter variable">-n</span> wordpress describe pod <span class="token parameter variable">-l</span> <span class="token assign-left variable">app</span><span class="token operator">=</span>wordpress
+kubectl <span class="token parameter variable">-n</span> wordpress get pvc
+</code></pre><p>Revisar primero montajes de PVC.</p>
+<h2 id="173-wordpress-queda-en-crashloopbackoff">17.3. WordPress queda en <code>CrashLoopBackOff</code> </h2>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+<span class="token assign-left variable">POD</span><span class="token operator">=</span><span class="token string">"<span class="token variable"><span class="token variable">$(</span>kubectl <span class="token parameter variable">-n</span> wordpress get pod <span class="token parameter variable">-l</span> <span class="token assign-left variable">app</span><span class="token operator">=</span>wordpress <span class="token parameter variable">-o</span> <span class="token assign-left variable">jsonpath</span><span class="token operator">=</span><span class="token string">'{.items[0].metadata.name}'</span><span class="token variable">)</span></span>"</span>
+kubectl <span class="token parameter variable">-n</span> wordpress logs <span class="token string">"<span class="token variable">${POD}</span>"</span> <span class="token parameter variable">-c</span> wordpress <span class="token parameter variable">--tail</span><span class="token operator">=</span><span class="token number">100</span>
+kubectl <span class="token parameter variable">-n</span> wordpress logs <span class="token string">"<span class="token variable">${POD}</span>"</span> <span class="token parameter variable">-c</span> mariadb <span class="token parameter variable">--tail</span><span class="token operator">=</span><span class="token number">100</span>
+kubectl <span class="token parameter variable">-n</span> wordpress logs <span class="token string">"<span class="token variable">${POD}</span>"</span> <span class="token parameter variable">-c</span> redis <span class="token parameter variable">--tail</span><span class="token operator">=</span><span class="token number">100</span>
+</code></pre><h2 id="174-1921689050-no-responde">17.4. <code>192.168.90.50</code> no responde </h2>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+kubectl <span class="token parameter variable">-n</span> wordpress get svc wordpress-lb <span class="token parameter variable">-o</span> wide
+kubectl <span class="token parameter variable">-n</span> wordpress get endpoints wordpress-lb
+kubectl <span class="token parameter variable">-n</span> metallb-system get pods <span class="token parameter variable">-o</span> wide
+kubectl <span class="token parameter variable">-n</span> metallb-system logs deployment/controller <span class="token parameter variable">--tail</span><span class="token operator">=</span><span class="token number">100</span>
+</code></pre><p>Desde anfitrion:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: anfitrion</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token function">ping</span> <span class="token parameter variable">-c</span> <span class="token number">3</span> <span class="token number">192.168</span>.90.50
+<span class="token function">curl</span> <span class="token parameter variable">-v</span> http://192.168.90.50/
+</code></pre><hr>
+<h1 id="18-limpieza-opcional-de-esta-fase">18. Limpieza opcional de esta fase </h1>
+<blockquote>
+<p>Ejecutar solo si quieres desmontar WordPress y MetalLB. No borres CephFS si quieres conservar datos.</p>
+</blockquote>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+kubectl <span class="token parameter variable">-n</span> wordpress delete svc wordpress-lb --ignore-not-found
+kubectl <span class="token parameter variable">-n</span> wordpress delete deployment wordpress --ignore-not-found
+kubectl <span class="token parameter variable">-n</span> wordpress delete svc wordpress --ignore-not-found
+</code></pre><p>Para borrar tambien datos persistentes de WordPress:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+kubectl <span class="token parameter variable">-n</span> wordpress delete pvc wordpress-content wordpress-db wordpress-redis --ignore-not-found
+kubectl delete namespace wordpress --ignore-not-found
+</code></pre><blockquote>
+<p>Si borras los PVCs, Ceph CSI eliminara los subvolumenes dinamicos porque el <code>StorageClass</code> usa <code>reclaimPolicy: Delete</code>.</p>
+</blockquote>
+<hr>
+<h1 id="181-opcional-habilitar-el-dashboard-de-ceph-sin-ssl">18.1. [Opcional] Habilitar el dashboard de Ceph sin SSL </h1>
+<p>No es un requisito del PDF (el requerimiento 2 ya lo cubre el Dashboard<br>
+de Kubernetes), pero es de muy bajo costo: el dashboard de Ceph no crea<br>
+ningun Pod nuevo, solo activa un modulo dentro del Pod <code>rook-ceph-mgr-a</code><br>
+que ya esta <code>Running</code>. Se sigue la <a href="https://rook.io/docs/rook/latest-release/Storage-Configuration/Monitoring/ceph-dashboard/">documentacion oficial de Rook</a>,<br>
+usando <code>ssl: false</code> para no tener que lidiar con el certificado<br>
+autofirmado, igual que el resto de esta guia evita TLS.</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+<span class="token comment"># Habilita el modulo dashboard del mgr, sin SSL, en el puerto 7000</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph patch cephcluster rook-ceph <span class="token parameter variable">--type</span> merge <span class="token punctuation">\</span>
+  <span class="token parameter variable">-p</span> <span class="token string">'{"spec":{"dashboard":{"enabled":true,"ssl":false,"port":7000}}}'</span>
+
+<span class="token comment"># Espera a que Rook cree el Service del dashboard con el puerto 7000/TCP</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph get svc rook-ceph-mgr-dashboard <span class="token parameter variable">-w</span>
+</code></pre><p>Presiona <code>Ctrl+C</code> en cuanto <code>rook-ceph-mgr-dashboard</code> aparezca con<br>
+<code>PORT(S)</code> en <code>7000/TCP</code> (puede tardar uno o dos minutos en reconciliar).</p>
+<blockquote>
+<p><strong>Importante:</strong> NO uses <code>kubectl patch svc rook-ceph-mgr-dashboard -p '{"spec":{"type":"NodePort"}}'</code> para exponerlo. El Service<br>
+<code>rook-ceph-mgr-dashboard</code> lo posee y reconcilia el operador de Rook, que<br>
+lo resetea a <code>ClusterIP</code> en su siguiente ciclo de reconciliacion (pocos<br>
+minutos despues). El sintoma es: funciona un rato, luego "Connection<br>
+refused" desde el anfitrion aunque <code>kubectl get svc</code> mostraba <code>NodePort</code><br>
+momentos antes. La forma persistente es crear un Service <strong>adicional</strong>,<br>
+no gestionado por Rook, con el mismo selector de Pods.</p>
+</blockquote>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+<span class="token comment"># Crea un Service NodePort propio (no tocado por el operador de Rook)</span>
+<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">'YAML'<span class="token bash punctuation"> <span class="token operator">|</span> kubectl apply <span class="token parameter variable">-f</span> -</span>
+apiVersion: v1
+kind: Service
+metadata:
+  name: rook-ceph-mgr-dashboard-external
+  namespace: rook-ceph
+spec:
+  type: NodePort
+  selector:
+    app: rook-ceph-mgr
+    mgr_role: active
+    rook_cluster: rook-ceph
+  ports:
+    - name: dashboard
+      port: 7000
+      targetPort: 7000
+      nodePort: 32174
+YAML</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph get svc rook-ceph-mgr-dashboard-external
+
+<span class="token comment"># Contrasena autogenerada por Rook para el usuario admin</span>
+kubectl <span class="token parameter variable">-n</span> rook-ceph get secret rook-ceph-dashboard-password <span class="token parameter variable">-o</span> <span class="token assign-left variable">jsonpath</span><span class="token operator">=</span><span class="token string">"{['data']['password']}"</span> <span class="token operator">|</span> base64 --decode<span class="token punctuation">;</span> <span class="token builtin class-name">echo</span>
+</code></pre><p>Punto de control: <code>get svc rook-ceph-mgr-dashboard-external</code> debe mostrar<br>
+<code>TYPE NodePort</code> con <code>7000:32174/TCP</code> de forma estable (repetir el <code>get</code><br>
+varias veces con minutos de diferencia para confirmar que no vuelve a<br>
+<code>ClusterIP</code>). Con ese <code>NodePort</code> y la contrasena impresa, accede desde el<br>
+anfitrion:</p>
+<pre data-role="codeBlock" data-info="text" class="language-text text"><code>http://192.168.90.1:32174/
+</code></pre><table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Usuario</td>
+<td><code>admin</code></td>
+</tr>
+<tr>
+<td>Password</td>
+<td>La impresa por el comando anterior (<code>rook-ceph-dashboard-password</code>)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="182-opcionalrecomendado-cambiar-el-password-del-dashboard-a-solo-letras-y-numeros">18.2. [Opcional/Recomendado] Cambiar el password del dashboard a solo letras y numeros </h2>
+<p>El password autogenerado por Rook trae simbolos (incluye backtick), faciles<br>
+de perder al copiar desde una terminal o un chat. Se puede reemplazar por<br>
+uno con solo letras/numeros directamente en Ceph (no toca el Secret de<br>
+Kubernetes, solo la base de datos interna del modulo dashboard):</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># NODO: k8-master</span>
+<span class="token comment"># RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+
+<span class="token comment"># Genera un password alfanumerico y lo copia al Pod del toolbox como archivo</span>
+<span class="token assign-left variable">NEWPASS</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">tr</span> <span class="token parameter variable">-dc</span> <span class="token string">'A-Za-z0-9'</span> <span class="token operator">&lt;</span> /dev/urandom <span class="token operator">|</span> <span class="token function">head</span> <span class="token parameter variable">-c</span> <span class="token number">20</span><span class="token variable">)</span></span>
+<span class="token builtin class-name">echo</span> <span class="token string">"Nuevo password: <span class="token variable">$NEWPASS</span>"</span>
+<span class="token builtin class-name">printf</span> <span class="token string">'%s'</span> <span class="token string">"<span class="token variable">$NEWPASS</span>"</span> <span class="token operator">&gt;</span> /tmp/cephpass.txt
+<span class="token assign-left variable">PODNAME</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span>kubectl get pod <span class="token parameter variable">-n</span> rook-ceph <span class="token parameter variable">-l</span> <span class="token assign-left variable">app</span><span class="token operator">=</span>rook-ceph-tools <span class="token parameter variable">-o</span> <span class="token assign-left variable">jsonpath</span><span class="token operator">=</span><span class="token string">'{.items[0].metadata.name}'</span><span class="token variable">)</span></span>
+kubectl <span class="token function">cp</span> /tmp/cephpass.txt rook-ceph/<span class="token variable">$PODNAME</span>:/tmp/cephpass.txt
+kubectl <span class="token parameter variable">-n</span> rook-ceph <span class="token builtin class-name">exec</span> <span class="token string">"<span class="token variable">$PODNAME</span>"</span> -- ceph dashboard ac-user-set-password admin <span class="token parameter variable">-i</span> /tmp/cephpass.txt
+</code></pre><p>Punto de control: probar login por API antes de usar el navegador:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token function">curl</span> <span class="token parameter variable">-sk</span> <span class="token parameter variable">-X</span> POST <span class="token string">"http://192.168.90.1:32174/api/auth"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">"Accept: application/vnd.ceph.api.v1.0+json"</span> <span class="token parameter variable">-H</span> <span class="token string">"Content-Type: application/json"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-d</span> <span class="token string">"{<span class="token entity" title="\&quot;">\"</span>username<span class="token entity" title="\&quot;">\"</span>:<span class="token entity" title="\&quot;">\"</span>admin<span class="token entity" title="\&quot;">\"</span>,<span class="token entity" title="\&quot;">\"</span>password<span class="token entity" title="\&quot;">\"</span>:<span class="token entity" title="\&quot;">\"</span><span class="token variable">$NEWPASS</span><span class="token entity" title="\&quot;">\"</span>}"</span>
+</code></pre><p>Debe devolver un JSON con un campo <code>"token"</code> (JWT). Si devuelve<br>
+<code>"Invalid credentials"</code>, revisar que <code>$NEWPASS</code> no se corrompio en la<br>
+terminal (verificar con <code>od -c</code> o <code>xxd</code> sobre el archivo antes de usarlo).</p>
+<hr>
+<h1 id="19-accesos-rapidos-a-todas-las-interfaces-desde-el-anfitrion">19. Accesos rapidos a todas las interfaces desde el anfitrion </h1>
+<p>Tabla resumen de rutas y credenciales para entrar a cada interfaz del laboratorio, todas alcanzables desde el <strong>anfitrion</strong> (host KVM) sin pasos adicionales.</p>
+<table>
+<thead>
+<tr>
+<th>Interfaz</th>
+<th>Ruta desde el anfitrion</th>
+<th>Usuario</th>
+<th>Password / credencial</th>
+<th>Notas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>WordPress (sitio publico)</td>
+<td><code>http://192.168.90.50/</code></td>
+<td>—</td>
+<td>—</td>
+<td>IP flotante MetalLB, sin login</td>
+</tr>
+<tr>
+<td>WordPress (wp-admin)</td>
+<td><code>http://192.168.90.50/wp-admin/</code></td>
+<td><code>uceda</code> (verificar, ver seccion 3.2)</td>
+<td><code>WordPressK8sLab2026!</code></td>
+<td>Definido en el asistente inicial de WordPress (seccion 14); si falla el login ver seccion 14.1</td>
+</tr>
+<tr>
+<td>Kubernetes Dashboard</td>
+<td><code>https://192.168.90.1:32000</code></td>
+<td><code>admin-user</code></td>
+<td>Token temporal</td>
+<td>Generar con <code>kubectl -n kubernetes-dashboard create token admin-user</code> desde <code>k8-master</code></td>
+</tr>
+<tr>
+<td>NGINX de prueba</td>
+<td><code>http://192.168.90.1:30885</code> (o cualquier nodo)</td>
+<td>—</td>
+<td>—</td>
+<td>NodePort de prueba de la guia principal</td>
+</tr>
+<tr>
+<td>SSH <code>k8-master</code></td>
+<td><code>ssh uceda@192.168.90.1</code></td>
+<td><code>uceda</code></td>
+<td>Llave <code>~/.ssh/id_ed25519</code></td>
+<td>Nodo donde se ejecuta <code>kubectl</code></td>
+</tr>
+<tr>
+<td>SSH <code>k8-worker1/2/3</code></td>
+<td><code>ssh uceda@192.168.90.2</code> / <code>.3</code> / <code>.4</code></td>
+<td><code>uceda</code></td>
+<td>Llave <code>~/.ssh/id_ed25519</code></td>
+<td>Workers del cluster</td>
+</tr>
+<tr>
+<td>Ceph (Rook toolbox)</td>
+<td><code>http://192.168.90.1:32174/</code></td>
+<td><code>admin</code></td>
+<td><code>13tAxYZaHbq0ujaxTkmU</code></td>
+<td>Habilitado con la seccion 18.1 mediante Service propio <code>rook-ceph-mgr-dashboard-external</code> (NodePort fijo 32174); password cambiado a solo letras/numeros en la seccion 18.2; tambien disponible por CLI con <code>kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph -s</code></td>
+</tr>
+<tr>
+<td>MariaDB / Redis</td>
+<td>Sin exposicion externa</td>
+<td>—</td>
+<td>Ver seccion 3.2</td>
+<td>Solo accesibles dentro del Pod <code>wordpress</code> (<code>127.0.0.1:3306</code> / <code>127.0.0.1:6379</code>)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Todas las contrasenas de esta tabla son de laboratorio (ver seccion 3.2). No las reutilices en entornos reales.</p>
+</blockquote>
+<hr>
+<h1 id="20-inventario-de-archivos-de-configuracion-criticos">20. Inventario de archivos de configuracion criticos </h1>
+<p>Lista de los archivos/recursos mas criticos de todo lo levantado en esta<br>
+guia, verificados directamente sobre el laboratorio el 2026-08-26.</p>
+<blockquote>
+<p><strong>Hallazgo importante:</strong> los manifiestos YAML aplicados con <code>kubectl apply -f /tmp/*.yaml</code> a lo largo de esta guia (CephCluster,<br>
+CephFilesystem, StorageClass, PVCs y Deployment de WordPress, pool de<br>
+MetalLB) <strong>ya no existen</strong> en <code>/tmp</code> de <code>k8-master</code> (se limpian solos,<br>
+es normal en Linux). Hoy la unica fuente de verdad de esos recursos es<br>
+<code>etcd</code> (el cluster vivo) y el texto de esta misma guia. Si <code>k8-master</code><br>
+se corrompiera sin haber hecho un backup real de <code>etcd</code>, la unica forma<br>
+de reconstruir esos recursos seria copiar el YAML desde las secciones<br>
+6, 7, 9-13 y 18 de este documento.</p>
+</blockquote>
+<h2 id="201-host-anfitrion--libvirtkvm">20.1. Host (anfitrion) — libvirt/KVM </h2>
+<table>
+<thead>
+<tr>
+<th>Archivo</th>
+<th>Ruta</th>
+<th>Que es</th>
+<th>Por que es critico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Red virtual <code>k8s-lab</code></td>
+<td><code>kubernetes/net/k8s-lab-network.xml</code></td>
+<td>XML de definicion de red libvirt (<code>virsh net-define</code>): bridge, rango DHCP y modo NAT/aislado de la subred del laboratorio</td>
+<td>Define la subred <code>192.168.90.0/24</code>; si se pierde, las VMs pierden DHCP/bridge</td>
+</tr>
+<tr>
+<td>cloud-init de cada VM</td>
+<td><code>kubernetes/cloud-init/</code> (<code>k8-master/worker1/2/3-user-data</code>, <code>-meta-data</code>, <code>-seed.iso</code>)</td>
+<td><code>user-data</code>/<code>meta-data</code> en formato cloud-init (YAML): usuario inicial, llave SSH publica, hostname; <code>-seed.iso</code> es la imagen ISO ya empaquetada que se monta como CD-ROM en la VM al primer arranque</td>
+<td>Usuario <code>uceda</code>, SSH keys, hostname; necesarios para recrear una VM desde cero</td>
+</tr>
+<tr>
+<td>Discos qcow2</td>
+<td><code>/var/lib/libvirt/images/k8s-lab/*.qcow2</code> (incluye <code>*-ceph-osd.qcow2</code> de la seccion 6.1)</td>
+<td>Imagenes de disco virtual formato QEMU COW2: el disco raiz de cada VM (SO + todo lo instalado) y el disco crudo <code>vdb</code> dedicado a cada OSD de Ceph</td>
+<td>Estado completo de cada VM y de los OSDs de Ceph</td>
+</tr>
+</tbody>
+</table>
+<h2 id="202-k8-master--control-plane-kubernetes">20.2. <code>k8-master</code> — control plane Kubernetes </h2>
+<table>
+<thead>
+<tr>
+<th>Archivo</th>
+<th>Ruta</th>
+<th>Que es</th>
+<th>Por que es critico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>kubeconfig admin</td>
+<td><code>/home/uceda/.kube/config</code> (copia de <code>/etc/kubernetes/admin.conf</code>)</td>
+<td>YAML con la URL del API server, la CA del cluster y el certificado/llave del usuario <code>kubernetes-admin</code>; es lo que usa <code>kubectl</code> para autenticarse</td>
+<td>Sin esto no hay <code>kubectl</code>; usado en cada comando de la guia</td>
+</tr>
+<tr>
+<td>Certificados/config kubeadm</td>
+<td><code>/etc/kubernetes/</code> (<code>admin.conf</code>, <code>pki/</code>)</td>
+<td>Carpeta con la Autoridad Certificadora (CA) del cluster y todos los certificados/llaves TLS generados por <code>kubeadm init</code> (API server, etcd, kubelet, front-proxy)</td>
+<td>Identidad del cluster (CA, certs de API server/etcd)</td>
+</tr>
+<tr>
+<td>containerd</td>
+<td><code>/etc/containerd/config.toml</code></td>
+<td>Archivo TOML de configuracion del runtime de contenedores: registries, <code>sandbox_image</code>, plugins CRI</td>
+<td>Runtime de contenedores de los 4 nodos</td>
+</tr>
+<tr>
+<td>kubelet</td>
+<td><code>/var/lib/kubelet/config.yaml</code></td>
+<td>YAML generado por kubeadm con los parametros del kubelet de ese nodo (cgroup driver, puertos, autenticacion al API server)</td>
+<td>Config del kubelet por nodo</td>
+</tr>
+<tr>
+<td>Datos de etcd</td>
+<td><code>/var/lib/etcd/</code> (en <code>k8-master</code>)</td>
+<td>Base de datos clave-valor (BoltDB) donde Kubernetes guarda literalmente todos sus objetos (Pods, Secrets, ConfigMaps, CRDs como <code>CephCluster</code>, etc.)</td>
+<td><strong>El mas critico de todos</strong>: todo el estado del cluster (todos los objetos, Secrets, CephCluster, Deployments) vive aqui. Si se pierde sin backup, se pierde el cluster completo</td>
+</tr>
+</tbody>
+</table>
+<h2 id="203-rook-ceph">20.3. Rook-Ceph </h2>
+<table>
+<thead>
+<tr>
+<th>Recurso</th>
+<th>Ubicacion</th>
+<th>Que es</th>
+<th>Por que es critico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CephCluster</code> CR</td>
+<td>Solo en etcd (namespace <code>rook-ceph</code>) — YAML fuente en <code>tmp/03-rook-cluster.yaml</code> y seccion 6.4</td>
+<td>Custom Resource de Rook que declara cuantos mon/mgr quiere el cluster, que imagen de Ceph usar y en que discos (<code>vdb</code>) crear los OSD; el operador de Rook lo lee y crea/mantiene todo lo demas</td>
+<td>Define mons/mgr/OSDs; sin backup del YAML, hay que reconstruirlo a mano</td>
+</tr>
+<tr>
+<td>Datos de monitores Ceph</td>
+<td><code>/var/lib/rook</code> en cada nodo mon (<code>dataDirHostPath</code>)</td>
+<td>Directorio en disco de cada nodo con el <code>monmap</code>, el keyring del cluster y el estado interno del monitor Ceph de ese nodo</td>
+<td>Mapa de OSDs, quorum; perder los 3 a la vez = perder el cluster Ceph</td>
+</tr>
+<tr>
+<td><code>CephFilesystem</code>/<code>StorageClass</code></td>
+<td>Solo en etcd — YAML fuente en <code>tmp/04-rook-filesystem.yaml</code>, <code>tmp/05-cephfs-storageclass.yaml</code> y seccion 7</td>
+<td>El primero declara el filesystem CephFS <code>myfs</code> (pools de datos/metadatos, MDS); el segundo es el objeto Kubernetes que le dice al CSI de Rook como aprovisionar PVCs sobre ese filesystem</td>
+<td>Necesarios para que los PVC sigan aprovisionando</td>
+</tr>
+<tr>
+<td>Secrets CSI (<code>rook-csi-cephfs-provisioner/node</code>)</td>
+<td>Namespace <code>rook-ceph</code>, autogenerados por Rook</td>
+<td><code>Secret</code> de Kubernetes con las llaves CephX (<code>aes</code>, 28 bytes) que usa el driver CSI para autenticarse contra el cluster Ceph al crear/montar volumenes</td>
+<td>Credenciales que usa el CSI para montar CephFS</td>
+</tr>
+</tbody>
+</table>
+<h2 id="204-wordpress">20.4. WordPress </h2>
+<table>
+<thead>
+<tr>
+<th>Archivo</th>
+<th>Ubicacion</th>
+<th>Que es</th>
+<th>Por que es critico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>wp-config.php</code></td>
+<td>Dentro del Pod (<code>/var/www/html/wp-config.php</code>), generado por variables de entorno del Deployment</td>
+<td>Archivo PHP estandar de WordPress con los datos de conexion a la BD (host/usuario/password), las <code>AUTH_KEY</code>/<code>SALT</code> y el prefijo de tablas; en esta imagen Docker se genera solo, leyendo las variables <code>WORDPRESS_DB_*</code>/<code>WORDPRESS_CONFIG_EXTRA</code> del Deployment</td>
+<td>Conexion a BD, claves; si cambia el Secret sin actualizar esto, WordPress deja de arrancar</td>
+</tr>
+<tr>
+<td><code>Secret wordpress-secrets</code></td>
+<td>Namespace <code>wordpress</code> (YAML fuente en <code>tmp/02-wordpress-secrets.yaml</code>, no versionado, ver seccion 21)</td>
+<td><code>Secret</code> de Kubernetes tipo <code>Opaque</code> con 3 claves: <code>mariadb-root-password</code>, <code>mariadb-password</code>, <code>wordpress-admin-password</code></td>
+<td>Passwords de MariaDB root/wordpress y el sugerido de WP admin</td>
+</tr>
+<tr>
+<td>Datos en PVCs CephFS</td>
+<td><code>wordpress-content</code>, <code>wordpress-db</code>, <code>wordpress-redis</code></td>
+<td>Volumenes CephFS montados en <code>/var/www/html</code> (plugins/temas/uploads), <code>/var/lib/mysql</code> (datos de MariaDB) y <code>/data</code> (AOF de Redis) respectivamente</td>
+<td>Todo el contenido real del sitio, la base de datos y el cache persistente</td>
+</tr>
+</tbody>
+</table>
+<h2 id="205-este-mismo-repositorio">20.5. Este mismo repositorio </h2>
+<table>
+<thead>
+<tr>
+<th>Archivo</th>
+<th>Que es</th>
+<th>Por que es critico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Este documento (<code>kubernetes/guia_continuacion_wordpress_cephfs_lab.md</code>)</td>
+<td>Runbook Markdown con explicacion, comandos y el YAML completo de cada paso ejecutado en el laboratorio</td>
+<td>Unica copia versionada de <strong>todos</strong> los manifiestos YAML aplicados (Rook, StorageClass, WordPress, MetalLB) — es el respaldo de facto mientras no se exporte el estado vivo del cluster a archivos separados</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h1 id="21-respaldo-de-los-manifiestos-yaml-en-tmp">21. Respaldo de los manifiestos YAML en <code>tmp/</code> </h1>
+<p>Los YAML de las secciones 6 a 18 se escribieron originalmente en <code>/tmp</code><br>
+de <code>k8-master</code> y se perdieron de ahi (comportamiento normal de Linux,<br>
+ver seccion 20). Se recrearon con contenido identico y quedaron<br>
+versionados en este repositorio, en la carpeta <code>tmp/</code> (raiz del<br>
+repositorio, junto a <code>ansible/</code>, <code>kubernetes/</code>, etc.), para poder<br>
+reaplicarlos sin tener que copiarlos a mano desde esta guia.</p>
+<p>Para reaplicar cualquiera de estos archivos desde <code>k8-master</code>:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span><span class="token string">"/home/uceda/.kube/config"</span>
+kubectl apply <span class="token parameter variable">-f</span> <span class="token operator">&lt;</span>archivo<span class="token operator">&gt;</span>.yaml
+</code></pre><table>
+<thead>
+<tr>
+<th>Archivo</th>
+<th>Seccion de esta guia</th>
+<th>Que es</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tmp/01-wordpress-namespace.yaml</code></td>
+<td>9</td>
+<td><code>Namespace wordpress</code></td>
+</tr>
+<tr>
+<td><code>tmp/02-wordpress-secrets.yaml</code></td>
+<td>9</td>
+<td><code>Secret wordpress-secrets</code> (passwords de MariaDB/WordPress). <strong>No versionado en git</strong> (bloqueado por <code>.gitignore: **/*secret*</code>); solo existe en disco local</td>
+</tr>
+<tr>
+<td><code>tmp/03-rook-cluster.yaml</code></td>
+<td>6.4</td>
+<td><code>CephCluster</code> (3 mon, 1 mgr, 3 OSD sobre el disco <code>vdb</code> de cada worker)</td>
+</tr>
+<tr>
+<td><code>tmp/04-rook-filesystem.yaml</code></td>
+<td>7.1</td>
+<td><code>CephFilesystem myfs</code> + <code>CephFilesystemSubVolumeGroup csi</code></td>
+</tr>
+<tr>
+<td><code>tmp/05-cephfs-storageclass.yaml</code></td>
+<td>7.2</td>
+<td><code>StorageClass cephfs-storage</code> (provisioner CSI de Rook)</td>
+</tr>
+<tr>
+<td><code>tmp/06-wordpress-pvcs.yaml</code></td>
+<td>10</td>
+<td>PVCs <code>wordpress-content</code> (5Gi RWX), <code>wordpress-db</code> (5Gi RWO), <code>wordpress-redis</code> (1Gi RWO)</td>
+</tr>
+<tr>
+<td><code>tmp/07-wordpress-cephfs.yaml</code></td>
+<td>11</td>
+<td><code>Deployment wordpress</code> (contenedores <code>wordpress</code>/<code>mariadb</code>/<code>redis</code>) + <code>Service wordpress</code> (ClusterIP)</td>
+</tr>
+<tr>
+<td><code>tmp/08-metallb-k8s-lab-pool.yaml</code></td>
+<td>12.2</td>
+<td><code>IPAddressPool k8s-lab-pool</code> + <code>L2Advertisement k8s-lab-advertisement</code> (IP <code>192.168.90.50</code>)</td>
+</tr>
+<tr>
+<td><code>tmp/09-wordpress-lb-http.yaml</code></td>
+<td>13</td>
+<td><code>Service wordpress-lb</code> tipo <code>LoadBalancer</code>, IP fija <code>192.168.90.50</code></td>
+</tr>
+<tr>
+<td><code>tmp/10-rook-ceph-mgr-dashboard-external.yaml</code></td>
+<td>18.1</td>
+<td><code>Service</code> <code>NodePort</code> propio del dashboard de Ceph (puerto <code>32174</code>), <strong>no gestionado por Rook</strong> (ver advertencia de la seccion 18.1 sobre por que no usar <code>kubectl patch svc</code> directo)</td>
+</tr>
+<tr>
+<td><code>tmp/test-cephfs-pvc.yaml</code></td>
+<td>8.1</td>
+<td>PVC de prueba <code>cephfs-test</code> — solo para validar el CSI, no es parte del despliegue final</td>
+</tr>
+<tr>
+<td><code>tmp/test-cephfs-pod.yaml</code></td>
+<td>8.2</td>
+<td>Pod de prueba <code>cephfs-test-pod</code> — solo para validar el CSI, no es parte del despliegue final</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Estos archivos reflejan el estado en el que se aplicaron durante esta<br>
+guia. Si mas adelante se modifica algo directamente con <code>kubectl edit</code><br>
+o <code>kubectl patch</code> sin actualizar el archivo correspondiente, el YAML de<br>
+<code>tmp/</code> queda desactualizado respecto al cluster real.</p>
+</blockquote>
+<hr>
+<h1 id="22-los-20-comandos-mas-criticos-de-este-entorno">22. Los 20 comandos mas criticos de este entorno </h1>
+<p>Tabla de referencia rapida con los comandos de diagnostico y<br>
+configuracion mas usados en este laboratorio, con el nodo donde se<br>
+ejecutan y para que sirven. Todos son de solo lectura o de mantenimiento<br>
+puntual (ninguno borra datos por si solo).</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:right">#</th>
+<th>Nodo / Servicio</th>
+<th>Comando</th>
+<th>Para que sirve</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right">1</td>
+<td><code>anfitrion</code></td>
+<td><code>virsh list --all</code></td>
+<td>Ver que VMs estan <code>running</code>/<code>shut off</code></td>
+</tr>
+<tr>
+<td style="text-align:right">2</td>
+<td><code>anfitrion</code></td>
+<td><code>virsh net-dhcp-leases k8s-lab</code></td>
+<td>Ver las IPs asignadas a cada VM en la red del laboratorio</td>
+</tr>
+<tr>
+<td style="text-align:right">3</td>
+<td><code>anfitrion</code></td>
+<td><code>ssh uceda@192.168.90.1</code></td>
+<td>Conectarse a <code>k8-master</code> para ejecutar <code>kubectl</code> (el anfitrion no tiene kubeconfig propio)</td>
+</tr>
+<tr>
+<td style="text-align:right">4</td>
+<td><code>k8-master</code></td>
+<td><code>export KUBECONFIG="/home/uceda/.kube/config"</code></td>
+<td>Requisito previo a cualquier comando <code>kubectl</code> en este laboratorio</td>
+</tr>
+<tr>
+<td style="text-align:right">5</td>
+<td><code>k8-master</code></td>
+<td><code>kubectl get nodes -o wide</code></td>
+<td>Confirmar que los 4 nodos (<code>k8-master</code>/<code>worker1/2/3</code>) estan <code>Ready</code></td>
+</tr>
+<tr>
+<td style="text-align:right">6</td>
+<td><code>k8-master</code></td>
+<td><code>kubectl get pods -A</code></td>
+<td>Ver el estado de todos los Pods del cluster, detectar <code>CrashLoopBackOff</code>/<code>Pending</code></td>
+</tr>
+<tr>
+<td style="text-align:right">7</td>
+<td><code>k8-master</code></td>
+<td><code>kubectl -n wordpress get pod -l app=wordpress -o wide</code></td>
+<td>Ver si WordPress esta <code>Running</code> y en que nodo (<code>NODE</code>) esta programado</td>
+</tr>
+<tr>
+<td style="text-align:right">8</td>
+<td><code>k8-master</code></td>
+<td><code>kubectl -n wordpress logs deploy/wordpress -c wordpress --tail=100</code></td>
+<td>Ver logs del contenedor WordPress si algo falla</td>
+</tr>
+<tr>
+<td style="text-align:right">9</td>
+<td><code>k8-master</code></td>
+<td><code>kubectl -n wordpress logs deploy/wordpress -c mariadb --tail=100</code></td>
+<td>Ver logs de MariaDB dentro del mismo Pod</td>
+</tr>
+<tr>
+<td style="text-align:right">10</td>
+<td><code>k8-master</code></td>
+<td><code>kubectl -n wordpress exec deploy/wordpress -c redis -- redis-cli FLUSHALL</code></td>
+<td>Vaciar cache de Redis (necesario tras cambiar algo directo en la BD, ej. un password)</td>
+</tr>
+<tr>
+<td style="text-align:right">11</td>
+<td><code>k8-master</code></td>
+<td><code>kubectl -n wordpress rollout restart deployment/wordpress</code></td>
+<td>Reiniciar el Pod de WordPress de forma controlada (recreacion, no borra datos)</td>
+</tr>
+<tr>
+<td style="text-align:right">12</td>
+<td><code>k8-master</code></td>
+<td><code>kubectl -n wordpress get pvc</code></td>
+<td>Confirmar que los 3 PVC (<code>content</code>/<code>db</code>/<code>redis</code>) siguen <code>Bound</code></td>
+</tr>
+<tr>
+<td style="text-align:right">13</td>
+<td><code>k8-master</code></td>
+<td><code>kubectl -n wordpress get svc wordpress-lb -o wide</code></td>
+<td>Ver la IP asignada por MetalLB y el puerto expuesto</td>
+</tr>
+<tr>
+<td style="text-align:right">14</td>
+<td><code>anfitrion</code></td>
+<td><code>curl -I http://192.168.90.50/</code></td>
+<td>Probar que WordPress responde desde fuera del cluster</td>
+</tr>
+<tr>
+<td style="text-align:right">15</td>
+<td><code>k8-master</code></td>
+<td><code>kubectl -n rook-ceph get cephcluster</code></td>
+<td>Ver la fase del cluster Ceph (<code>Ready</code>/<code>Progressing</code>)</td>
+</tr>
+<tr>
+<td style="text-align:right">16</td>
+<td><code>k8-master</code></td>
+<td><code>kubectl -n rook-ceph get pods -o wide</code></td>
+<td>Ver estado de mon/mgr/osd/mds/CSI de Ceph y en que worker corre cada uno</td>
+</tr>
+<tr>
+<td style="text-align:right">17</td>
+<td><code>k8-master</code></td>
+<td><code>kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph -s</code></td>
+<td>Salud general de Ceph (<code>HEALTH_OK</code>/<code>WARN</code>, quorum de mons, OSDs up/in)</td>
+</tr>
+<tr>
+<td style="text-align:right">18</td>
+<td><code>k8-master</code></td>
+<td><code>kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph osd tree</code></td>
+<td>Confirmar que los 3 OSD (<code>vdb</code> de cada worker) estan <code>up</code>/<code>in</code></td>
+</tr>
+<tr>
+<td style="text-align:right">19</td>
+<td><code>k8-master</code></td>
+<td><code>kubectl -n metallb-system get ipaddresspool,l2advertisement</code></td>
+<td>Confirmar que el pool <code>k8s-lab-pool</code> (IP <code>192.168.90.50</code>) sigue configurado</td>
+</tr>
+<tr>
+<td style="text-align:right">20</td>
+<td><code>k8-master</code></td>
+<td><code>kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph dashboard ac-user-set-password admin -i &lt;archivo&gt;</code></td>
+<td>Resetear el password del dashboard de Ceph si se pierden las credenciales (ver seccion 18.2)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Ninguno de estos comandos modifica el entorno por si solo, salvo el<br>
+<code>rollout restart</code> (#11, recrea el Pod sin perder datos de los PVC) y el<br>
+<code>ac-user-set-password</code> (#20, solo cambia un password si se ejecuta a<br>
+proposito). El resto son de solo lectura/diagnostico.</p>
+</blockquote>
+
+<hr>
+<h1 id="23-planificacion-capacidad-de-repuesto-n1-agregar-k8-worker4">23. [Planificacion] Capacidad de repuesto N+1: agregar <code>k8-worker4</code> </h1>
+<blockquote>
+<p><strong>Estado: SOLO PLANIFICACION, NADA DE ESTO SE HA EJECUTADO TODAVIA.</strong><br>
+Esta seccion documenta, en detalle y con la lista de comandos, como<br>
+agregar un 4o worker de repuesto para que el cluster tolere la perdida<br>
+permanente de un worker sin quedar en <code>HEALTH_WARN</code> indefinido. Ver la<br>
+discusion previa: hoy solo <code>wordpress</code>/<code>mgr</code>/<code>mds</code> se reprograman<br>
+solos; los <code>mon</code> no tienen a donde migrar (los 3 workers ya tienen 1<br>
+cada uno) y los <code>osd</code> no pueden moverse (estan atados al disco fisico<br>
+de su worker). Un 4o worker con su propio disco resuelve ambos casos.</p>
+</blockquote>
+<h2 id="230-decisiones-de-diseno">23.0. Decisiones de diseno </h2>
+<table>
+<thead>
+<tr>
+<th>Parametro</th>
+<th style="text-align:right">Valor elegido</th>
+<th>Motivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nombre</td>
+<td style="text-align:right"><code>k8-worker4</code></td>
+<td>Sigue el patron <code>k8-worker1/2/3</code></td>
+</tr>
+<tr>
+<td>IP</td>
+<td style="text-align:right"><code>192.168.90.5</code></td>
+<td>Siguiente libre en la subred <code>192.168.90.0/24</code> del lab</td>
+</tr>
+<tr>
+<td>MAC</td>
+<td style="text-align:right"><code>52:54:00:90:00:05</code></td>
+<td>Siguiente libre en la secuencia usada por <code>create-k8s-lab-vms.sh</code> (<code>...:01</code> a <code>...:04</code>)</td>
+</tr>
+<tr>
+<td>RAM / vCPU</td>
+<td style="text-align:right"><code>5120</code> MB / <code>2</code></td>
+<td>Igual a <code>k8-worker1/2/3</code> (<code>create-k8s-lab-vms.sh</code>)</td>
+</tr>
+<tr>
+<td>Disco raiz</td>
+<td style="text-align:right"><code>40G</code>, overlay qcow2 sobre la misma imagen base</td>
+<td>Igual a los otros workers (seccion 0.1.4 de la guia principal)</td>
+</tr>
+<tr>
+<td>Disco OSD (<code>vdb</code>)</td>
+<td style="text-align:right"><code>20G</code>, qcow2 crudo</td>
+<td>Igual a la seccion 6.1 de esta guia</td>
+</tr>
+<tr>
+<td>Rol en Kubernetes</td>
+<td style="text-align:right">Worker normal (<code>kubeadm join</code>), sin taints especiales</td>
+<td>Debe poder recibir Pods normales (WordPress, mgr) y el nuevo OSD</td>
+</tr>
+<tr>
+<td>Rol en Ceph</td>
+<td style="text-align:right">Solo aporta un disco extra a <code>CephCluster.spec.storage.nodes</code>; no se le agrega <code>mon</code> a proposito</td>
+<td>Con 4 nodos y <code>mon.count: 3</code>, Rook deja 1 worker libre como candidato natural de fail-over de mon</td>
+</tr>
+</tbody>
+</table>
+<h2 id="231-fase-1-crear-la-vm-k8-worker4-anfitrion">23.1. Fase 1 — Crear la VM <code>k8-worker4</code> (anfitrion) </h2>
+<p>Mismo patron que el resto de VMs del lab (imagen base + overlay qcow2 +
+cloud-init + <code>virt-install</code>), documentado en la guia principal secciones
+0.1.4, 0.1.6 y 0.1.7.1.</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code># NODO: anfitrion
+# RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)
+VM_DIR="/var/lib/libvirt/images/k8s-lab"
+CLOUD_INIT_DIR="/home/uceda/Documents/InstalacionOpenstack/openstack-ansible/kubernetes/cloud-init"
+BASE_IMG="${VM_DIR}/noble-server-cloudimg-amd64.img"
+
+# 1. Crear el disco raiz de k8-worker4 (40G, igual a los otros workers)
+BASE_FMT="$(sudo qemu-img info "$BASE_IMG" | awk -F': ' '/file format/ {print $2; exit}')"
+sudo qemu-img create -f qcow2 -F "$BASE_FMT" -b "$BASE_IMG" "${VM_DIR}/k8-worker4.qcow2" 40G
+
+# 2. Cloud-init: user-data (mismo patron que k8-worker1/2/3, mismo usuario/llave SSH)
+cat <<'EOF' > "${CLOUD_INIT_DIR}/k8-worker4-user-data"
+#cloud-config
+hostname: k8-worker4
+manage_etc_hosts: true
+
+users:
+  - default
+  - name: uceda
+    groups: [sudo]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJkgKn+STK1A8yTy62VfS5af/5D6q6HaZr6dVPyGA5qb uceda@uceda-ThinkPad-L15-Gen-2a
+
+ssh_pwauth: false
+
+package_update: true
+packages:
+  - qemu-guest-agent
+
+growpart:
+  mode: auto
+  devices: ['/']
+
+resize_rootfs: true
+
+runcmd:
+  - systemctl enable --now qemu-guest-agent
+EOF
+
+# 3. Cloud-init: meta-data
+cat <<'EOF' > "${CLOUD_INIT_DIR}/k8-worker4-meta-data"
+instance-id: k8-worker4
+local-hostname: k8-worker4
+EOF
+
+# 4. Generar la ISO seed de cloud-init
+cloud-localds \
+  "${CLOUD_INIT_DIR}/k8-worker4-seed.iso" \
+  "${CLOUD_INIT_DIR}/k8-worker4-user-data" \
+  "${CLOUD_INIT_DIR}/k8-worker4-meta-data"
+
+# 5. Crear la VM (mismo patron que create-k8s-lab-vms.sh)
+sudo virt-install \
+  --name k8-worker4 \
+  --memory 5120 \
+  --vcpus 2 \
+  --cpu host-passthrough \
+  --import \
+  --disk path="${VM_DIR}/k8-worker4.qcow2",format=qcow2,bus=virtio \
+  --disk path="${VM_DIR}/k8-worker4-seed.iso",device=cdrom \
+  --network network=k8s-lab,model=virtio,mac=52:54:00:90:00:05 \
+  --os-variant ubuntu24.04 \
+  --graphics none \
+  --noautoconsole
+
+# 6. Verificar que arranco y tomo IP por DHCP
+sleep 60
+virsh domifaddr k8-worker4 || true
+virsh net-dhcp-leases k8s-lab | grep k8-worker4 || true
+</code></pre><p>Punto de control: <code>virsh net-dhcp-leases k8s-lab</code> debe mostrar
+<code>k8-worker4</code> con IP <code>192.168.90.5</code>. Confirmar SSH:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code># NODO: anfitrion
+ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=10 uceda@192.168.90.5 'hostname; cloud-init status'
+</code></pre><h2 id="232-fase-2-preparar-el-sistema-operativo-de-k8-worker4">23.2. Fase 2 — Preparar el sistema operativo de <code>k8-worker4</code> </h2>
+<p>Mismos pasos que la guia principal secciones 4, 5, 6 y 7 (deshabilitar
+swap, modulos de kernel/sysctl, containerd, kubeadm/kubelet/kubectl),
+aplicados solo a este nodo nuevo. Ejecutar desde <code>k8-master</code> (ya tiene
+acceso SSH sin password a todos los workers):</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code># NODO: k8-master
+# RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)
+set -euo pipefail
+SSH_OPTS=(-o StrictHostKeyChecking=accept-new -o ConnectTimeout=10)
+W4=192.168.90.5
+
+# 4. Deshabilitar swap (en caliente y permanente)
+ssh "${SSH_OPTS[@]}" uceda@$W4 'sudo swapoff -a && swapon --show; free -h'
+ssh "${SSH_OPTS[@]}" uceda@$W4 "sudo cp /etc/fstab /etc/fstab.bak && sudo sed -ri '/^([^#].*\\sswap\\s.*)\$/s/^/#/' /etc/fstab"
+
+# 5. Modulos de kernel y sysctl
+ssh "${SSH_OPTS[@]}" uceda@$W4 'cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+overlay
+br_netfilter
+EOF
+sudo modprobe overlay
+sudo modprobe br_netfilter
+lsmod | grep -E "overlay|br_netfilter"'
+
+ssh "${SSH_OPTS[@]}" uceda@$W4 "printf '%s\n' 'net.bridge.bridge-nf-call-iptables  = 1' 'net.bridge.bridge-nf-call-ip6tables = 1' 'net.ipv4.ip_forward                 = 1' | sudo tee /etc/sysctl.d/k8s.conf >/dev/null && sudo sysctl --system"
+
+# 6. containerd
+ssh "${SSH_OPTS[@]}" uceda@$W4 'sudo apt-get update && sudo apt-get install -y containerd'
+ssh "${SSH_OPTS[@]}" uceda@$W4 'sudo mkdir -p /etc/containerd && containerd config default | sudo tee /etc/containerd/config.toml > /dev/null'
+ssh "${SSH_OPTS[@]}" uceda@$W4 "sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml && grep -n SystemdCgroup /etc/containerd/config.toml"
+ssh "${SSH_OPTS[@]}" uceda@$W4 'sudo systemctl restart containerd && sudo systemctl enable containerd && sudo systemctl status containerd --no-pager'
+
+# 7. kubeadm/kubelet/kubectl (misma version v1.36 que el resto del cluster)
+ssh "${SSH_OPTS[@]}" uceda@$W4 '
+  sudo apt-get update
+  sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+  sudo mkdir -p -m 755 /etc/apt/keyrings
+  curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.36/deb/Release.key | sudo gpg --dearmor --yes -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.36/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list >/dev/null
+  sudo apt-get update
+  sudo apt-get install -y kubelet kubeadm kubectl
+  sudo apt-mark hold kubelet kubeadm kubectl
+  sudo systemctl enable kubelet
+  kubeadm version -o short
+'
+</code></pre><p>Punto de control: el ultimo comando debe imprimir una version <code>v1.36.x</code>,
+igual a la de <code>k8-master</code> (<code>kubeadm version -o short</code> en el master).</p>
+<h2 id="233-fase-3-unir-k8-worker4-al-cluster-kubeadm-join">23.3. Fase 3 — Unir <code>k8-worker4</code> al cluster (<code>kubeadm join</code>) </h2>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code># NODO: k8-master
+# RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)
+export KUBECONFIG="/home/uceda/.kube/config"
+
+# Genera un token de join nuevo (los anteriores ya expiraron)
+JOIN_COMMAND="$(kubeadm token create --print-join-command)"
+echo "$JOIN_COMMAND"
+
+# Ejecuta ese join en k8-worker4
+ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=10 uceda@192.168.90.5 "sudo $JOIN_COMMAND"
+
+# Verificar que aparece en el cluster
+kubectl get nodes -o wide
+</code></pre><p>Punto de control: <code>k8-worker4</code> debe aparecer en <code>kubectl get nodes</code>,
+inicialmente <code>NotReady</code> (falta el CNI) y pasar a <code>Ready</code> en 1-2 minutos
+en cuanto Calico despliegue su Pod ahi (<code>kubectl -n calico-system get
+pods -o wide | grep k8-worker4</code>).</p>
+<h2 id="234-fase-4-agregar-el-disco-osd-vdb-y-el-modulo-ceph">23.4. Fase 4 — Agregar el disco OSD (<code>vdb</code>) y el modulo <code>ceph</code> </h2>
+<p>Identico a las secciones 6.1 y 6.2 de esta misma guia, aplicado solo a
+<code>k8-worker4</code>:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code># NODO: anfitrion
+# RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)
+VM_DIR="/var/lib/libvirt/images/k8s-lab"
+
+sudo qemu-img create -f qcow2 "${VM_DIR}/k8-worker4-ceph-osd.qcow2" 20G
+sudo virsh attach-disk k8-worker4 \
+  --source "${VM_DIR}/k8-worker4-ceph-osd.qcow2" \
+  --target vdb --subdriver qcow2 --targetbus virtio \
+  --live --config --persistent
+
+sudo virsh domblklist k8-worker4
+
+ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=10 uceda@192.168.90.5 \
+  'hostname; lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINTS /dev/vdb'
+</code></pre><p>Punto de control: <code>FSTYPE</code> vacio para <code>vdb</code> (disco crudo, sin
+particiones), igual que se valido para los otros 3 workers en 6.1.</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code># NODO: anfitrion
+# RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)
+ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=10 uceda@192.168.90.5 '
+  sudo modprobe ceph
+  echo "ceph" | sudo tee /etc/modules-load.d/ceph.conf
+  lsmod | grep -q "^ceph " && echo "OK: modulo ceph cargado" || echo "ERROR: modulo ceph no cargado"
+'
+</code></pre><h2 id="235-fase-5-agregar-k8-worker4-al-cephcluster-de-rook">23.5. Fase 5 — Agregar <code>k8-worker4</code> al <code>CephCluster</code> de Rook </h2>
+<p>Se edita el mismo YAML de la seccion 6.4 / <code>tmp/03-rook-cluster.yaml</code>,
+agregando una 4a entrada a <code>storage.nodes</code>. <strong>No se toca <code>mon.count</code></strong>
+(se deja en <code>3</code>): con 4 nodos y 3 mons, Rook ya tiene un candidato de
+sobra para el fail-over automatico de mon si se pierde uno de los 3
+actuales.</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code># NODO: k8-master
+# RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)
+export KUBECONFIG="/home/uceda/.kube/config"
+
+kubectl -n rook-ceph patch cephcluster rook-ceph --type merge -p '
+{
+  "spec": {
+    "storage": {
+      "nodes": [
+        {"name": "k8-worker1", "devices": [{"name": "vdb"}]},
+        {"name": "k8-worker2", "devices": [{"name": "vdb"}]},
+        {"name": "k8-worker3", "devices": [{"name": "vdb"}]},
+        {"name": "k8-worker4", "devices": [{"name": "vdb"}]}
+      ]
+    }
+  }
+}'
+
+kubectl -n rook-ceph get cephcluster
+kubectl -n rook-ceph get pods -o wide -w
+</code></pre><p>Presiona <code>Ctrl+C</code> cuando aparezca un nuevo <code>rook-ceph-osd-3-...</code> en
+<code>Running</code> sobre <code>k8-worker4</code> (más un <code>rook-ceph-osd-prepare-k8-worker4-*</code>
+en <code>Completed</code>).</p>
+<p>También actualizar el respaldo versionado en git para que quede
+consistente (ver sección 21):</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code># NODO: anfitrion o k8-master (segun donde este el checkout del repo)
+# RUTA: /home/uceda/Documents/InstalacionOpenstack/openstack-ansible
+# Editar tmp/03-rook-cluster.yaml agregando el bloque de k8-worker4 a storage.nodes,
+# igual al que se aplico arriba con kubectl patch, para que el archivo en git
+# refleje el estado real del CephCluster.
+</code></pre><h2 id="236-fase-6-verificar-la-capacidad-de-repuesto">23.6. Fase 6 — Verificar la capacidad de repuesto </h2>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code># NODO: k8-master
+# RUTA: cualquiera (no depende del directorio de trabajo; usa rutas absolutas o ninguna ruta de archivo)
+export KUBECONFIG="/home/uceda/.kube/config"
+
+echo "== Nodos =="
+kubectl get nodes -o wide
+
+echo "== Salud de Ceph =="
+kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph -s
+
+echo "== Arbol de OSD (deben ser 4, uno por worker) =="
+kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph osd tree
+
+echo "== Pods de rook-ceph por nodo =="
+kubectl -n rook-ceph get pods -o wide
+</code></pre><p>Punto de control esperado:</p>
+<table>
+<thead>
+<tr>
+<th>Verificacion</th>
+<th>Esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>kubectl get nodes</code></td>
+<td><code>k8-master</code>, <code>k8-worker1/2/3/4</code> en <code>Ready</code></td>
+</tr>
+<tr>
+<td><code>ceph -s</code> → <code>osd</code></td>
+<td><code>4 osds: 4 up, 4 in</code></td>
+</tr>
+<tr>
+<td><code>ceph osd tree</code></td>
+<td>4 hojas, una por worker, todas <code>up</code></td>
+</tr>
+<tr>
+<td>Ningun <code>mon</code>/<code>mgr</code> corriendo en <code>k8-worker4</code> (todavia)</td>
+<td>Correcto: Rook solo lo usara como destino de fail-over si se pierde otro worker</td>
+</tr>
+</tbody>
+</table>
+<h2 id="237-fase-7-opcional-simular-la-perdida-de-un-worker">23.7. Fase 7 (opcional) — Simular la perdida de un worker y confirmar la recuperacion automatica </h2>
+<p>Solo para validar que el N+1 realmente funciona, <strong>no forma parte del
+despliegue normal</strong>:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code># NODO: anfitrion
+# Apagar (no destruir) uno de los workers ORIGINALES, ej. k8-worker2
+sudo virsh shutdown k8-worker2
+
+# Esperar varios minutos (node-monitor-grace-period + tolerationSeconds +
+# mon_osd_down_out_interval de Ceph) y luego revisar desde k8-master:
+#   kubectl get nodes
+#   kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph -s
+#   kubectl -n rook-ceph get pods -o wide
+# Esperado: un nuevo osd se crea en k8-worker4 y Ceph re-replica los datos
+# perdidos de k8-worker2 automaticamente, sin intervencion manual.
+
+# Para revertir la simulacion:
+sudo virsh start k8-worker2
+</code></pre><blockquote>
+<p><strong>No ejecutar esta fase sin avisar primero</strong>: apaga intencionalmente<br>
+un worker en uso (<code>k8-worker2</code> aloja hoy <code>mon-b</code>/<code>osd-1</code>); aunque el<br>
+resto del cluster deberia tolerarlo, es una prueba disruptiva.</p>
+</blockquote>
+
+      </div>
+      
+      
+    
+    
+    
+    
+    
+    
+  
+    </body></html>

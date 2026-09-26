@@ -1,0 +1,13 @@
+<network>
+  <name>ceph-net</name>
+  <uuid>2e5565b2-6c75-4e03-a0be-488c8267cd79</uuid>
+  <forward mode='nat'/>
+  <bridge name='virbr1' stp='on' delay='0'/>
+  <mac address='52:54:00:c6:2b:03'/>
+  <ip address='192.168.5.1' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='192.168.5.100' end='192.168.5.200'/>
+    </dhcp>
+  </ip>
+</network>
+

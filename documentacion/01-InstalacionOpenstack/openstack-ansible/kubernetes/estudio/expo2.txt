@@ -1,0 +1,236 @@
+# ============================================================
+# 1. CREDENCIALES Y APUNTES DE LA DEMO
+# ============================================================
+
+# anfitrion / credenciales de la demo (no son comandos, solo apuntes)
+#   ceph admin: 13tAxYZaHbq0ujaxTkmU
+#   wordpress uceda: WordPressK8sLab2026!
+
+#                   TOKEN
+kubectl -n kubernetes-dashboard create token admin-user
+
+
+
+
+# k8-master / (setup) fijar kubeconfig, aplica a todos los kubectl siguientes
+export KUBECONFIG="/home/uceda/.kube/config"
+
+## servicios de kubernetes
+kubectl get ns
+# workers de uno de los servicios
+kubectl -n rook-ceph get pods -o custom-columns=NODE:.spec.nodeName --no-headers | sort -u
+
+
+
+
+# prueba del worker3
+sudo virsh shutdown k8-worker3
+kubectl -n wordpress logs deploy/wordpress -c wordpress --tail=100
+sudo virsh start k8-worker3
+
+
+# ============================================================
+# 3. ESTADO GENERAL DEL CLUSTER KUBERNETES
+# ============================================================
+
+# k8-master / ver todos los nodos del cluster
+kubectl get nodes -o wide
+
+## servicios de kubernetes
+kubectl get ns
+
+# workers en los que estan operando 
+kubectl get svc -A -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,TYPE:.spec.type,CLUSTER-IP:.spec.clusterIP,EXTERNAL-IP:.status.loadBalancer.ingress[*].ip,PORTS:.spec.ports[*].port
+
+# pods del worker 1
+kubectl get pods -A -o wide --field-selector spec.nodeName=k8-worker1
+
+# k8-master / ver todos los pods + columna NODE (en que nodo corre cada pod)
+kubectl get pods -A -o wide
+
+
+# ============================================================
+# 4. REDES KVM DEL ANFITRION
+# ============================================================
+
+# anfitrion / ver la lista de redes KVM
+virsh net-list --all
+
+# anfitrion / ver los bridges de red del host
+ip link show type bridge
+
+# anfitrion / ver rango de red + rango DHCP de la red k8s-lab
+virsh net-dumpxml k8s-lab
+
+
+# ============================================================
+# 5. CONFIGURACION Y TOPOLOGIA DE CEPH / ROOK
+# ============================================================
+
+# k8-master / topologia del cluster Ceph (mon/mgr/osd, discos vdb, keyType)
+kubectl get pods -A -o wide
+# k8-master / ceph.conf real dentro de un monitor (ej. mon-a)
+kubectl -n rook-ceph exec deploy/rook-ceph-mon-a -- cat /etc/ceph/ceph.conf
+
+# k8-master / configuracion efectiva del cluster Ceph (todos los valores de config)
+kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph config dump
+
+# k8-master / CephFilesystem myfs
+kubectl -n rook-ceph get cephfilesystem myfs -o yaml
+
+# k8-master / StorageClass que usa CephFS
+kubectl get storageclass cephfs-storage -o yaml
+
+# anfitrion / manifiesto fuente rook-cluster en el repo
+cat /home/uceda/Documents/InstalacionOpenstack/openstack-ansible/kubernetes/tmp/03-rook-cluster.yaml
+
+# k8-master / ver daemons de ceph (mon/mgr/osd/mds) y en que worker estan
+kubectl -n rook-ceph get pods -o custom-columns=DAEMON:.metadata.name,NODE:.spec.nodeName --sort-by=.spec.nodeName | grep -E 'mon|mgr|osd|mds|DAEMON'
+
+
+# ============================================================
+# 6. CONFIGURACION DE WORDPRESS
+# ============================================================
+
+# k8-master / Deployment wordpress (imagenes, variables de entorno, volumenes, 3 contenedores)
+kubectl -n wordpress get deploy wordpress -o yaml
+
+# k8-master / wp-config.php dentro del contenedor wordpress (config PHP/DB/Redis)
+kubectl -n wordpress exec deploy/wordpress -c wordpress -- cat /var/www/html/wp-config.php
+
+# k8-master / variables de entorno del contenedor wordpress (DB host, Redis, etc.)
+kubectl -n wordpress exec deploy/wordpress -c wordpress -- env | grep -E 'WORDPRESS|WP_|MARIADB'
+
+#-------- k8-master / entrar al contenedor wordpress dentro de /var/www/html/wp-content/uploads/
+kubectl -n wordpress exec -it deploy/wordpress -c wordpress -- bash -c "cd /var/www/html/wp-content/uploads/ && exec bash"
+
+
+# ============================================================
+# 7. VOLUMENES Y MOUNTS CEPH EN WORDPRESS
+# ============================================================
+
+# k8-master / ver los mounts Ceph del contenedor mariadb
+kubectl -n wordpress exec deploy/wordpress -c mariadb -- mount | grep -i ceph
+
+# k8-master / ver los mounts Ceph del contenedor wordpress
+kubectl -n wordpress exec deploy/wordpress -c wordpress -- mount | grep -i ceph
+
+# k8-master / ver los mounts Ceph del contenedor redis
+kubectl -n wordpress exec deploy/wordpress -c redis -- mount | grep -i ceph
+
+
+# ============================================================
+# 8. PODS DE WORDPRESS
+# ============================================================
+
+# k8-master / ver los pods del namespace wordpress
+kubectl -n wordpress get pods
+
+# k8-master / ver en que worker corre el pod de WordPress (la app)
+kubectl -n wordpress get pod -o wide
+
+
+# ============================================================
+# 9. LOGS DE WORDPRESS, MARIADB Y REDIS
+# ============================================================
+
+# k8-master / logs del contenedor mariadb
+kubectl -n wordpress logs deploy/wordpress -c mariadb --tail=100
+
+# k8-master / logs del contenedor wordpress
+kubectl -n wordpress logs deploy/wordpress -c wordpress --tail=100
+
+# k8-master / logs del contenedor redis
+kubectl -n wordpress logs deploy/wordpress -c redis --tail=100
+
+
+# ============================================================
+# 10. LOGS DE ROOK-CEPH
+# ============================================================
+
+# k8-master / logs del operador rook-ceph
+kubectl -n rook-ceph logs deploy/rook-ceph-operator --tail=200
+
+
+# ============================================================
+# 11. COMPONENTES Y LOGS DE KUBERNETES
+# ============================================================
+
+# k8-master / ver los pods de los componentes de kubernetes (kube-system)
+kubectl -n kube-system get pods
+
+# k8-master / logs de un pod de kube-system (cambiar {pod} por el nombre real)
+kubectl -n kube-system logs {pod} --tail=100
+
+# k8-master / logs del kube-scheduler
+kubectl -n kube-system logs kube-scheduler-k8-master --tail=100
+
+
+# ============================================================
+# 12. LOGS DE KUBELET Y CONTAINERD
+# ============================================================
+
+# anfitrion / logs de kubelet en k8-master (via SSH a 192.168.90.1)
+ssh uceda@192.168.90.1 'sudo journalctl -u kubelet --no-pager -n 100'
+
+# anfitrion / logs de containerd en k8-master (via SSH a 192.168.90.1)
+ssh uceda@192.168.90.1 'sudo journalctl -u containerd --no-pager -n 100'
+
+
+# ============================================================
+# 13. MANIFIESTOS Y CONFIGURACION DEL CONTROL PLANE
+# ============================================================
+
+# k8-master / manifiesto estatico del kube-apiserver
+sudo cat /etc/kubernetes/manifests/kube-apiserver.yaml
+
+# k8-master / manifiesto estatico de etcd
+sudo cat /etc/kubernetes/manifests/etcd.yaml
+
+# k8-master / manifiesto estatico del kube-controller-manager
+sudo cat /etc/kubernetes/manifests/kube-controller-manager.yaml
+
+# k8-master / manifiesto estatico del kube-scheduler
+sudo cat /etc/kubernetes/manifests/kube-scheduler.yaml
+
+# k8-master / config de kubeadm
+sudo cat /etc/kubernetes/kubeadm-config.yaml
+
+# k8-master / kubeconfig admin
+sudo cat /etc/kubernetes/admin.conf
+
+
+# ============================================================
+# 14. INGRESS-NGINX Y ROUTING DE WORDPRESS
+# ============================================================
+
+# k8-master / ConfigMap del controlador ingress-nginx (parametros globales del proxy)
+kubectl -n ingress-nginx get cm ingress-nginx-controller -o yaml
+
+# k8-master / nginx.conf dentro del controlador ingress-nginx
+kubectl -n ingress-nginx exec deploy/ingress-nginx-controller -- cat /etc/nginx/nginx.conf
+
+# k8-master / Ingress de WordPress (routing + TLS que usa nginx)
+kubectl -n wordpress get ingress wordpress -o yaml
+
+
+# ============================================================
+# 15. APAGADO Y ENCENDIDO DE LAS VMS
+# ============================================================
+
+# anfitrion / apagar las VMs del cluster iterando $vm (k8-worker4 k8-worker3 k8-worker2 k8-worker1 k8-master)
+sudo virsh shutdown "$vm"
+
+# anfitrion / encender k8-master
+sudo virsh start k8-master
+
+# anfitrion / iniciar el worker4
+sudo virsh start k8-worker4
+
+
+# ============================================================
+# 16. SINCRONIZACION DE HORA CON CHRONY
+# ============================================================
+
+# anfitrion / comprobar chrony en cada VM (config + tracking + sources)
+for ip in 192.168.90.1 192.168.90.2 192.168.90.3 192.168.90.4 192.168.90.5; do echo "========== $ip =========="; ssh uceda@$ip 'echo "--- /etc/chrony/chrony.conf ---"; cat /etc/chrony/chrony.conf; echo "--- chronyc tracking ---"; chronyc tracking; echo "--- chronyc sources ---"; chronyc sources'; done

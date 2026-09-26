@@ -1,0 +1,33 @@
+NAME         STATUS   ROLES           AGE     VERSION
+k8-master    Ready    control-plane   7d      v1.36.4
+k8-worker1   Ready    <none>          6d23h   v1.36.4
+k8-worker2   Ready    <none>          6d23h   v1.36.4
+k8-worker3   Ready    <none>          6d23h   v1.36.4
+k8-worker4   Ready    <none>          4d16h   v1.36.4
+---
+NAMESPACE              NAME                                   TYPE           CLUSTER-IP       EXTERNAL-IP     PORT(S)                  AGE
+calico-system          calico-api                             ClusterIP      10.99.26.81      <none>          443/TCP                  6d23h
+calico-system          calico-kube-controllers-metrics        ClusterIP      None             <none>          9094/TCP                 6d23h
+calico-system          calico-typha                           ClusterIP      10.108.205.10    <none>          5473/TCP                 6d23h
+calico-system          goldmane                               ClusterIP      10.97.49.201     <none>          7443/TCP                 6d23h
+calico-system          whisker                                ClusterIP      10.99.89.60      <none>          8081/TCP                 6d23h
+default                kubernetes                             ClusterIP      10.96.0.1        <none>          443/TCP                  7d
+default                nginx-app                              NodePort       10.100.214.205   <none>          80:30885/TCP             6d22h
+kube-system            kube-dns                               ClusterIP      10.96.0.10       <none>          53/UDP,53/TCP,9153/TCP   7d
+kubernetes-dashboard   kubernetes-dashboard-api               ClusterIP      10.106.152.153   <none>          8000/TCP                 6d21h
+kubernetes-dashboard   kubernetes-dashboard-auth              ClusterIP      10.99.142.27     <none>          8000/TCP                 6d21h
+kubernetes-dashboard   kubernetes-dashboard-kong-proxy        NodePort       10.111.106.201   <none>          443:32000/TCP            6d21h
+kubernetes-dashboard   kubernetes-dashboard-metrics-scraper   ClusterIP      10.103.143.57    <none>          8000/TCP                 6d21h
+kubernetes-dashboard   kubernetes-dashboard-web               ClusterIP      10.102.125.123   <none>          8000/TCP                 6d21h
+metallb-system         metallb-webhook-service                ClusterIP      10.96.163.195    <none>          443/TCP                  6d16h
+rook-ceph              rook-ceph-exporter                     ClusterIP      10.108.53.15     <none>          9926/TCP                 6d16h
+rook-ceph              rook-ceph-mgr                          ClusterIP      10.108.243.90    <none>          9283/TCP                 6d16h
+rook-ceph              rook-ceph-mgr-dashboard                ClusterIP      10.111.89.40     <none>          7000/TCP                 5d18h
+rook-ceph              rook-ceph-mgr-dashboard-external       NodePort       10.108.187.109   <none>          7000:32174/TCP           5d18h
+rook-ceph              rook-ceph-mon-a                        ClusterIP      10.102.29.96     <none>          6789/TCP,3300/TCP        6d16h
+rook-ceph              rook-ceph-mon-b                        ClusterIP      10.109.139.198   <none>          6789/TCP,3300/TCP        6d16h
+rook-ceph              rook-ceph-mon-c                        ClusterIP      10.109.93.251    <none>          6789/TCP,3300/TCP        6d16h
+wordpress              wordpress                              ClusterIP      10.97.153.171    <none>          80/TCP                   6d16h
+wordpress              wordpress-lb                           LoadBalancer   10.106.243.222   192.168.90.50   80:32731/TCP             6d16h
+---
+No resources found

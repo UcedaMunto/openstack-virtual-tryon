@@ -1,0 +1,85 @@
+@startuml
+title OpenStack - Infraestructura de red con nodos y WordPress
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+cloud "Internet\n203.0.113.0/24" as INTERNET
+
+node "Controller\nserverocontroller\n203.0.113.239" as CTRL {
+  rectangle "enp1s0\nPublic/API" as ENP1
+  rectangle "br-mgmt\n10.0.0.11/24" as BRMGMT
+
+  frame "Open vSwitch" as OVS {
+    rectangle "br-provider" as BRPROV
+    rectangle "br-int" as BRINT
+    rectangle "br-tun" as BRTUN
+  }
+
+  frame "Neutron" as NEU {
+    rectangle "L3 agent\nqrouter-*" as QROUTER
+    rectangle "DHCP agent\nqdhcp-*" as QDHCP
+  }
+
+  rectangle "NAT/DNAT host\n:8080 -> WordPress" as DNAT
+}
+
+node "compute1\n203.0.113.240" as C1
+node "compute2\n203.0.113.241" as C2
+node "compute3\n203.0.113.242" as C3
+node "compute4\n203.0.113.243" as C4
+
+node "storage1\n203.0.113.244\nCeph + Cinder" as ST1
+node "object1\n203.0.113.245\nSwift" as O1
+node "object2\n203.0.113.246\nSwift" as O2
+
+cloud "Red de gestión/túneles\n10.0.0.0/24" as MGMT
+cloud "Red tenant\nselfservice 10.10.10.0/24" as TENANT
+
+node "wp-web-01\n10.10.10.76\nNginx/PHP" as WPWEB
+node "wp-db-01\n10.10.10.152\nMariaDB" as WPDB
+
+INTERNET --> ENP1 : Acceso API/Horizon
+INTERNET --> DNAT : HTTP :8080
+DNAT --> QROUTER : DNAT
+QROUTER --> WPWEB : tráfico web
+WPWEB --> WPDB : MySQL/MariaDB
+
+BRMGMT -- MGMT
+MGMT -- C1
+MGMT -- C2
+MGMT -- C3
+MGMT -- C4
+MGMT -- ST1
+MGMT -- O1
+MGMT -- O2
+
+BRINT <--> QROUTER
+BRINT <--> QDHCP
+BRINT <--> BRTUN
+BRINT <--> BRPROV
+
+BRTUN <--> C1 : VXLAN/Geneve overlays
+BRTUN <--> C2 : VXLAN/Geneve overlays
+BRTUN <--> C3 : VXLAN/Geneve overlays
+BRTUN <--> C4 : VXLAN/Geneve overlays
+
+QROUTER -- TENANT
+TENANT -- WPWEB
+TENANT -- WPDB
+
+ST1 ..> CTRL : Cinder backend (RBD)
+O1 ..> CTRL : Swift object service
+O2 ..> CTRL : Swift object service
+
+note right of CTRL
+Servicios de red en controller:
+- neutron-openvswitch-agent
+- neutron-l3-agent
+- neutron-dhcp-agent
+- openvswitch-switch
+(endpoints y agentes en UP)
+end note
+
+@enduml

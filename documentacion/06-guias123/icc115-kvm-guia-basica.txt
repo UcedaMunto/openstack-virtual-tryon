@@ -1,0 +1,82 @@
+﻿Universidad de El Salvador
+Facultad de Ingeniería y Arquitectura
+Escuela de Ingeniería de Sistemas Informáticos
+
+Guía Básica KVM
+v1
+
+I. Resultados de Aprendizaje:
+    • Establecer las diferencias entre los tipos de hipervisores para la virtualización de máquinas virtuales.
+    • Configurar y utilizar a nivel de usuario KVM como solución de hipervisor para la creación de máquinas virtuales.
+
+II. Contexto:
+El uso de Hipervisores ha sido posible la posibilidad de virtualizar diferentes sistemas operativos sobre un cliente host, esto amplía las posibilidades de uso en cuanto a pruebas y despliegues sobre un máquina virtual (VM) sin necesidad de tener que desplegar en metal, cuando de aplicaciones se trata. 
+
+Hipervisor tipo 1 (Hypervisor Type 1): 
+Está basado en el hardware del equipo host; es decir que todas las máquinas virtuales que ejecuta, hace uso de los recursos del hardware disponibles, si está en el hardware, este lo puede utilizar. Esto tiene una limitante en cuanto a la arquitectura, sólo se podrá virtualizar arquitecturas íntimamente relacionadas con el hardware del equipo host.
+Este tipo de hipervisor tiende a tener un nivel de rendimientos altamente aceptable, ya que la virtualización lo que hace es dividir los recursos hardware en pequeñas porciones.
+
+
+
+Hipervisor tipo 2 (Hypervisor Type 2): 
+
+Virtualiza  la mayoría de componentes haciendo usos de recursos del sistema operativo. Es decir que todas las características dependen de las funciones que el desarrollador del hipervisor ha decidido incluir para tal tarea. Esto aunque podría dar mayor flexibilidad en cuanto a solventar algunos aspectos de la arquitectura, impacta fuertemente en el rendimiento total del servicio, debido al nivel de abstracción que deberá de incluirse como una capa extra sobre el hardware.
+
+II. KVM (Kernel-base Virtual Machine)
+KVM como su nombre lo indica es una máquina virtual basada en el kernel (KVM) la cual es una tecnología de virtualización Open Source totalmente integrada al Kernel Linux. Con KVM se puede convertir cualquier equipo con una instalación de Linux en un hipervisor potente que permite que el host ejecute una o varios entornos virtuales aislados llamados máquinas virtuales(VM) o invitados (guests).
+KVM forma parte del kernel linux desde la versión 2.6.20, Ubuntu 22.04 usa la versión 5.14.0 por ejemplo. Por lo tanto, todas las versiones posteriores a la 2.6.20 disponen de KVM a partir de 2006. Siendo esta particular de formar parte del código de Linux aprovechan de forma inmediata todas las mejoras, correcciones y funciones nuevas sin requiere ningún tipo de configuración o ingeniería adicional.
+KVM convierte cualquier equipo Linux en un hipervisor tipo 1, es decir en un servidor dedicado (bare metal). Utilizando todos los elementos del sistema incorporado en la  máquina host que lo ejecuta. Entre los elementos más destacados podemos encontrar la pila de procesos de entrada y salida [E/S], el procesador, núcleos e hilos que dispone, la memoria ram, el disco duro, entre otros.
+Para la activación de algunas herramientas en ambiente Debian o Ubuntu bastará con instalar los paquetes que acceden a KVM
+sudo apt -y install bridge-utils cpu-checker libvirt-clients libvirt-daemon qemu-system qemu-kvm 
+Si se desea estar seguro que el procesador soporta virtualización podría ejecutarse la siguiente orden:
+kvm-ok
+Lanzar una máquina virtual, puede ser tan simple como ejecutar la siguiente orden en CLI
+sudo virt-install --name ubuntu-guest --os-variant ubuntu20.04 --vcpus 2 --ram 2048 --location http://ftp.ubuntu.com/ubuntu/dists/focal/main/installer-amd64/ --network bridge=virbr0,model=virtio --graphics none --extra-args='console=ttyS0,115200n8 serial'
+Donde:
+    • virt-install: Activa el modo de gestión de KVM para lanzamiento de un proceso sobre una imagen de Sistema Operativo.
+    • name: Se establece un nombre de host para la instalación o ejecución.
+    • os-variant: Etiqueta la distribución o variante de Sistema Operativo.
+    • vcpus: Cantidad de núcleos asignados a la ejecución.
+    • ram: Cantidad de  memoria ram en MB asignados a la ejecución
+    • location: Origen de la imagen de Sistema Operativo.
+    • network: Tipo de red a utilizar para asociarla a la interfaz de la imagen.
+    • graphics: Modo gráfico asignado a la ejecución de la instancia.
+    • extra-args: Argumentos extras a considerar en la ejecución de la instancia.
+
+
+2.1. Gestión de Máquinas Virtuales
+La gestión de máquinas virtuales requiere ciertas competencias que de alguna manera pueden resultar complejas o simples dependiendo de la herramienta que se utilice. KVM dispone de muchas herramientas que permiten la gestión  a través de diferentes interfaces. Cada una de ellas implementa el api de acceso a los recursos, por lo general basada en Qemu destacable emulación de CPU a nivel de usuario.
+2.1.1. Virtual Machine Manager
+Es una aplicación de escritorio basada en el CLI virt-manager, el cual accede a los recursos de KVM a través de Qemu.
+Parte de la configuración de este gestor se hace al momento de instalar los paquetes básicos de activación de KVM, pero de igual manera se puede instalar el gestor.
+sudo apt install virt-manager
+Por lo general todo queda debidamente configurado, en caso de tener algún problema de permisos de usuario, podría intentar configurar el usuario que tendrá acceso a la interfaz de despliegue de máquinas virtuales.
+sudo adduser ‘username’ libvirt
+sudo adduser ‘[username]’ kvm
+Podría optar por una visualización de instancias en CLI a través de la orden:
+virsh list --all
+Note que se ejecuta como usuario.
+2.1.2. Gnome Boxes
+Gnome Boxes es una aplicación de escritorio destinada a la gestión de máquinas virtuales, así como su despliegue a través de acceso a repositorios hub con imágenes públicas, lo que facilita mucho la implementación de máquinas virtuales de diferentes tipos. Implementa interfaces de acceso al api virtual del sistema operativo desde una interfaz fácil de utilizar.
+sudo apt install gnome-boxes
+2.1.3. Consola Web (Cockpit)
+Cockpit es una interfaz Web para la gestión de máquinas virtuales de cualquier tipo gestionadas por KVM. Se recomienda hacer la instalación en Ubuntu 22.04. 
+Está pensada para poder utilizada a nivel de computadoras normales, así como servidores; de tal manera de poder anidar recursos de hardware y software si fuera la necesidad, sin entrar en los detalles de un despliegue Cloud, pero sin perder las características muy explotadas a través de KVM.
+Instalación:
+sudo apt update
+Soporte para el api virt y la gestión de máquinas virtuales
+sudo apt install cockpit cockpit-machines -y
+Soporte para el API virt y la gestión de POD y contenedores
+sudo apt install cockpit-podman -y
+
+2.1.3.1. Acceso web
+Para acceder a la interfaz web, en algunas ocasiones será necesario permitir la regla de firewall propio de Linux que active el acceso, sobre si se hace desde equipos remotos a través de la IP.
+sudo ufw allow 9090/tcp
+Desde su equipo local o remoto, ahora usted podrá acceder a la interfaz desde el puerto 9090, abriendo un navegador web y escribiendo:
+https://<Your-Server-IP>:9090
+Puede escribir por defecto localhost en lugar de la dirección IP si lo hace a través de su propio equipo.
+
+
+III. Requerimiento de Laboratorio
+Caso Práctico : Instalación de MAC OS Sonoma(14)
+Siguiendo la guía desplegada en github, se le recomienda realizar la instalación de una máquina virtual para desplegar MAC OS Sonoma, que pueda correr de forma efectiva sobre el equipo host, siguiendo la siguiente guía: https://github.com/kholia/OSX-KVM

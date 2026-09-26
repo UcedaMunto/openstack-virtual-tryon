@@ -1,0 +1,10 @@
+<network>
+  <name>ceph-data-net</name>
+  <uuid>861245e2-c3d4-4d2e-94aa-fa2e1fbccf8e</uuid>
+  <forward mode='nat'/>
+  <bridge name='vbrcdata' stp='on' delay='0'/>
+  <mac address='52:54:00:dd:95:bd'/>
+  <ip address='192.168.140.1' netmask='255.255.255.0'>
+  </ip>
+</network>
+

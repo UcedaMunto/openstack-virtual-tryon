@@ -1,0 +1,112 @@
+@startuml 04-infraestructura-sistema
+title Infraestructura de sistema completa del laboratorio
+
+skinparam componentStyle rectangle
+
+actor "Usuario\n(navegador)" as usuario
+
+node "anfitrion\n(host fisico KVM/libvirt)\n192.168.90.254" as anfitrion {
+  component "virbr90 + red libvirt\nk8s-lab (192.168.90.0/24)" as red
+}
+
+package "Cluster Kubernetes v1.36.4\n(4 VMs KVM)" as cluster {
+  node "k8-master\n192.168.90.1\nControl Plane" as master
+  node "k8-worker1\n192.168.90.2" as w1
+  node "k8-worker2\n192.168.90.3" as w2
+  node "k8-worker3\n192.168.90.4" as w3
+}
+
+package "Networking del cluster" as networking {
+  component "Calico CNI\n(pod network)" as calico
+  component "MetalLB\n(IPAddressPool + L2Advertisement)" as metallb
+}
+
+package "Almacenamiento: Rook-Ceph\n(namespace rook-ceph)" as ceph_stack {
+  component "CephCluster\n(3 mon, 1 mgr, 3 osd sobre vdb)" as cephcluster
+  component "CephFilesystem myfs\n(MDS)" as cephfs
+  component "StorageClass\ncephfs-storage" as sc
+  component "CSI cephfs/rbd\n(ctrlplugin/nodeplugin)" as csi
+}
+
+package "Aplicacion: WordPress\n(namespace wordpress)" as app_stack {
+  component "Pod wordpress\n(wordpress + mariadb + redis)" as wp
+  database "PVC wordpress-content\n(5Gi RWX)" as pvc_content
+  database "PVC wordpress-db\n(5Gi RWO)" as pvc_db
+  database "PVC wordpress-redis\n(1Gi RWO)" as pvc_redis
+  component "Service wordpress-lb\n(LoadBalancer, 192.168.90.50:80)" as svc_lb
+}
+
+package "Otros servicios expuestos" as otros {
+  component "kubernetes-dashboard\n(NodePort 32000)" as k8s_dash
+  component "nginx prueba\n(NodePort 30885)" as nginx
+  component "rook-ceph-mgr-dashboard-external\n(NodePort 32174)" as ceph_dash
+}
+
+usuario --> red : http/https
+red --> master
+red --> w1
+red --> w2
+red --> w3
+
+master -[hidden]-> networking
+w1 -[hidden]-> ceph_stack
+
+master --> calico
+w1 --> calico
+w2 --> calico
+w3 --> calico
+
+w1 --> cephcluster
+w2 --> cephcluster
+w3 --> cephcluster
+cephcluster --> cephfs
+cephfs --> sc
+sc --> csi
+csi --> pvc_content
+csi --> pvc_db
+csi --> pvc_redis
+
+pvc_content --> wp
+pvc_db --> wp
+pvc_redis --> wp
+
+metallb --> svc_lb
+svc_lb --> wp
+
+usuario --> svc_lb : http://192.168.90.50/
+usuario --> k8s_dash : https://192.168.90.1:32000
+usuario --> ceph_dash : http://192.168.90.1:32174/
+usuario --> nginx : http://192.168.90.1:30885
+
+note bottom of ceph_stack
+  Instalado con Rook v1.20.6 (operador oficial de Ceph para K8s),
+  Ceph v20.2.4 (Squid). Sin dashboard nativo de Rook expuesto por
+  defecto (seccion 18.1 lo habilita con un Service propio,
+  NO gestionado por Rook, para que sobreviva a la reconciliacion
+  del operador).
+end note
+
+note bottom of app_stack
+  Los 3 contenedores comparten el mismo Pod (localhost interno):
+  WORDPRESS_DB_HOST = 127.0.0.1:3306
+  WP_REDIS_HOST = 127.0.0.1 (puerto 6379)
+end note
+
+legend right
+  |= Termino / Tecnologia |= Que es |
+  | KVM/libvirt | Hipervisor (KVM) y su capa de gestion (libvirt) usados en el anfitrion para crear las 4 VMs del cluster |
+  | Kubernetes | Orquestador de contenedores; agrupa las 4 VMs en un cluster (1 control-plane + 3 workers) |
+  | Calico | CNI (plugin de red) que provee la red interna de Pods entre los 4 nodos |
+  | MetalLB | Load-balancer software que asigna la IP flotante 192.168.90.50 sin depender de un cloud provider |
+  | Rook | Operador de Kubernetes que instala y administra Ceph (mon/mgr/osd/mds) dentro del propio cluster |
+  | Ceph | Sistema de almacenamiento distribuido (objetos/bloques/archivos); aqui se usa su variante de archivos, CephFS |
+  | CephCluster | Custom Resource que declara la topologia deseada del cluster Ceph (cuantos mon/mgr, en que discos) |
+  | CephFilesystem (CephFS) | Filesystem distribuido de Ceph, expuesto a Kubernetes via el driver CSI para PVCs ReadWriteMany |
+  | StorageClass | Objeto de Kubernetes que define como aprovisionar almacenamiento dinamicamente (que CSI usar, con que parametros) |
+  | CSI (Container Storage Interface) | Estandar que conecta Kubernetes con proveedores de almacenamiento externos (aqui, Rook-Ceph) |
+  | PVC (PersistentVolumeClaim) | Peticion de almacenamiento hecha por una aplicacion; Kubernetes la enlaza a un volumen real via la StorageClass |
+  | Service (NodePort/LoadBalancer) | Objeto de Kubernetes que expone un conjunto de Pods en la red: NodePort usa un puerto fijo en cada nodo, LoadBalancer pide una IP dedicada (aqui, via MetalLB) |
+  | Pod multi-contenedor | Pod que agrupa varios contenedores (wordpress+mariadb+redis) que comparten red (localhost) y pueden compartir volumenes |
+endlegend
+
+@enduml

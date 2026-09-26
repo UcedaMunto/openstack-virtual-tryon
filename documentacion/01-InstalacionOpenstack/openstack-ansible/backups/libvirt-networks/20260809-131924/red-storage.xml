@@ -1,0 +1,9 @@
+<network>
+  <name>red-storage</name>
+  <uuid>fcca2843-07c4-4dbd-8cef-97462819baa6</uuid>
+  <bridge name='red-storage' stp='on' delay='0'/>
+  <mac address='52:54:00:a7:9c:be'/>
+  <ip address='192.168.40.1' netmask='255.255.255.0'>
+  </ip>
+</network>
+

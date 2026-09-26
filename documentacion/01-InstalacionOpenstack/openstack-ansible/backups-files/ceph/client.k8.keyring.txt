@@ -1,0 +1,10 @@
+Inferring fsid 97af58d1-9efd-11f1-bbf1-52540063e430
+Inferring config /var/lib/ceph/97af58d1-9efd-11f1-bbf1-52540063e430/mon.os-storage01/config
+Using ceph image with id 'ff836bb28e7d' and tag 'v19' created on 2026-08-18 15:06:29 +0000 UTC
+quay.io/ceph/ceph@sha256:ff836bb28e7d0be0ec4dd22e79407174452a96e11ee62e9cdd1fa47f4bcc3bdc
+[client.k8]
+	key = AQCdFItquSx2JRAA+Vl4zhGX+shWV6eXCxDKWg==
+	caps mds = "allow rw"
+	caps mgr = "allow rw"
+	caps mon = "allow r"
+	caps osd = "allow rw"

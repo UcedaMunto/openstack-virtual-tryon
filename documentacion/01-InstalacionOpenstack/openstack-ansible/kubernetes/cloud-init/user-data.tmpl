@@ -1,0 +1,35 @@
+#cloud-config
+# user-data.tmpl: plantilla compartida por todos los nodos del laboratorio
+# Kubernetes (kubernetes/cloud-init/<nodo>-user-data). Cada archivo se
+# genera con scripts/gen-cloud-init.sh, que sustituye __HOSTNAME__ por el
+# nombre del nodo y __SSH_PUBLIC_KEY__ por el contenido real de una clave
+# publica SSH (por defecto ~/.ssh/id_ed25519.pub). Asi la clave y la
+# estructura comun viven en un solo lugar en vez de repetirse a mano en
+# cada uno de los 6 archivos (k8-master, k8-worker1-4, ceph-admin).
+
+hostname: __HOSTNAME__
+manage_etc_hosts: true          # cloud-init mantiene /etc/hosts con el hostname (resolucion local)
+
+users:
+  - default                     # conserva el usuario por defecto de la imagen base (para no perder acceso)
+  - name: uceda                 # usuario adicional para administrar el lab (kubeadm/kubectl, SSH manual)
+    groups: [sudo]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL   # sudo sin password: para automatizar tareas privilegiadas sin prompt
+    ssh_authorized_keys:
+      - __SSH_PUBLIC_KEY__
+
+ssh_pwauth: false                # deshabilita login SSH por password (solo autenticacion por clave)
+
+package_update: true              # ejecuta apt update antes de instalar los paquetes de abajo
+packages:
+  - qemu-guest-agent              # permite a libvirt/virsh conocer la IP y apagar/reiniciar la VM de forma limpia
+
+growpart:
+  mode: auto                      # expande la particion raiz si el disco qcow2 es mas grande que la imagen base
+  devices: ['/']
+
+resize_rootfs: true               # redimensiona el sistema de archivos raiz tras el growpart
+
+runcmd:
+  - systemctl enable --now qemu-guest-agent   # arranca y habilita el guest agent al finalizar cloud-init

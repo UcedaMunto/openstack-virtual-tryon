@@ -1,0 +1,117 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontSize 11
+skinparam defaultFontName "Arial"
+skinparam rectangleBorderColor #555555
+skinparam rectangleBorderThickness 1.2
+skinparam nodeBorderColor #333333
+skinparam nodeBorderThickness 1.5
+skinparam arrowColor #333333
+skinparam arrowThickness 1.5
+
+title <b>OpenStack — Conectividad Externa (Tráfico Norte-Sur)</b>\n<size:10>VXLAN Overlay · L3 Agent centralizado · OVS en controller y computes</size>
+
+' ============================================================
+'  RED EXTERNA / KVM HOST
+' ============================================================
+cloud "<b>Internet / Red externa</b>\nRouter del KVM Host (ThinkPad)\n203.0.113.1 gw" as INTERNET #FFEBEE
+
+' ============================================================
+'  RED PROVIDER (virbr30 KVM)
+' ============================================================
+cloud "<b>openstack-provider</b>\nvirbr30 · L2 flat · sin IP\nRed física simulada" as PROV #E8F5E9
+
+' ============================================================
+'  RED ADMIN / VXLAN UNDERLAY
+' ============================================================
+cloud "<b>openstack-admin</b>\nvirbr10 · 10.0.0.0/24\nUnderlay para túneles VXLAN" as ADM #E3F2FD
+
+' ============================================================
+'  CONTROLLER
+' ============================================================
+node "<b>controller</b>  (10.0.0.11 / 203.0.113.239)" as CTRL #FFF3E0 {
+
+  rectangle "<b>neutron-l3-agent</b>\nqrouter-XXXX namespace\n· qr-port → red tenant\n· qg-port → red provider\n· SNAT / DNAT Floating IP" as L3 #FFCC80
+
+  rectangle "<b>neutron-dhcp-agent</b>\nqdhcp-XXXX namespace\n· dhcp tap → red tenant\n· Asigna IPs a instancias" as DHCP #FFE082
+
+  rectangle "<b>br-int</b>  (OVS)\nBridge de integración\nconecta namespaces qrouter/qdhcp" as CTRL_INT #B3E5FC
+
+  rectangle "<b>br-tun</b>  (OVS)\nVXLAN endpoint: 10.0.0.11\npatch-int ↔ patch-tun" as CTRL_TUN #B2EBF2
+
+}
+
+' ============================================================
+'  COMPUTE NODE (representativo: compute1)
+' ============================================================
+node "<b>compute1</b>  (10.0.0.10 / 203.0.113.240)\n<size:9>[misma arquitectura en compute2, compute3, compute4]</size>" as C1 #EDE7F6 {
+
+  rectangle "<b>br-provider</b>  (OVS)\nfail_mode=secure\nPort: enp8s0 (uplink)\nPort: phy-br-provider (patch→br-int)" as C1_PROV #C8E6C9
+
+  rectangle "<b>br-int</b>  (OVS)\nfail_mode=secure\nPorts: tap-*, patch-tun\npatch-provider" as C1_INT #B3E5FC
+
+  rectangle "<b>br-tun</b>  (OVS)\nVXLAN endpoint: 10.0.0.10\nports: vxlan-0a00000b (ctrl)\nvxlan-0a00000c (c2) ...\npatch-int ↔ patch-tun" as C1_TUN #B2EBF2
+
+  rectangle "<b>tap-XXXXXXXX</b>\nInterfaz Linux tap\nconecta VM a br-int" as TAP #F8BBD0
+
+  node "<b>Instancia OpenStack</b>\n(VM tenant)\nvirtio NIC" as VM #FFFDE7
+
+}
+
+' ============================================================
+'  FLUJO INTERNO — COMPUTE NODE
+' ============================================================
+VM          -up->  TAP       : virtio NIC
+TAP         -up->  C1_INT    : tap port en br-int
+C1_INT      <-->   C1_TUN    : patch-tun / patch-int
+C1_INT      <-->   C1_PROV   : patch-provider / phy-br-provider
+
+' ============================================================
+'  FLUJO INTERNO — CONTROLLER
+' ============================================================
+L3    <-->  CTRL_INT : qr-port (tenant)\nqg-port (provider)
+DHCP  <-->  CTRL_INT : dhcp tap port
+CTRL_INT <--> CTRL_TUN : patch-tun / patch-int
+
+' ============================================================
+'  VXLAN TUNNELS (underlay: red admin 10.0.0.0/24)
+' ============================================================
+CTRL_TUN <..> C1_TUN : "<color:#1565C0><b>VXLAN tunnel</b>\nVNI por red tenant\nUDP 4789\n10.0.0.11 ↔ 10.0.0.10</color>"
+
+' ============================================================
+'  CONEXIÓN AL PROVIDER NETWORK
+' ============================================================
+C1_PROV -down-> PROV : enp8s0\n(uplink físico)
+
+' ============================================================
+'  CONEXIÓN EXTERNA
+' ============================================================
+PROV -down-> INTERNET : virbr30 → KVM host\nrouting / NAT host
+
+' ============================================================
+'  NOTAS DE FLUJO
+' ============================================================
+note right of L3
+  <b>Tráfico Norte-Sur (Floating IP):</b>
+  Internet → virbr30 → br-provider (compute)
+  → br-int → VXLAN → br-int (controller)
+  → qrouter DNAT → br-int → VXLAN
+  → br-int (compute) → tap → VM
+end note
+
+note right of C1_TUN
+  <b>Tráfico Este-Oeste (entre VMs):</b>
+  VM-A (compute1) → br-int → br-tun
+  → VXLAN → br-tun (compute2) → br-int
+  → tap → VM-B
+  Sin pasar por el controller.
+end note
+
+note bottom of ADM
+  El underlay VXLAN usa la red admin (10.0.0.0/24).
+  Cada nodo tiene un endpoint VXLAN en su IP 10.0.0.x.
+  Los túneles se crean automáticamente por neutron-ovs-agent.
+end note
+
+@enduml

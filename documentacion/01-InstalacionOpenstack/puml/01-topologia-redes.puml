@@ -1,0 +1,70 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontSize 12
+skinparam defaultFontName "Arial"
+skinparam nodeBorderColor #555555
+skinparam nodeBorderThickness 1.5
+skinparam cloudBorderColor #888888
+skinparam cloudBorderThickness 1.5
+skinparam arrowColor #444444
+skinparam arrowThickness 1.5
+
+title <b>OpenStack Lab — Topología de Redes KVM</b>\n<size:10>Host: ThinkPad L15 Gen 2a · AMD Ryzen 5 PRO 5650U · 30 GB RAM · KVM/QEMU 8.2.2</size>
+
+' ============================================================
+'  REDES KVM
+' ============================================================
+cloud "<b>openstack-public</b>\nvirbr113 · 203.0.113.0/24\nSSH · VNC · API externo" as PUB #FFFDE7
+cloud "<b>openstack-admin</b>\nvirbr10 · 10.0.0.0/24\nGestión interna · APIs\nRabbitMQ · Tunnel VXLAN" as ADM #E3F2FD
+cloud "<b>openstack-provider</b>\nvirbr30 · (L2 flat, sin IP)\nRed flat provider Neutron\nTráfico instancias N/S" as PROV #E8F5E9
+
+' ============================================================
+'  CONTROLLER
+' ============================================================
+node "<b>controller</b>  (serverocontroller)\n─────────────────────────────────────\nKeystone  ·  Glance  ·  Placement\nNova-API  ·  Nova-Scheduler  ·  Nova-Conductor\nNeutron-Server  ·  Neutron-L3-Agent\nNeutron-DHCP-Agent  ·  OVS-Agent\nbr-int  ·  br-tun" as CTRL #FFF3E0
+
+' ============================================================
+'  COMPUTE NODES
+' ============================================================
+node "<b>compute1</b>\n─────────────────────────\nnova-compute\nneutron-openvswitch-agent\nbr-provider · br-int · br-tun" as C1 #F3E5F5
+node "<b>compute2</b>\n─────────────────────────\nnova-compute\nneutron-openvswitch-agent\nbr-provider · br-int · br-tun" as C2 #F3E5F5
+node "<b>compute3</b>\n─────────────────────────\nnova-compute\nneutron-openvswitch-agent\nbr-provider · br-int · br-tun" as C3 #F3E5F5
+node "<b>compute4</b>\n─────────────────────────\nnova-compute\nneutron-openvswitch-agent\nbr-provider · br-int · br-tun" as C4 #F3E5F5
+
+' ============================================================
+'  CONEXIONES — Red pública (virbr113)
+' ============================================================
+PUB -down- CTRL : "<size:10>enp1s0\n203.0.113.239</size>"
+PUB -down- C1   : "<size:10>enp1s0\n203.0.113.240</size>"
+PUB -down- C2   : "<size:10>enp1s0\n203.0.113.241</size>"
+PUB -down- C3   : "<size:10>enp1s0\n203.0.113.242</size>"
+PUB -down- C4   : "<size:10>enp1s0\n203.0.113.243</size>"
+
+' ============================================================
+'  CONEXIONES — Red admin / gestión (virbr10)
+' ============================================================
+ADM -down- CTRL : "<size:10>enp7s0\n10.0.0.11</size>"
+ADM -down- C1   : "<size:10>enp7s0\n10.0.0.10</size>"
+ADM -down- C2   : "<size:10>enp7s0\n10.0.0.12</size>"
+ADM -down- C3   : "<size:10>enp7s0\n10.0.0.13</size>"
+ADM -down- C4   : "<size:10>enp7s0\n10.0.0.14</size>"
+
+' ============================================================
+'  CONEXIONES — Red provider (virbr30) — solo computes
+' ============================================================
+C1 -down- PROV : "<size:10>enp8s0</size>"
+C2 -down- PROV : "<size:10>enp8s0</size>"
+C3 -down- PROV : "<size:10>enp8s0</size>"
+C4 -down- PROV : "<size:10>enp8s0</size>"
+
+' ============================================================
+'  NOTA
+' ============================================================
+note bottom of PROV
+  virbr30 no tiene IP asignada en el host KVM.
+  Es una red L2 pura (flat) para las instancias OpenStack.
+  Cada compute conecta enp8s0 al bridge OVS br-provider.
+end note
+
+@enduml

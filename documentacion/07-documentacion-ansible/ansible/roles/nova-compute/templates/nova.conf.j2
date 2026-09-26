@@ -1,0 +1,43 @@
+[DEFAULT]
+my_ip = {{ mgmt_ip }}
+transport_url = rabbit://{{ rabbitmq_user }}:{{ rabbitmq_password }}@{{ controller_fqdn }}:5672/
+
+[api]
+auth_strategy = keystone
+
+[keystone_authtoken]
+www_authenticate_uri = http://{{ controller_fqdn }}:5000
+auth_url = http://{{ controller_fqdn }}:5000
+memcached_servers = {{ controller_mgmt_ip }}:{{ memcached_port }}
+auth_type = password
+project_domain_name = Default
+user_domain_name = Default
+project_name = service
+username = nova
+password = {{ openstack_admin_password }}
+
+[vnc]
+enabled = true
+server_listen = 0.0.0.0
+server_proxyclient_address = {{ mgmt_ip }}
+novncproxy_base_url = http://{{ controller_public_ip }}:6080/vnc_lite.html
+
+[glance]
+api_servers = http://{{ controller_fqdn }}:9292
+
+[oslo_concurrency]
+lock_path = /var/lib/nova/tmp
+
+[placement]
+region_name = {{ openstack_region }}
+project_domain_name = Default
+project_name = service
+auth_type = password
+user_domain_name = Default
+auth_url = http://{{ controller_fqdn }}:5000/v3
+username = placement
+password = {{ openstack_admin_password }}
+
+[libvirt]
+virt_type = {{ nova_virt_type }}
+cpu_mode = {{ nova_cpu_mode }}

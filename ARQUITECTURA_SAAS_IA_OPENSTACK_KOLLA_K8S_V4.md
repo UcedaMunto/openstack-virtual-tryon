@@ -16,6 +16,8 @@
 > 3. **Upgrades y rollbacks por imágenes** de contenedor, más predecibles y automatizables.
 > 4. El documento de arquitectura previo (V3) ya anticipaba adoptar Kolla-Ansible.
 
+> 📚 **Documentación de apoyo vinculada:** este documento se apoya en la base de conocimiento consolidada en [`documentacion/`](documentacion/README.md), que contiene los scripts, XML, YAML, PlantUML y configs **ya probados** en implementaciones previas (OpenStack Kolla-Ansible, Kubernetes + Rook-Ceph, Ceph, KVM/libvirt, Ansible). Ver también la verificación de factibilidad y revisión del plan en [`documentacion/VERIFICACION-PLAN-Y-FACTIBILIDAD.md`](documentacion/VERIFICACION-PLAN-Y-FACTIBILIDAD.md).
+
 ---
 
 # 1. Resumen ejecutivo
@@ -1542,6 +1544,8 @@ Helm empaqueta
 Argo CD sincroniza
 ```
 
+> 🤖 **Automatización crítica (requisito):** toda dependencia e instalación debe quedar **automatizada en scripts secuenciales e idempotentes**, ejecutables sobre **Ubuntu 24.04**, para poder reproducir la infraestructura en **otras redes** editando únicamente un inventario. Implementación real en [`implementacion/`](implementacion/) (scripts `00-bootstrap` … `06-nvidia-runtime` + `run-all.sh`; detalle en `implementacion/README.md` y `implementacion/docs/00-orden-de-instalacion.md`).
+
 ---
 
 # 56. Nodo de control Ansible
@@ -1662,6 +1666,8 @@ node-01
 
 Las IPs se toman del `.env` (NODE01_MGMT_IP, NODE02_MGMT_IP, NODE03_MGMT_IP).
 
+> 📚 **Referencia ejecutable:** inventario Kolla-Ansible real (grupos `control/network/compute/storage/monitoring` + `[all:vars]`) en [`documentacion/01-InstalacionOpenstack/openstack-ansible/ansible/inventory/multinode`](documentacion/01-InstalacionOpenstack/openstack-ansible/ansible/inventory/multinode) y [`hosts-minimal-backup.ini`](documentacion/01-InstalacionOpenstack/openstack-ansible/ansible/inventory/hosts-minimal-backup.ini).
+
 ## 57.3 Inventario de máquinas virtuales (OpenStack dinámico)
 
 Después de desplegar OpenStack, las VMs podrán administrarse mediante:
@@ -1758,6 +1764,8 @@ infrastructure/
 └── docs/
 ```
 
+> 📚 **Referencia ejecutable:** estructura Ansible real (inventario + `group_vars` + playbooks + roles `common/linux-bridges/ovs-bridges/nova-compute/neutron-ovs-agent`) en [`documentacion/07-documentacion-ansible/ansible/`](documentacion/07-documentacion-ansible/ansible/).
+
 Esta separación evita mezclar:
 
 ```text
@@ -1847,6 +1855,8 @@ kolla-ansible -i inventory post-deploy
 ```
 
 Este playbook **no reimplementa** Kolla-Ansible: lo orquesta y valida.
+
+> 📚 **Referencia ejecutable:** el laboratorio ya validó este flujo (`bootstrap-servers → prechecks → pull → deploy → post-deploy`); ver inventario y redes en [`documentacion/01-InstalacionOpenstack/openstack-ansible/`](documentacion/01-InstalacionOpenstack/openstack-ansible/). Nota: `pull` es opcional (ver [`VERIFICACION-PLAN-Y-FACTIBILIDAD.md` §4·H3](documentacion/VERIFICACION-PLAN-Y-FACTIBILIDAD.md)).
 
 ## 59.7 `06_gpu_host.yml`
 
@@ -2178,6 +2188,8 @@ VLAN 50 · External   10.10.4.0/24
 
 Las IPs concretas de cada host están en el archivo **`.env`**.
 
+> 📚 **Referencia ejecutable:** definiciones XML comentadas de las redes `os-mgmt`/`os-tunnel`/`os-external` en [`documentacion/01-InstalacionOpenstack/openstack-ansible/networks/`](documentacion/01-InstalacionOpenstack/openstack-ansible/networks/); XML mínimos en [`documentacion/05-redes-xml-kvm/`](documentacion/05-redes-xml-kvm/); guías de bridges/VLAN en [`documentacion/03-PRACTICA-KVM/`](documentacion/03-PRACTICA-KVM/).
+
 > Nota: al ser un único sitio no se requiere WireGuard ni ruteo entre sitios. La red se resuelve con VLANs sobre un switch local.
 
 ---
@@ -2265,6 +2277,8 @@ FASE 1
 FASE FUTURA
 → Ceph / almacenamiento distribuido
 ```
+
+> 📚 **Referencia ejecutable:** tres caminos de Ceph ya probados — Docker Compose en [`documentacion/04-LXC-ceph/`](documentacion/04-LXC-ceph/), KVM nativo en [`documentacion/02-cluster-ceph/`](documentacion/02-cluster-ceph/), y Rook dentro de Kubernetes en [`documentacion/01-InstalacionOpenstack/openstack-ansible/kubernetes/tmp/03-rook-cluster.yaml`](documentacion/01-InstalacionOpenstack/openstack-ansible/kubernetes/tmp/03-rook-cluster.yaml).
 
 ---
 
@@ -2817,6 +2831,8 @@ FASHN-VTON PRODUCTIVO
 
 **Regla de orden (heredada del plan de trabajo):** cada capa debe validarse antes de construir la siguiente encima. No tiene sentido crear VMs si OpenStack aún no funciona; no tiene sentido desplegar Kubernetes si las VMs no están preparadas.
 
+> 📚 **Referencia ejecutable:** checklist etapa por etapa (con el activo concreto a usar en cada paso) en [`documentacion/README.md` §4](documentacion/README.md); verificación de factibilidad y hallazgos de lógica en [`documentacion/VERIFICACION-PLAN-Y-FACTIBILIDAD.md`](documentacion/VERIFICACION-PLAN-Y-FACTIBILIDAD.md).
+
 ## Etapa 0 — Diseño de direccionamiento (solo en papel)
 
 - [ ] Completar el archivo **`.env`** con IPs reales, hostnames y roles de los 3 nodos.
@@ -2885,6 +2901,8 @@ pull
 deploy
 post-deploy
 ```
+
+> 📚 **Implementación automatizada:** esta etapa está cubierta por los scripts `implementacion/scripts/07..11` (`07-kolla-config.sh` → `08-kolla-bootstrap.sh` → `09-kolla-hosts.sh` → `11-kolla-deploy.sh`). `pull` es opcional (el `deploy` ya descarga imágenes). El puerto 5000 (Keystone) debe quedar libre: el script `11` escala a 0 el `vton-registry` del k3s si está en uso. Ver [`implementacion/README.md`](implementacion/README.md).
 
 Configurar:
 
@@ -3398,6 +3416,25 @@ A partir de esta arquitectura conviene generar:
 16. **Runbook de Ansible y convenciones de roles/playbooks.**
 17. **Inventario bare metal, Kolla y dinámico OpenStack.**
 18. **Procedimiento de recuperación automatizada con Ansible + Kolla-Ansible.**
+
+---
+
+# 100. Referencias a la base de conocimiento y verificación
+
+Este documento queda vinculado a la base de conocimiento consolidada y a la verificación de factibilidad/plan:
+
+| Recurso | Ruta |
+|---|---|
+| Punto de entrada único (índice + clasificación + mapa + checklist) | [`documentacion/README.md`](documentacion/README.md) |
+| Verificación de factibilidad y revisión del plan (V4 ↔ labs) | [`documentacion/VERIFICACION-PLAN-Y-FACTIBILIDAD.md`](documentacion/VERIFICACION-PLAN-Y-FACTIBILIDAD.md) |
+| Inventario Kolla-Ansible real | [`documentacion/01-InstalacionOpenstack/openstack-ansible/ansible/inventory/multinode`](documentacion/01-InstalacionOpenstack/openstack-ansible/ansible/inventory/multinode) |
+| Redes OpenStack (XML comentados) | [`documentacion/01-InstalacionOpenstack/openstack-ansible/networks/`](documentacion/01-InstalacionOpenstack/openstack-ansible/networks/) |
+| cloud-init de nodos | [`documentacion/01-InstalacionOpenstack/openstack-ansible/cloud-init/`](documentacion/01-InstalacionOpenstack/openstack-ansible/cloud-init/) |
+| Kubernetes (scripts + manifests) | [`documentacion/01-InstalacionOpenstack/openstack-ansible/kubernetes/`](documentacion/01-InstalacionOpenstack/openstack-ansible/kubernetes/) |
+| Ansible (roles + playbooks + inventario) | [`documentacion/07-documentacion-ansible/ansible/`](documentacion/07-documentacion-ansible/ansible/) |
+| Ceph (docker + kvm) | [`documentacion/04-LXC-ceph/`](documentacion/04-LXC-ceph/) · [`documentacion/02-cluster-ceph/`](documentacion/02-cluster-ceph/) |
+| KVM/libvirt + bridges/VLAN | [`documentacion/03-PRACTICA-KVM/`](documentacion/03-PRACTICA-KVM/) · [`documentacion/05-redes-xml-kvm/`](documentacion/05-redes-xml-kvm/) |
+| Instalación automatizada de dependencias (scripts secuenciales) | [`implementacion/`](implementacion/) · [`implementacion/README.md`](implementacion/README.md) |
 
 ---
 

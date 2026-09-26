@@ -1,0 +1,109 @@
+@startuml 03-pods-y-conexion
+title Pods por namespace y comandos para conectarse
+
+skinparam componentStyle rectangle
+left to right direction
+
+package "kube-system" as ns_kubesystem {
+  component "coredns (x2)" as coredns
+  component "etcd, kube-apiserver,\nkube-controller-manager,\nkube-scheduler" as controlplane
+  component "kube-proxy (x4, uno por nodo)" as kubeproxy
+}
+
+package "calico-system" as ns_calico {
+  component "calico-node (x4)" as calico_node
+  component "calico-kube-controllers" as calico_ctrl
+  component "calico-typha" as calico_typha
+  component "csi-node-driver (x4)" as calico_csi
+  component "whisker, goldmane" as calico_obs
+}
+
+package "tigera-operator" as ns_tigera {
+  component "tigera-operator" as tigera
+}
+
+package "kubernetes-dashboard" as ns_dash {
+  component "dashboard-web/api/auth/\nkong/metrics-scraper" as dash_pods
+}
+
+package "metallb-system" as ns_metallb {
+  component "controller" as mlb_ctrl
+  component "speaker (x4, uno por nodo)" as mlb_speaker
+}
+
+package "rook-ceph" as ns_rook {
+  component "rook-ceph-operator" as rook_op
+  component "mon-a / mon-b / mon-c" as rook_mon
+  component "mgr-a" as rook_mgr
+  component "osd-0 / osd-1 / osd-2" as rook_osd
+  component "mds-myfs-a" as rook_mds
+  component "rook-ceph-tools (toolbox)" as rook_tools
+  component "CSI cephfs/rbd\nctrlplugin + nodeplugin" as rook_csi
+}
+
+package "wordpress" as ns_wp {
+  component "Pod wordpress\n(3 contenedores:\nwordpress+mariadb+redis)" as wp_pod
+}
+
+package "default" as ns_default {
+  component "nginx-app (prueba)" as nginx_pod
+}
+
+note right of ns_wp
+  ** Conectarse al Pod de WordPress **
+  kubectl -n wordpress get pod -l app=wordpress
+  kubectl -n wordpress exec -it deploy/wordpress -c wordpress -- bash
+  kubectl -n wordpress exec -it deploy/wordpress -c mariadb  -- bash
+  kubectl -n wordpress exec -it deploy/wordpress -c redis    -- sh
+
+  ** Probar cada contenedor **
+  kubectl -n wordpress exec deploy/wordpress -c mariadb -- \
+    mariadb-admin ping -h 127.0.0.1 -uroot -p'RootK8sLab2026!'
+  kubectl -n wordpress exec deploy/wordpress -c redis -- redis-cli ping
+end note
+
+note right of ns_rook
+  ** Toolbox de Ceph (estado del cluster) **
+  kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph -s
+  kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph osd tree
+  kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph fs status myfs
+
+  ** Logs del operador si algo falla **
+  kubectl -n rook-ceph logs deploy/rook-ceph-operator --tail=200
+end note
+
+note right of ns_dash
+  ** Token de acceso al Dashboard de Kubernetes **
+  kubectl -n kubernetes-dashboard create token admin-user
+end note
+
+note right of ns_metallb
+  ** Diagnostico si el LoadBalancer no asigna IP **
+  kubectl -n metallb-system get pods -o wide
+  kubectl -n metallb-system logs deployment/controller --tail=100
+  kubectl -n metallb-system describe ipaddresspool k8s-lab-pool
+end note
+
+note bottom of ns_default
+  ** Comando generico para entrar a cualquier Pod **
+  kubectl -n <namespace> get pods
+  kubectl -n <namespace> exec -it <pod> -- sh
+  kubectl -n <namespace> logs <pod> -c <contenedor> --tail=100
+end note
+
+legend right
+  |= Termino / Tecnologia |= Que es |
+  | Namespace | Particion logica dentro de un cluster Kubernetes para agrupar y aislar recursos (ej. wordpress, rook-ceph) |
+  | Pod | Unidad minima ejecutable de Kubernetes; puede contener uno o varios contenedores que comparten red y almacenamiento (ej. el Pod wordpress con 3 contenedores) |
+  | kubectl exec | Comando para ejecutar un proceso (ej. una shell) dentro de un contenedor de un Pod ya corriendo |
+  | CoreDNS | Servidor DNS interno del cluster; resuelve nombres de Service (ej. wordpress.wordpress.svc) a IPs internas |
+  | Calico | Plugin de red (CNI) que provee la red de Pods y las politicas de red del cluster |
+  | Tigera operator | Operador que instala y gestiona Calico usando el CRD Installation en vez de manifiestos sueltos |
+  | MetalLB | Load-balancer software que asigna IPs tipo LoadBalancer en clusters sin proveedor cloud |
+  | Rook | Operador que despliega y gestiona el cluster Ceph (mon/mgr/osd/mds) dentro de Kubernetes |
+  | Toolbox (rook-ceph-tools) | Pod auxiliar con el cliente ceph instalado, usado solo para diagnostico/administracion manual del cluster Ceph |
+  | Deployment | Objeto de Kubernetes que gestiona un conjunto de Pods identicos (replicas, rollout, rollback) |
+  | Kubernetes Dashboard | Interfaz web oficial de Kubernetes para ver y administrar el cluster desde el navegador |
+endlegend
+
+@enduml

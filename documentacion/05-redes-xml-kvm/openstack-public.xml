@@ -1,0 +1,19 @@
+<network>
+  <name>openstack-public</name>
+
+  <forward mode='nat'/>
+
+  <bridge name='virbr113'
+          stp='on'
+          delay='0'/>
+
+  <ip address='203.0.113.1'
+      netmask='255.255.255.0'>
+
+    <dhcp>
+      <range start='203.0.113.100'
+             end='203.0.113.250'/>
+    </dhcp>
+
+  </ip>
+</network>

@@ -1,0 +1,4 @@
+<network>
+  <name>openstack-provider</name>
+  <bridge name='virbr30' stp='on' delay='0'/>
+</network>

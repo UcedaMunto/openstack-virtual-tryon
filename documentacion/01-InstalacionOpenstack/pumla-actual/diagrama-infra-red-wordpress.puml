@@ -1,0 +1,83 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam linetype ortho
+
+title Infraestructura de red actual con WordPress (2026-07-21)
+
+cloud "Internet" as INTERNET
+cloud "Publica 203.0.113.0/24" as PUB
+cloud "MGMT 10.0.0.0/24" as MGMT
+cloud "Provider 192.168.122.0/24" as PROVIDER
+cloud "Tenant 10.10.10.0/24" as TENANT
+
+node "controller\n203.0.113.239\nbr-mgmt 10.0.0.11\nNeutron L3/DHCP/OVS" as CTRL {
+  rectangle "OVS br-provider/br-int/br-tun\nVXLAN peers: 10.0.0.10, 10.0.0.12" as COVS
+  rectangle "qrouter-926f...\nqdhcp-7c22..., qdhcp-bfb7..." as CNS
+  rectangle "DNAT host :8080" as DNAT
+}
+
+node "compute2\n203.0.113.241\nbr-mgmt 10.0.0.12" as C2 {
+  node "wp-web-01\n10.10.10.76\nFIP 192.168.122.137" as WPWEB
+  node "wp-db-01\n10.10.10.152\nFIP 192.168.122.152" as WPDB
+}
+
+node "compute1\n203.0.113.240\nbr-mgmt 10.0.0.10" as C1 {
+  node "test-vm1\n10.10.10.229\nFIP 192.168.122.115\nSHUTOFF" as TVM1
+}
+
+node "compute3\n203.0.113.242" as C3
+node "compute4\n203.0.113.243" as C4
+node "storage1\n203.0.113.244\n10.0.0.15\nCinder/Ceph" as ST1
+node "object1\n203.0.113.245\n10.0.0.51\nSwift" as O1
+node "object2\n203.0.113.246\n10.0.0.52\nSwift" as O2
+
+PUB -- CTRL
+PUB -- C1
+PUB -- C2
+PUB -- C3
+PUB -- C4
+PUB -- ST1
+PUB -- O1
+PUB -- O2
+
+MGMT -- CTRL
+MGMT -- C1
+MGMT -- C2
+MGMT -- C3
+MGMT -- C4
+MGMT -- ST1
+MGMT -- O1
+MGMT -- O2
+
+PROVIDER -- CTRL
+PROVIDER -- C1
+PROVIDER -- C2
+PROVIDER -- C3
+PROVIDER -- C4
+
+TENANT -- CTRL
+TENANT -- C1
+TENANT -- C2
+TENANT -- C3
+TENANT -- C4
+
+INTERNET --> DNAT : HTTP :8080
+DNAT --> WPWEB
+WPWEB --> WPDB : MySQL/MariaDB
+
+ST1 ..> CTRL : Cinder backend
+O1 ..> CTRL : Swift object storage
+O2 ..> CTRL : Swift object storage
+
+note right of CTRL
+Floating IPs:
+- 192.168.122.137 -> 10.10.10.76
+- 192.168.122.152 -> 10.10.10.152
+- 192.168.122.115 -> 10.10.10.229
+- 192.168.122.136 libre
+end note
+
+@enduml

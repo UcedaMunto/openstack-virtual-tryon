@@ -1,0 +1,104 @@
+--- metallb ipaddresspool ---
+apiVersion: v1
+items:
+- apiVersion: metallb.io/v1beta1
+  kind: IPAddressPool
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"metallb.io/v1beta1","kind":"IPAddressPool","metadata":{"annotations":{},"name":"k8s-lab-pool","namespace":"metallb-system"},"spec":{"addresses":["192.168.90.50-192.168.90.50"]}}
+    creationTimestamp: "2026-08-23T16:30:51Z"
+    generation: 1
+    name: k8s-lab-pool
+    namespace: metallb-system
+    resourceVersion: "101127"
+    uid: ce51554e-55c2-44bc-94b3-742cf0c9dc4f
+  spec:
+    addresses:
+    - 192.168.90.50-192.168.90.50
+    autoAssign: true
+    avoidBuggyIPs: false
+  status:
+    assignedIPv4: 1
+    assignedIPv6: 0
+    availableIPv4: 0
+    availableIPv6: 0
+kind: List
+metadata:
+  resourceVersion: ""
+--- metallb l2advertisement ---
+apiVersion: v1
+items:
+- apiVersion: metallb.io/v1beta1
+  kind: L2Advertisement
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"metallb.io/v1beta1","kind":"L2Advertisement","metadata":{"annotations":{},"name":"k8s-lab-advertisement","namespace":"metallb-system"},"spec":{"ipAddressPools":["k8s-lab-pool"]}}
+    creationTimestamp: "2026-08-23T16:30:51Z"
+    generation: 1
+    name: k8s-lab-advertisement
+    namespace: metallb-system
+    resourceVersion: "101128"
+    uid: fa7e620f-b09b-40c0-a224-ab491ef880da
+  spec:
+    ipAddressPools:
+    - k8s-lab-pool
+kind: List
+metadata:
+  resourceVersion: ""
+--- ingress-nginx-controller svc ---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    meta.helm.sh/release-name: ingress-nginx
+    meta.helm.sh/release-namespace: ingress-nginx
+    metallb.io/ip-allocated-from-pool: k8s-lab-pool
+  creationTimestamp: "2026-08-23T16:29:36Z"
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.15.1
+    helm.sh/chart: ingress-nginx-4.15.1
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+  resourceVersion: "101125"
+  uid: a7e8c51a-6304-4b51-abe5-8253c65096c3
+spec:
+  allocateLoadBalancerNodePorts: true
+  clusterIP: 10.100.2.224
+  clusterIPs:
+  - 10.100.2.224
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - appProtocol: http
+    name: http
+    nodePort: 30721
+    port: 80
+    protocol: TCP
+    targetPort: http
+  - appProtocol: https
+    name: https
+    nodePort: 32025
+    port: 443
+    protocol: TCP
+    targetPort: https
+  selector:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+  sessionAffinity: None
+  type: LoadBalancer
+status:
+  loadBalancer:
+    ingress:
+    - ip: 192.168.90.50
+      ipMode: VIP

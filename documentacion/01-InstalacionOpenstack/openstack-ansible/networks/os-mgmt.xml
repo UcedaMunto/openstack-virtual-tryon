@@ -1,0 +1,58 @@
+<!--
+  Red "os-mgmt" (OpenStack-Ansible): red de gestion/management (equivalente a
+  br-mgmt). Usa NAT para dar salida a Internet/host a las VMs conectadas y
+  ofrece DHCP para asignar direcciones automaticamente durante el
+  aprovisionamiento inicial.
+-->
+<network>
+    <!-- Nombre logico de la red en libvirt -->
+    <name>os-mgmt</name>
+
+    <!--
+      Modo NAT: libvirt hace de router/NAT entre esta red y la red del host,
+      permitiendo que las VMs salgan a Internet (apt, pip, repos, etc.).
+      Nota: se corrige el typo original <fordward> -> <forward>.
+    -->
+    <forward mode='nat'/>
+
+    <!--
+      Bridge software "virbr-os-mgmt" con STP activado y sin retardo de
+      convergencia, igual que en las demas redes.
+      Nota: se corrige el typo original <brige> -> <bridge>.
+    -->
+    <bridge name='virbr-os-mgmt' stp='on' delay='0'/>
+
+    <!--
+      Direccion IP del propio host en esta red (gateway 192.168.60.1/24)
+      y rango DHCP 192.168.60.100-199 para asignar IP automatica a las VMs
+      que arranquen sin configuracion de red estatica todavia.
+    -->
+    <ip address='192.168.60.1' netmask='255.255.255.0'>
+        <dhcp>
+            <range start='192.168.60.100' end='192.168.60.199'/>
+        </dhcp>
+    </ip>
+</network>
+
+<!--
+  Siguientes pasos para implementarla:
+    1. virsh net-define os-mgmt.xml
+    2. virsh net-autostart os-mgmt
+    3. virsh net-start os-mgmt
+    4. Conectar todos los nodos (controller, compute, storage, swift, etc.)
+       a esta red como su interfaz de gestion (br-mgmt) en create-kvm-vm.sh /
+       virt-install --network network=os-mgmt.
+    5. Una vez arrancadas las VMs, fijar IPs estaticas dentro/fuera del rango
+       DHCP segun openstack_user_config.yml de openstack-ansible (usada para
+       SSH, Ansible, RabbitMQ, MySQL/Galera, APIs internas, etc.), dejando el
+       DHCP solo como red de emergencia/instalacion inicial.
+    6. Revisar reglas de NAT/firewall del host si hace falta exponer algun
+       servicio de gestion hacia fuera.
+
+  Uso estandar de este tipo de red (management/NAT):
+    Es la red interna de administracion usada por Ansible, SSH y los servicios
+    "internal" de OpenStack (APIs, base de datos, mensajeria). El modo NAT +
+    DHCP es tipico de laboratorios/entornos de pruebas para dar acceso a
+    Internet y arranque rapido; en produccion suele sustituirse por IPs
+    estaticas y sin NAT (routing real) por motivos de rendimiento y control.
+-->

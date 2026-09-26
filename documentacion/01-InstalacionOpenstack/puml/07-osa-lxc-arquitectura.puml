@@ -1,0 +1,206 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontSize 11
+skinparam defaultFontName "Arial"
+skinparam nodeBorderColor #37474F
+skinparam nodeBorderThickness 1.8
+skinparam rectangleBorderColor #37474F
+skinparam rectangleBorderThickness 1.2
+skinparam componentBorderColor #37474F
+skinparam arrowColor #37474F
+skinparam arrowThickness 1.5
+
+top to bottom direction
+
+title <b>Arquitectura OSA -- OpenStack-Ansible con contenedores LXC</b>\n<size:10>Modelo de referencia: 3 NICs | 4 bridges Linux | Contenedores por servicio | OVS en computes</size>
+
+' ============================================================
+'  REDES FISICAS / KVM
+' ============================================================
+cloud "<b>Red de Gestion</b>  [virbr10 / eth0]\n10.0.0.0/24\nAPIs internas, RabbitMQ, MySQL, VXLAN underlay" as MGMT_NET #E3F2FD
+cloud "<b>Red Provider / VLAN</b>  [virbr30 / eth1]\nL2 flat o VLANs etiquetadas\nFloating IPs, trafico N-S instancias" as VLAN_NET #E8F5E9
+cloud "<b>Red Overlay / VXLAN</b>  [virbr20 / eth2]\n10.1.0.0/24  (underlay dedicado)\nTuneles VXLAN entre computes" as VXLAN_NET #EDE7F6
+cloud "<b>Red de Almacenamiento</b>  [virbr40 / eth3]\n10.2.0.0/24  (opcional)\nCeph / NFS / iSCSI" as STOR_NET #FFF9C4
+
+' ============================================================
+'  NODO CONTROLLER
+' ============================================================
+node "<b>CONTROLLER NODE</b>  (servidor fisico / VM KVM)\nUbuntu 22.04 -- corre LXC + OpenStack API services" as CTRL_HOST #FFF3E0 {
+
+  ' NICs fisicas
+  rectangle "<b>eth0</b>  (NIC fisica mgmt)\nsin IP directa\nmiembro de br-mgmt" as CTRL_ETH0 #FFCC80
+  rectangle "<b>eth1</b>  (NIC fisica provider)\nsin IP directa\nmiembro de br-vlan" as CTRL_ETH1 #FFCC80
+  rectangle "<b>eth3</b>  (NIC storage, opcional)\nsin IP directa\nmiembro de br-storage" as CTRL_ETH3 #FFCC80
+
+  ' Linux bridges del host
+  rectangle "<b>br-mgmt</b>  [Linux bridge]\n10.0.0.11/24\nmiembro: eth0\nveth de cada contenedor" as CTRL_BRMGMT #B3E5FC
+  rectangle "<b>br-vlan</b>  [Linux bridge]\nsin IP (L2 puro)\nmiembro: eth1\nuplink de OVS br-provider" as CTRL_BRVLAN #C8E6C9
+  rectangle "<b>br-storage</b>  [Linux bridge]\n10.2.0.11/24\nmiembro: eth3" as CTRL_BRSTOR #FFF9C4
+
+  ' Contenedores LXC
+  node "<b>LXC: keystone</b>\nveth0 -> br-mgmt\nIP: 10.0.0.101\nAuthN/AuthZ REST API" as LXC_KS #E1F5FE
+  node "<b>LXC: glance</b>\nveth0 -> br-mgmt\nIP: 10.0.0.102\nImagen registry" as LXC_GL #E1F5FE
+  node "<b>LXC: nova-api</b>\nveth0 -> br-mgmt\nIP: 10.0.0.103\nnova-conductor\nnova-scheduler" as LXC_NOVA #E1F5FE
+  node "<b>LXC: neutron-server</b>\nveth0 -> br-mgmt\nIP: 10.0.0.104\nneutron-l3-agent\nneutron-dhcp-agent\nneutron-metadata-agent" as LXC_NEUT #E1F5FE
+  node "<b>LXC: horizon</b>\nveth0 -> br-mgmt\nIP: 10.0.0.105\nDashboard web" as LXC_HOR #E1F5FE
+  node "<b>LXC: rabbitmq</b>\nveth0 -> br-mgmt\nIP: 10.0.0.106\nmensajeria AMQP" as LXC_MQ #E1F5FE
+  node "<b>LXC: galera (MySQL)</b>\nveth0 -> br-mgmt\nIP: 10.0.0.107\ncluster 3 nodos" as LXC_DB #E1F5FE
+  node "<b>LXC: memcached</b>\nveth0 -> br-mgmt\nIP: 10.0.0.108\ncache de tokens" as LXC_MC #E1F5FE
+}
+
+' ============================================================
+'  NODO COMPUTE (representativo -- misma arch en c1/c2/c3/c4)
+' ============================================================
+node "<b>COMPUTE NODE</b>  (x4: compute1..4)\nUbuntu 22.04 -- corre LXC + nova-compute + OVS" as COMP_HOST #F3E5F5 {
+
+  ' NICs fisicas
+  rectangle "<b>eth0</b>  (NIC mgmt)\nsin IP directa\nmiembro de br-mgmt" as COMP_ETH0 #FFCC80
+  rectangle "<b>eth1</b>  (NIC provider)\nsin IP directa\nmiembro de br-vlan" as COMP_ETH1 #FFCC80
+  rectangle "<b>eth2</b>  (NIC overlay)\nsin IP directa\nmiembro de br-vxlan" as COMP_ETH2 #FFCC80
+
+  ' Linux bridges del host
+  rectangle "<b>br-mgmt</b>  [Linux bridge]\n10.0.0.1X/24\nmiembro: eth0" as COMP_BRMGMT #B3E5FC
+  rectangle "<b>br-vlan</b>  [Linux bridge]\nsin IP\nmiembro: eth1\nuplink -> OVS br-provider" as COMP_BRVLAN #C8E6C9
+  rectangle "<b>br-vxlan</b>  [Linux bridge]\n10.1.0.1X/24  (NIC dedicada)\nmiembro: eth2\nuplink -> OVS br-tun" as COMP_BRVXLAN #CE93D8
+
+  ' Contenedores LXC en compute
+  node "<b>LXC: nova-compute</b>\nveth0 -> br-mgmt\nveth1 -> br-storage (opcional)\nIP mgmt: 10.0.0.201\nlibvirtd: hypervisor KVM\ninstancias VM via QEMU/KVM" as LXC_NC #F8BBD9
+  node "<b>LXC: neutron-ovs-agent</b>\nveth0 -> br-mgmt\nIP mgmt: 10.0.0.202\ngestiona OVS br-int/br-tun\nprograma flows de red" as LXC_OVS #F8BBD9
+
+  ' OVS bridges (en el host, no en contenedor)
+  rectangle "<b>OVS br-int</b>  [host]\ntap-XXXX (VMs)\npatch-tun | patch-provider\nintegration bridge" as OVS_INT #A5D6A7
+  rectangle "<b>OVS br-tun</b>  [host]\nlocal_ip: 10.1.0.1X\nvxlan-XXXXXXXX (tuneles)\nencapsula L2 en VXLAN UDP 4789" as OVS_TUN #A5D6A7
+  rectangle "<b>OVS br-provider</b>  [host]\nuplink: br-vlan\nphy-br-provider (patch -> br-int)\ntráfico N-S hacia red fisica" as OVS_PROV #A5D6A7
+
+  ' Instancias VM
+  node "<b>VM instancia</b>\ntap interface -> br-int\nIP tenant: 10.10.10.X\nFloating: 192.168.x.x\nvirtio NIC (paravirtualizada)" as VM #FFFDE7
+}
+
+' ============================================================
+'  CONEXIONES: host NICs -> bridges
+' ============================================================
+CTRL_ETH0 --> CTRL_BRMGMT : "miembro"
+CTRL_ETH1 --> CTRL_BRVLAN : "miembro"
+CTRL_ETH3 --> CTRL_BRSTOR : "miembro"
+
+COMP_ETH0 --> COMP_BRMGMT  : "miembro"
+COMP_ETH1 --> COMP_BRVLAN  : "miembro"
+COMP_ETH2 --> COMP_BRVXLAN : "miembro"
+
+' ============================================================
+'  CONEXIONES: contenedores LXC -> bridges via veth
+' ============================================================
+LXC_KS   --> CTRL_BRMGMT : "veth (par virtual)"
+LXC_GL   --> CTRL_BRMGMT
+LXC_NOVA --> CTRL_BRMGMT
+LXC_NEUT --> CTRL_BRMGMT
+LXC_HOR  --> CTRL_BRMGMT
+LXC_MQ   --> CTRL_BRMGMT
+LXC_DB   --> CTRL_BRMGMT
+LXC_MC   --> CTRL_BRMGMT
+
+LXC_NC  --> COMP_BRMGMT : "veth mgmt"
+LXC_OVS --> COMP_BRMGMT : "veth mgmt"
+
+' ============================================================
+'  CONEXIONES: OVS <-> bridges Linux
+' ============================================================
+COMP_BRVLAN  --> OVS_PROV : "uplink\n(br-vlan port en OVS)"
+COMP_BRVXLAN --> OVS_TUN  : "uplink\n(local_ip underlay)"
+OVS_PROV <--> OVS_INT : "patch ports\nphy-br-provider\nint-br-provider"
+OVS_TUN  <--> OVS_INT : "patch ports\npatch-tun\npatch-int"
+
+' ============================================================
+'  VMs -> OVS
+' ============================================================
+VM --> OVS_INT : "tap interface\n(virtio NIC)"
+
+' ============================================================
+'  BRIDGES -> REDES FISICAS
+' ============================================================
+CTRL_BRMGMT  -up-> MGMT_NET  : "10.0.0.11"
+CTRL_BRVLAN  -up-> VLAN_NET  : "L2 uplink"
+CTRL_BRSTOR  -up-> STOR_NET  : "10.2.0.11"
+
+COMP_BRMGMT  -up-> MGMT_NET  : "10.0.0.1X"
+COMP_BRVLAN  -up-> VLAN_NET  : "L2 uplink"
+COMP_BRVXLAN -up-> VXLAN_NET : "10.1.0.1X"
+
+' ============================================================
+'  TUNELES VXLAN entre computes
+' ============================================================
+OVS_TUN <..> VXLAN_NET : "<color:#4A148C>VXLAN VNI\nUDP 4789\ncompute-to-compute</color>"
+
+' ============================================================
+'  LAYOUT VERTICAL
+' ============================================================
+CTRL_HOST -[hidden]down- COMP_HOST
+
+' ============================================================
+'  NOTA DIFERENCIA LAB vs OSA REAL
+' ============================================================
+note as NOTA_LAB #FFF9C4
+  <b>Diferencia: este lab vs OSA real</b>
+
+  Este lab (instalacion manual):          OSA real (OpenStack-Ansible):
+  - Servicios directamente en el SO       - Cada servicio en su contenedor LXC
+  - Sin LXC                               - Aislamiento y actualizacion por servicio
+  - br-vxlan sin NIC fisica (/32)         - br-vxlan con eth2 dedicada (/24)
+  - 2 NICs por nodo                       - 3-4 NICs por nodo recomendado
+  - Configuracion manual                  - Automatizado via playbooks Ansible
+end note
+
+' ============================================================
+'  GLOSARIO
+' ============================================================
+note as GLOSARIO #E8EAF6
+  <b>Glosario</b>
+
+  <b>LXC</b>              Linux Containers. Contenedor del kernel Linux (no VM).
+                   Comparte kernel con el host pero tiene su propio filesystem,
+                   red y procesos. OSA despliega cada servicio OpenStack en un LXC.
+
+  <b>veth pair</b>        Par de interfaces virtuales enlazadas (como un cable virtual).
+                   Un extremo dentro del LXC, el otro en el bridge del host.
+                   Todo lo que entra por un extremo sale por el otro.
+
+  <b>Linux bridge</b>     Switch L2 virtual en el kernel. Agrupa NICs fisicas y veth
+                   de contenedores en el mismo dominio de broadcast.
+
+  <b>NIC member</b>       Interfaz (fisica o virtual) "enchufada" a un bridge como puerto.
+                   Pierde su IP directa y la sede al bridge.
+
+  <b>OVS</b>              Open vSwitch. Switch L2/L3 programable via OpenFlow.
+                   Gestiona el trafico entre VMs (br-int), tuneles VXLAN (br-tun)
+                   y la red provider fisica (br-provider).
+
+  <b>br-int</b>           Integration bridge (OVS). Punto central donde se conectan
+                   los tap de las VMs, los namespaces de red y los patch ports.
+
+  <b>br-tun</b>           Tunnel bridge (OVS). Encapsula y desencapsula VXLAN UDP 4789.
+                   local_ip = IP del nodo en la red overlay.
+
+  <b>br-provider</b>      Provider bridge (OVS). Conectado a br-vlan (Linux) como uplink.
+                   Maneja trafico plano (flat) o etiquetado (802.1Q) hacia red fisica.
+
+  <b>tap interface</b>    Interfaz virtual que conecta una VM al bridge OVS.
+                   Creada por libvirt al arrancar la instancia.
+
+  <b>VXLAN VNI</b>        Virtual Network Identifier. Identifica una red tenant (ej. 640).
+                   Equivale a una VLAN pero encapsulada en UDP sobre cualquier red IP.
+
+  <b>patch port</b>       Puerto especial OVS que conecta dos bridges OVS entre si
+                   (ej. br-int <-> br-tun, br-int <-> br-provider).
+
+  <b>Floating IP</b>      IP publica (de la red provider) asignada a una instancia.
+                   El L3 agent hace DNAT/SNAT entre la IP tenant y la floating IP.
+
+  <b>namespace qrouter</b> Espacio de red aislado del kernel donde corre el router virtual.
+                   Tiene interfaces qg (gateway externo) y qr (hacia red tenant).
+
+  <b>neutron-ovs-agent</b> Agente que programa los flows de OVS segun la politica de red.
+                   Crea/destruye tuneles VXLAN segun que computes tienen VMs activas.
+end note
+
+@enduml

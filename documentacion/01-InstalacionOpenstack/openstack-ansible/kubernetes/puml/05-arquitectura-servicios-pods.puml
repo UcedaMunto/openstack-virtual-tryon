@@ -1,0 +1,98 @@
+@startuml 05-arquitectura-servicios-pods
+title Arquitectura de servicios y Pods del laboratorio Kubernetes
+caption Presentacion de la infraestructura montada (estado real del laboratorio)
+
+skinparam componentStyle rectangle
+skinparam backgroundColor #FFFFFF
+skinparam packageStyle rectangle
+left to right direction
+
+actor "Usuario\n(navegador)" as user
+
+package "Anfitrion (KVM/libvirt)\n192.168.90.254" {
+  component "virbr90 / red k8s-lab\n192.168.90.0/24 (NAT)" as red
+}
+
+package "Cluster Kubernetes v1.36.4" as cluster {
+  node "k8-master (Control Plane)\n192.168.90.1" as master {
+    component "kube-apiserver" as api
+    component "etcd" as etcd
+    component "scheduler + controller-manager" as ctrl
+    component "kubelet + containerd" as kl_m
+    component "kube-proxy + calico-node" as net_m
+  }
+  node "k8-worker1\n192.168.90.2" as w1
+  node "k8-worker2\n192.168.90.3" as w2
+  node "k8-worker3\n192.168.90.4" as w3
+}
+
+package "Networking" as net {
+  component "Calico CNI v3.32.1\n(pod network 172.16.0.0/16)" as calico
+  component "MetalLB v0.16.1\n(IPAddressPool 192.168.90.50)" as metallb
+}
+
+package "Almacenamiento (rook-ceph)" as storage {
+  component "Rook Operator v1.20.6" as rookop
+  component "Ceph v20.2.4\n3 mon + 1 mgr + 3 osd (vdb)" as ceph
+  component "CephFilesystem myfs\n(1 MDS activo)" as myfs
+  component "StorageClass cephfs-storage\n(CSI cephfs)" as sc
+}
+
+package "Aplicacion (wordpress)" as app {
+  component "Pod wordpress (1 replica)\n[wordpress:6.8-apache]\n[mariadb:11.4]\n[redis:7.4]" as wp
+  database "PVC content (5Gi RWX)\n/var/www/html" as pvc1
+  database "PVC db (5Gi RWO)\n/var/lib/mysql" as pvc2
+  database "PVC redis (1Gi RWO)\n/data" as pvc3
+  component "Service wordpress (ClusterIP)" as svc_c
+  component "Service wordpress-lb\n(LoadBalancer: 192.168.90.50:80)" as svc_lb
+}
+
+package "Otros accesos" as otros {
+  component "Dashboard K8s\nNodePort 32000 (HTTPS)" as dash
+  component "NGINX prueba\nNodePort 30885 (HTTP)" as nginx
+  component "Dashboard Ceph\nNodePort 32174 (HTTP)" as cdash
+}
+
+user --> red : navegador
+red --> master : 192.168.90.1
+red --> w1 : .2
+red --> w2 : .3
+red --> w3 : .4
+
+master --> calico
+w1 --> calico
+w2 --> calico
+w3 --> calico
+
+w1 --> ceph : vdb (osd)
+w2 --> ceph : vdb (osd)
+w3 --> ceph : vdb (osd)
+rookop ..> ceph : gestiona
+ceph --> myfs : data/metadata pools (size 3)
+myfs --> sc : provisioner
+sc ..> pvc1 : aprovisiona
+sc ..> pvc2 : aprovisiona
+sc ..> pvc3 : aprovisiona
+pvc1 --> wp
+pvc2 --> wp
+pvc3 --> wp
+svc_c --> wp : selector app=wordpress
+metallb ..> svc_lb : asigna VIP
+svc_lb --> wp : targetPort http
+
+user --> svc_lb : http://192.168.90.50/
+user --> dash : https://192.168.90.1:32000
+user --> cdash : http://192.168.90.1:32174/
+user --> nginx : http://192.168.90.1:30885
+
+legend right
+  |= Capa |= Componentes clave |
+  | Infra | KVM/libvirt + bridge virbr90 + red NAT k8s-lab |
+  | Orquestacion | Kubernetes v1.36.4: control-plane (k8-master) + 3 workers |
+  | Red | Calico (CNI, pod network) + MetalLB (LoadBalancer L2) |
+  | Almacenamiento | Rook v1.20.6 gestionando Ceph v20.2.4 (3 mon, 1 mgr, 3 osd) + CephFS myfs + StorageClass cephfs-storage |
+  | Aplicacion | WordPress + MariaDB + Redis en un solo Pod, datos en 3 PVCs CephFS |
+  | Exposicion | LoadBalancer MetalLB 192.168.90.50:80, Dashboard 32000, Ceph 32174, NGINX 30885 |
+endlegend
+
+@enduml

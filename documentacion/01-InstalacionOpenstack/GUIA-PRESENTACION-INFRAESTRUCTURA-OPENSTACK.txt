@@ -1,0 +1,200 @@
+GUIA DE PRESENTACION - INFRAESTRUCTURA OPENSTACK (LAB)
+Version: 2026-07-22
+Objetivo: Demostrar el cumplimiento de requerimientos del laboratorio y apuntar a nota 10.
+
+====================================================================
+0) TOPOLOGIA Y ROLES DE NODOS (apertura de la presentacion)
+====================================================================
+Nodos y rol:
+- controller (203.0.113.239): Keystone, Glance, Placement, Nova API/Scheduler/Conductor,
+  Neutron server + L3 + DHCP + OVS agent, Horizon, Cinder scheduler, Swift proxy.
+- compute1 (203.0.113.240): Nova compute + OVS (hipervisor).
+- compute2 (203.0.113.241): Nova compute + OVS (hipervisor, VMs WordPress).
+- compute3 (203.0.113.242): Nova compute + OVS (hipervisor).
+- compute4 (203.0.113.243): Nova compute + OVS (hipervisor).
+- storage1 (203.0.113.244): Cinder volume + Ceph (RBD backend).
+- object1 (203.0.113.245): Swift object node.
+- object2 (203.0.113.246): Swift object node.
+
+ssh uceda@203.0.113.239
+
+
+====================================================================
+I) REQUERIMIENTO 1 - ENTORNO BASE Y RELOJ UNIFICADO (Chrony)
+====================================================================
+Meta: evidenciar que todos los nodos sincronizan tiempo (clave para tokens, mensajes y scheduling).
+        Archivo de configuracion a mostrar en cada nodo:
+        - /etc/chrony/chrony.conf
+
+Comandos (desde host local):
+ssh uceda@203.0.113.239 "hostname; systemctl is-active chrony; chronyc tracking | head -n 8"
+ssh uceda@203.0.113.240 "hostname; systemctl is-active chrony; chronyc tracking | head -n 8"
+ssh uceda@203.0.113.241 "hostname; systemctl is-active chrony; chronyc tracking | head -n 8"
+
+Comprobacion explicita de desde donde recupera hora cada nodo:
+ssh uceda@203.0.113.239 "hostname; chronyc sources -v | head -n 14; chronyc tracking | grep -E 'Reference ID|Stratum'"
+ssh uceda@203.0.113.240 "hostname; chronyc sources -v | head -n 14; chronyc tracking | grep -E 'Reference ID|Stratum'"
+ssh uceda@203.0.113.241 "hostname; chronyc sources -v | head -n 14; chronyc tracking | grep -E 'Reference ID|Stratum'"
+
+Comando opcional en controller para ver quien se sincroniza de el:
+ssh uceda@203.0.113.239 "sudo chronyc clients"
+
+
+====================================================================
+II) REQUERIMIENTO 2 - SERVICIOS BASICOS OPENSTACK
+====================================================================
+Preparar sesion OpenStack en controller:
+ssh uceda@203.0.113.239
+sudo -i
+source /root/admin-openrc
+env | grep '^OS_'
+
+# KEYSTONE
+openstack token issue
+- Keystone autenticando correctamente.
+- Variables de entorno de admin cargadas.
+
+
+# Identity (Keystone), catalogo y endpoints
+openstack service list
+openstack endpoint list
+openstack catalog list
+- Servicios registrados y publicados en Keystone.
+
+
+# Glance, Placement, Nova control plane
+curl -sS -o /dev/null -w '%{http_code}\n' http://controller:9292
+curl -sS -o /dev/null -w '%{http_code}\n' http://controller:8778
+curl -sS -o /dev/null -w '%{http_code}\n' http://controller:8774/v2.1
+openstack image list
+- APIs respondiendo (HTTP valido) e imagenes disponibles.
+
+
+# Nova Compute (minimo 2 nodos compute)
+openstack compute service list
+openstack hypervisor list
+openstack hypervisor stats show
+openstack hypervisor show compute1
+openstack hypervisor show compute2
+- Hipervisores registrados y capacidad computacional visible.
+
+
+# Neutron (red)
+/etc/neutron/plugins/ml2/ml2_conf.ini #[vlxan]
+openstack network agent list
+openstack network list
+openstack subnet list
+openstack router list
+- Agentes L3/DHCP/OVS en estado UP y redes presentes.
+
+# Puertos internos (br-int)
+sudo ovs-ofctl show br-int
+
+# Puertos de túneles VXLAN (br-tun)
+sudo ovs-ofctl show br-tun
+
+# Puertos externos/provider (br-provider o br-ex)
+sudo ovs-ofctl show br-provider
+
+
+
+# Horizon (Dashboard)
+echo http://203.0.113.239/horizon
+- URL de acceso para login web y gestion visual de nube.
+
+2.6 Cinder (Block Storage) con backend Ceph/RBD
+openstack volume service list
+openstack volume backend pool list --long
+openstack volume type list --long
+openstack volume list --all-projects
+ssh uceda@203.0.113.244 "echo '<tu_password>' | sudo -S ceph health"
+
+Que demuestra:
+- Servicio de volumen activo y backend Ceph operativo.
+
+====================================================================
+III) REQUERIMIENTO 3 - OBJECT STORAGE (SWIFT)
+====================================================================
+openstack container list
+openstack object store account show
+systemctl status swift-proxy --no-pager
+ssh uceda@203.0.113.245 "echo '<tu_password>' | sudo -S systemctl status swift-object --no-pager"
+ssh uceda@203.0.113.246 "echo '<tu_password>' | sudo -S systemctl status swift-object --no-pager"
+
+Que demuestra:
+- Plano proxy + nodos object activos.
+
+====================================================================
+IV) REQUERIMIENTOS 4 Y 5 - RED INTERNA, EXTERNA Y ROUTER
+====================================================================
+openstack network show selfservice-net
+openstack network show provider-net
+openstack subnet show selfservice-subnet
+openstack router show router1
+openstack floating ip list
+
+Que demuestra:
+- Red interna tenant + red externa provider + router entre ambas + FIPs.
+
+Prueba desde namespace del router:
+ip netns list | grep qrouter
+ROUTER_NS=$(ip netns list | awk '/qrouter/ {print $1; exit}')
+ip netns exec "$ROUTER_NS" ip -br addr
+ip netns exec "$ROUTER_NS" ip route
+ip netns exec "$ROUTER_NS" ping -c 2 10.10.10.76
+ip netns exec "$ROUTER_NS" ping -c 2 10.10.10.152
+
+Que demuestra:
+- Enrutamiento interno correcto y conectividad a VMs.
+
+====================================================================
+V) REQUERIMIENTO 6 - WORDPRESS ALCANZABLE DESDE EXTERNA
+====================================================================
+openstack server list --name wp-
+openstack server show wp-web-01
+openstack server show wp-db-01
+openstack port list --server wp-web-01
+openstack port list --server wp-db-01
+
+Pruebas HTTP publicas:
+curl -I http://203.0.113.239:8080/
+curl -I "http://203.0.113.239:8080/wp-login.php"
+
+Regla de publicacion:
+iptables -t nat -S PREROUTING | grep 8080
+
+Que demuestra:
+- Servicio WordPress publicado y consumible desde red externa.
+
+====================================================================
+VI) EVIDENCIAS PARA APUNTAR A NOTA 10 (RUBRICA)
+====================================================================
+Checklist de cierre:
+[ ] Login exitoso en Horizon con usuario valido.
+[ ] Servicios base en estado correcto (Keystone/Glance/Placement/Nova/Neutron/Cinder/Swift).
+[ ] Minimo 2 computes activos y visibles en hypervisor list.
+[ ] Red interna + externa + router funcionando.
+[ ] Instancias WordPress accesibles por consola (Horizon noVNC) y remoto.
+[ ] WordPress alcanzable externamente (HTTP 200/302 esperado).
+[ ] Volumen asociado a instancia DB y backend Ceph/RBD operativo.
+[ ] Crony sincronizado en todos los nodos.
+
+Comandos de respaldo para contingencia durante demo:
+openstack token issue
+openstack network agent list
+openstack compute service list
+openstack volume service list
+openstack server list --name wp-
+ssh uceda@203.0.113.244 "echo '<tu_password>' | sudo -S ceph health"
+
+====================================================================
+NOTAS DE PRESENTACION (TIEMPO SUGERIDO: 12-18 MIN)
+====================================================================
+- Min 1-2: Topologia y roles de nodos.
+- Min 3-4: Chrony y salud base.
+- Min 5-8: Servicios OpenStack y APIs.
+- Min 9-12: Redes, router, namespaces.
+- Min 13-15: WordPress externo + evidencia final.
+- Min 16-18: Ronda de preguntas y checklist de rubrica.
+
+Fin de guia.

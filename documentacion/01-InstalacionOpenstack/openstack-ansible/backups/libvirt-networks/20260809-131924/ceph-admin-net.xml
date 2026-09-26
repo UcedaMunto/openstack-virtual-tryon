@@ -1,0 +1,10 @@
+<network>
+  <name>ceph-admin-net</name>
+  <uuid>fbb814a6-80c5-4a4d-b2a4-f7c7d2ca7480</uuid>
+  <forward mode='nat'/>
+  <bridge name='vbrcadmin' stp='on' delay='0'/>
+  <mac address='52:54:00:4a:86:c5'/>
+  <ip address='192.168.130.1' netmask='255.255.255.0'>
+  </ip>
+</network>
+

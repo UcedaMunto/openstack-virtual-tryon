@@ -1,0 +1,47 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam linetype ortho
+
+title OpenStack actual - Conectividad externa (Norte-Sur)
+
+cloud "Internet" as INTERNET
+cloud "Provider subnet\n192.168.122.0/24" as PROVIDER
+cloud "Tenant subnet\n10.10.10.0/24" as TENANT
+
+node "controller\n203.0.113.239\nNeutron L3 agent + qrouter" as CTRL {
+  rectangle "qrouter-926f...\nqr-f0e... (tenant)\nqg-1fc... (provider)" as QROUTER
+  rectangle "iptables DNAT host\n:8080 -> WordPress" as DNAT
+}
+
+node "compute2\nVMs WordPress" as C2 {
+  node "wp-web-01\n10.10.10.76\nFIP 192.168.122.137" as WPWEB
+  node "wp-db-01\n10.10.10.152\nFIP 192.168.122.152" as WPDB
+}
+
+node "compute1" as C1 {
+  node "test-vm1\n10.10.10.229\nFIP 192.168.122.115" as TVM1
+}
+
+INTERNET --> DNAT : HTTP :8080
+DNAT --> QROUTER : DNAT
+QROUTER --> WPWEB : 10.10.10.76
+WPWEB --> WPDB : MySQL/MariaDB
+
+QROUTER --> PROVIDER : external gateway
+QROUTER --> TENANT : tenant routing
+WPWEB -- TENANT
+WPDB -- TENANT
+TVM1 -- TENANT
+
+note right of PROVIDER
+Floating IPs actuales:
+- 192.168.122.137 -> 10.10.10.76
+- 192.168.122.152 -> 10.10.10.152
+- 192.168.122.115 -> 10.10.10.229
+- 192.168.122.136 libre
+end note
+
+@enduml

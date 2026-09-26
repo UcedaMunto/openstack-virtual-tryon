@@ -1,0 +1,46 @@
+<!--
+  Red "os-external" (OpenStack-Ansible): red de tipo puente (bridge) pura,
+  sin <forward> declarado, por lo que libvirt la gestiona como red aislada:
+  crea el bridge software pero no hace NAT ni enruta hacia el host/exterior
+  por si sola. Corresponde a la red "provider"/externa de OpenStack (equivalente
+  a br-vlan / br-ex), usada para el trafico de Floating IPs y redes externas
+  de los tenants.
+-->
+<network>
+    <!-- Nombre logico con el que libvirt identifica la red (virsh net-*) -->
+    <name>os-external</name>
+
+    <!--
+      Bridge software "virbr-os-ext" con Spanning Tree Protocol activado
+      (stp='on') y sin retardo de forwarding (delay='0'), para que los puertos
+      pasen a estado forwarding casi de inmediato.
+      Nota: se corrige el typo original <brige> -> <bridge>, elemento valido
+      del esquema de libvirt.
+    -->
+    <bridge name='virbr-os-ext' stp='on' delay='0'/>
+</network>
+
+<!--
+  Siguientes pasos para implementarla:
+    1. virsh net-define os-external.xml
+    2. virsh net-autostart os-external
+    3. virsh net-start os-external
+    4. Para que actue realmente como red "provider" (salida real al exterior),
+       anadir un <forward mode='bridge'/> apuntando a un bridge fisico ya
+       configurado en el host (br-ex) o adjuntar manualmente una NIC fisica
+       al bridge virbr-os-ext (ip link set <iface> master virbr-os-ext).
+    5. Conectar esta red a la interfaz de red "externa" de los nodos
+       controller/network en las definiciones de las VMs (create-kvm-vm.sh
+       / virt-install --network network=os-external).
+    6. En Neutron, crear la red externa/proveedor (openstack network create
+       --external --provider-network-type flat/vlan --provider-physical-network ...)
+       mapeada al bridge/interfaz que sale por esta red.
+
+  Uso estandar de este tipo de red (red externa / provider):
+    Es la red por la que las instancias acceden a Internet/red corporativa
+    mediante Floating IPs y por la que entran las peticiones externas via los
+    routers de Neutron. No necesita DHCP ni NAT gestionados por libvirt porque
+    el direccionamiento real de esos rangos lo administra la infraestructura
+    fisica o Neutron; libvirt solo aporta el segmento L2 (bridge) sobre el que
+    circula ese trafico.
+-->

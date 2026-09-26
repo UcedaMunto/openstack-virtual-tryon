@@ -1,0 +1,227 @@
+﻿Universidad de El Salvador
+Facultad de Ingeniería y Arquitectura
+Escuela de Ingeniería de Sistemas Informáticos
+
+
+Guía bridge, vlans  Linux con nmcli
+
+1. Contexto:
+Muchos paquetes de software en Linux requieren de configuraciones especiales de red para poder interactuar sobre todo en ambientes de virtualización así como contenerización de soluciones.
+La presente guía brinda información rápida de como estructura un puente así como la interacción del mismo con interfaces de red existentes. Aunque el comportamiento de un bridge dependerá de qué contexto se use se vaya a utilizar, para fines de esta guía se utilizará NetworkManager; es decir, está destinada a un entorno de escritorio, según como se muestra en la figura siguiente:
+
+Figura No. 1: Entorno de operación de una conexión bridge en un entorno de escritorio (host) conectado a Internet.
+
+
+2. Introducción:
+Cuando se va a trabajar con bridges es importante tomar en cuenta el entorno sobre el cual se desplegará, cuando se está en un entorno de servidor, los componentes estarán enfocados a configuración a través de de Netplan utilizando networkd como gestores de interfaces. En cambio, cuando se trabaja en entornos de escritorios el ganador siempre es NetworkManager, este último además de su interfaz gráfica, posee un entorno de trabajo a nivel de CLI conocido como nmcli (NetworkManager CLI interface).
+
+3. Instalación de paquetes
+Deberá instalar el paquete que le permitirá interactuar con los bridge, aunque algunos no están directamente vinculados con el uso, recuerde que está configurando para un entorno de uso en máquinas virtuales.
+
+sudo apt install bridge-utils qemu-kvm libvirt-daemon-system vlan tcpdump
+
+
+4. Creación de la interfaz puente
+Podrá crear un bridge al cual posteriormente podrá endosarle una interfaz de red según la necesidad, así como su integración con KVM, deberá hacer lo siguiente:nmcli connection 
+sudo nmcli connection add type bridge ifname br0 stp no
+
+Realiza la siguiente acción:
+
+    • Objetivo: Crear una nueva conexión de red de tipo puente (bridge) utilizando NetworkManager.
+    • nmcli connection add: Es el comando base de NetworkManager CLI (nmcli) para añadir una nueva configuración de conexión.
+    • type bridge: Especifica que el tipo de conexión que se está creando es un puente (bridge).
+    • ifname br0: Asigna el nombre de interfaz br0 a este nuevo puente. Este será el identificador visible del puente en el sistema.
+    • stp no: Configura el protocolo Spanning Tree Protocol (STP) en el puente como deshabilitado. STP es un protocolo de red que evita bucles, pero a menudo se deshabilita en configuraciones simples de virtualización.
+
+En resumen, esta orden crea el puente virtual inicial br0, listo para que se le asocien interfaces de red físicas o virtuales.
+
+5. Vinculación de la interfaz de red física
+Una vez creada la interfaz bridge, se deberá proceder a asociar la interfaz de red física sobre la cual actuará como puente.
+sudo nmcli con add type bridge-slave ifname enp0s1 master br0
+Realiza la siguiente acción:
+
+    • Objetivo: Crea una nueva conexión que actúa como esclava de un bridge existente.
+    • nmcli connection add: Es el comando base de NetworkManager para añadir una nueva conexión.
+    • type bridge-slave: Especifica que el tipo de conexión que se está creando es un "esclavo de puente".
+    • ifname enp0s1: Asigna la interfaz de red física (enp0s1 en este caso, que sería la tarjeta de red real del sistema) a esta nueva conexión esclava. Esta interfaz es la que se "puentea".
+    • master br0: Indica que esta nueva conexión esclava (enp0s1) debe ser asociada inmediatamente al bridge principal, identificado por el nombre br0, que fue creado en el paso anterior.
+
+En resumen, esta orden vincula la interfaz de red física enp0s1 al puente virtual br0, haciendo que br0 maneje todo el tráfico que antes pasaba por enp0s1.
+
+Debe tener presente que si en NetworkManager su conexión se etiqueta como Perfil 1, por ejemplo,  u otro nombre, es a esta conexión que usted debe asociar el puente en lugar de enp0s1.
+
+6. Iniciar el puente
+Una vez se han completado los pasos anteriores, usted puede proceder a levantar la interfaz puente de la siguiente manera:
+
+Antes de iniciar el bridge, puede resultar útil, mostrar las conexiones en el equipo host:
+
+:~$ nmcli connection show
+NAME                UUID                                  TYPE      DEVICE 
+br0                 148733a6-b6cf-407d-84c1-15465733c174  bridge    br0    
+br0-slave           a4251937-6370-4ec4-8c51-ba45ad5341a8  ethernet  enp0s1   
+lo                  ca407757-618c-4097-8c9b-6720d5762403  loopback  lo     
+virbr0              e66c10fa-243b-43d4-a004-fbff0d468a8e  bridge    virbr0 
+bridge-slave-enp0s1 59fc888f-e482-4528-8167-c11886dd527d  ethernet  --       
+enp0s1              8a22a94e-c2f3-4604-b45f-e2efbdf686b0  ethernet  --     
+...  
+
+
+
+Para este caso tome en cuenta que el bridge y la conexión que acaba de activarse son  br0 y bridge-slave-enp0s1
+Entonces usted deberá activar ambas el bridge entre en operación.
+sudo nmcli con up br0
+sudo nmcli con up bridge-slave-enp0s1
+
+Descripción:
+
+    • Objetivo: Activar o "levantar" la conexión de red asociada a la interfaz puente br0  y bridge-slave-enp0s1 utilizando NetworkManager.
+    • nmcli con up: Es el comando utilizado en NetworkManager CLI (nmcli) para activar una conexión de red previamente configurada, permitiendo que la interfaz comience a manejar el tráfico.
+    • br0: Es el nombre de la conexión (que coincide con el nombre de la interfaz) del puente virtual que se creó en los pasos anteriores.
+
+En resumen, esta orden activa la interfaz puente br0 para que esté operativa y pueda gestionar el tráfico de las interfaces esclavas asociadas.
+
+7. Mostrar conexiones puente
+Para hacer seguimiento de las conexiones puente y de otras conexiones a través de nmcli se hace de la siguiente manera:
+
+nmcli con show br0
+Descripción:
+
+    • Objetivo: Mostrar los detalles de configuración y el estado actual de una conexión de red específica (el puente br0) administrada por NetworkManager.
+    • nmcli con show: Es el comando utilizado en NetworkManager CLI (nmcli) para inspeccionar (mostrar) la configuración de una conexión de red.
+    • br0: Es el nombre de la conexión (el puente virtual) cuyos detalles se desean ver.
+
+En resumen, esta orden muestra toda la configuración de la conexión br0, incluyendo sus propiedades, interfaces asociadas y estado, lo cual es útil para verificar que el puente se haya configurado y levantado correctamente.
+
+También puede revisar que interfaces físicas están asociadas (esclavizadas) al puerto.
+
+nmcli con show --active | grep bridge
+Descripción:
+
+    • Objetivo: Filtrar y mostrar únicamente las conexiones activas que están relacionadas con configuraciones de tipo bridge (puente) en NetworkManager.
+    • nmcli con show --active: Muestra una lista de todas las conexiones de red que están actualmente activas y operativas en el sistema.
+    • |: Es el operador pipe (tubería) de la línea de comandos de Linux, que toma la salida del comando anterior (nmcli con show --active) y la redirige como entrada al siguiente comando.
+    • grep bridge: Es el comando grep que busca el patrón "bridge" dentro de la entrada que recibe.
+
+En resumen, esta orden muestra solo aquellas conexiones de red que NetworkManager tiene activas y que contienen la palabra "bridge" en su descripción, lo cual ayuda a verificar rápidamente qué puentes y sus esclavas están actualmente en funcionamiento.
+
+Para la tarea de monitorizar también podrá apoyarse con las órdenes siguientes:
+
+ip addr show br0
+bridge link show br0
+bridge fdb show dev br0
+La última línea le permitirá ver la tabla de direcciones mac asociadas al puente.
+
+8. Configurar máquina virtual (VM) con la interfaz puente
+Una vez que el sistema reconoce br0, configurarlo en la interfaz gráfica es muy sencillo:
+    1. Abre virt-manager y selecciona tu máquina virtual (debe estar apagada).
+    2. Haz clic en el icono de la bombilla (Mostrar detalles del hardware).
+    3. En el panel de la izquierda, selecciona NIC (Tarjeta de red).
+    4. En "Origen de la red" (Network source), selecciona: Bridge device... (Dispositivo puente).
+    5. En "Nombre del dispositivo" (Device name), escribe: br0.
+    6. En "Modelo de dispositivo", asegúrate de que esté en virtio para obtener el mejor rendimiento.
+    7. Haz clic en Aplicar y arranca tu VM.
+9. Configuración vía XML (si prefieres virsh)
+Si eres de los que prefiere la terminal o estás editando el archivo de configuración directamente con virsh edit [nombre_vm], busca la sección <interface> y déjala algo así:
+XML
+<interface type='bridge'>
+  <mac address='52:54:00:ee:44:11'/>
+  <source bridge='br0'/>
+  <model type='virtio'/>
+</interface>
+
+
+Tenga en cuenta que si al reiniciar su equipo las configuraciones podrían perderse, por lo tanto, deberá proceder a realizar algunas configuraciones a nivel de netplan, en su entorno host.
+
+10. Configurando soporte para Vlans
+Para trabajar con vlan sobre bridges no se debe de perder de vista las configuraciones a realizar en el equipo host, así como en las máquinas virtuales. Es importante tener en cuenta que se debe de setear que el bridge soporte el filtrado de vlan, para que esta configuración sea funcional.
+
+10.1 Configuración del Host
+Enfoquémonos en la configuración del Host, con la finalidad de activar el bridge para que soporte el filtrado de vlans. Manteniendo siempre el enfoque de uso con NetworkManager Cli (nmcli) tendríamos los siguiente:
+
+sudo nmcli con add type bridge con-name br0 ifname br0
+sudo nmcli con mod br0 bridge.vlan-filtering yes
+Esta sección parece incompleta. El objetivo es describir el propósito de las dos últimas líneas de comando, que configuran un bridge para el soporte de VLANs en NetworkManager.
+
+sudo nmcli con add type bridge con-name br0 ifname br0
+sudo nmcli con mod br0 bridge.vlan-filtering yes
+
+
+Descripción de la segunda línea:
+
+    • Objetivo: Modificar la conexión de red del puente br0 para habilitar explícitamente el filtrado de VLAN.
+    • nmcli con mod: Es el comando utilizado en NetworkManager CLI para modificar una conexión existente.
+    • br0: Es el nombre de la conexión del puente que se está modificando.
+    • bridge.vlan-filtering yes: Esta propiedad crucial le indica al kernel de Linux y a NetworkManager que el puente br0 debe inspeccionar y manejar las etiquetas de VLAN (802.1Q). Al estar habilitado, el puente solo reenviará el tráfico VLAN a los puertos esclavo (incluyendo interfaces virtuales de VM) que hayan sido configurados para ese ID de VLAN específico, permitiendo el aislamiento del tráfico.
+
+Esta orden habilita la capacidad de filtrado de VLAN en el puente br0, un requisito fundamental para segmentar el tráfico de red de las máquinas virtuales por VLAN ID.
+
+10.2. Incluyendo la interfaz física al bridge
+Estamos asumiendo que usted está construyendo el bridge desde cero con capacidad de reconocer el etiquetado vlans 802.1Q, en ese sentido una vez creado el bridge, tenemos que asociar la interfaz física.
+
+sudo nmcli con add type bridge-slave con-name br0-port1 ifname enp3s0 master br0
+Detalle de la orden:
+    • Objetivo: Crear una nueva conexión esclava de un puente existente (br0), asociando una interfaz de red física específica (enp3s0) a dicho puente.
+    • sudo nmcli con add: Es el comando base para añadir una nueva configuración de conexión en NetworkManager CLI con permisos de superusuario.
+    • type bridge-slave: Especifica que el tipo de conexión que se está creando es un "esclavo de puente", diseñado para ser parte de un bridge.
+    • con-name br0-port1: Asigna el nombre br0-port1 a la nueva conexión (perfil de NetworkManager) para facilitar su gestión. Este nombre se utiliza internamente en NetworkManager.
+    • ifname enp3s0: Identifica la interfaz de red física (enp3s0) que será esclavizada. Todo el tráfico que pase por enp3s0 será ahora gestionado por el puente.
+    • master br0: Indica que esta conexión esclava debe ser inmediatamente asociada al bridge principal, que se llama br0.
+
+En resumen, esta orden agrega la interfaz de red física enp3s0 como un puerto al puente virtual br0 y le asigna el nombre de conexión br0-port1, completando la configuración base para que el tráfico de enp3s0 sea controlado por el bridge con soporte para filtrado de VLAN. Note que en esta ocasión no dejamos que escriba un nombre de conexión por default, sino que también lo estamos pasando por parámetro br0-port1.
+
+10.3 Permitir las VLANs en el bridge en modo trunking
+Es importante destacar que para el caso que estamos poniendo de ejemplo, las vlan deben de pasar a través del puente con el tag de su vlan id, para que sean reconocidas en su destino, puesto que se trata de varias vlans a través de un mismo punto.
+
+# Permitir VLAN 10 y 20 como etiquetadas
+sudo nmcli con mod br0 +bridge.vlans "10, 20"
+
+Descripción de la línea:
+
+    • Objetivo: Modificar la conexión del puente br0 para permitir específicamente que las tramas con etiquetas de VLAN ID 10 y VLAN ID 20 pasen a través del puente, actuando esencialmente como un puerto trunk.
+    • sudo nmcli con mod: Comando para modificar una conexión existente de NetworkManager con privilegios de superusuario.
+    • br0: El nombre de la conexión (el puente virtual) que se está modificando.
+    • +bridge.vlans "10, 20": Esta es la parte clave. Utiliza el operador + para añadir las VLAN IDs 10 y 20 a la lista de VLANs permitidas en el bridge. Dado que esta configuración se aplica al puente en sí (y no a un puerto esclavo específico), asegura que las máquinas virtuales conectadas al br0 puedan enviar y recibir tráfico etiquetado con estos IDs de VLAN (Modo Trunking).
+
+En resumen, esta orden configura el puente virtual br0 para que funcione como un puerto de enlace troncal (trunk), permitiendo que el tráfico etiquetado para las VLAN 10 y 20 pueda ser procesado por el puente y, por extensión, por las máquinas virtuales que se conecten a él.
+
+–
+Debe tomar en cuenta que si fuera el caso que la máquina virtual consumirá una única vlan a través del puente del host, esta puede pasarse de forma untagged, y configurar la máquina virtual (VM) de manera normal, ya que será el puente quien se encargue de realizar todo el filtrado. Una ejemplo de esto podría ser de la siguiente manera:
+
+sudo nmcli con add type vlan con-name enp1s3.10 ifname enp1s3.10 dev enp1s3 id 10
+–
+
+10.4. Configuración de Máquina Virtual (VM) modo Trunk
+Debe tomar en cuenta que para este caso la máquina virtual deberá actuar en modo trunk, ya que estará pasando muchas vlan a través de la misma interfaz. Por lo tanto a continuación se detalla el archivo netplan con la configuración de ejemplo.
+
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    # Interfaz física de la VM (debe estar conectada al Bridge del host)
+    enp0s3:
+      dhcp4: no
+      up: true
+
+  vlans:
+    # Interfaz para la VLAN 10 (Ventas)
+    vlan10:
+      id: 10
+      link: enp0s3
+      addresses:
+        - 192.168.10.50/24
+      nameservers:
+        addresses: [8.8.8.8, 1.1.1.1]
+
+    # Interfaz para la VLAN 20 (RRHH)
+    vlan20:
+      id: 20
+      link: enp0s3
+      addresses:
+        - 192.168.20.50/24
+
+No pierda de vista que aunque tenga configurado un bridge en el host a nivel de máquina virtual no necesitará configurarlo, porque es el bridge que se encargará de filtrar las vlans directamente.
+
+Nada más debe de asegurar se que que tanto la máquina virtual como el host tengan activo en el kernel la lectura del etiqueta 802.1q.
+
+sudo modprobe 8021q
+

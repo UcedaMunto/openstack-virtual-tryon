@@ -1,0 +1,17 @@
+[ovs]
+# bridge_mappings: nombre_red_neutron:bridge_OVS
+# El neutron-server usa "provider" como nombre lógico.
+# El OVS agent necesita saber qué bridge físico corresponde.
+bridge_mappings = {{ neutron_bridge_mappings }}
+
+# local_ip: IP de este nodo para los túneles VXLAN (underlay)
+# Debe ser la IP de br-mgmt (10.0.0.x) — no la IP pública
+local_ip = {{ neutron_local_ip }}
+
+[agent]
+tunnel_types = vxlan
+l2_population = true
+
+[securitygroup]
+enable_security_group = true
+firewall_driver = openvswitch

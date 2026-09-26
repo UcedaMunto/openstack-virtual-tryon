@@ -1,0 +1,43 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam linetype ortho
+
+title Red de instancias actual - VXLAN overlay
+
+cloud "Tenant selfservice-net\n10.10.10.0/24" as TENANT
+cloud "Underlay mgmt\n10.0.0.0/24\nUDP 4789" as UNDERLAY
+
+node "controller\nbr-tun local_ip 10.0.0.11\nbr-int\nVXLAN peers activos:\n- 10.0.0.10 (compute1)\n- 10.0.0.12 (compute2)" as CTRL
+node "compute1\nbr-tun local_ip 10.0.0.10\nbr-int\npeer activo: 10.0.0.11" as C1
+node "compute2\nbr-tun local_ip 10.0.0.12\nbr-int\npeers activos: 10.0.0.10,10.0.0.11\ntaps WordPress" as C2
+node "compute3\nbr-tun local_ip 10.0.0.13\nbr-int\n(sin peers vxlan activos ahora)" as C3
+node "compute4\nbr-tun local_ip 10.0.0.14\nbr-int\n(sin peers vxlan activos ahora)" as C4
+
+CTRL <..> C1 : vxlan-0a00000a (ctrl->c1)
+CTRL <..> C2 : vxlan-0a00000c (ctrl->c2)
+C1 <..> C2 : vxlan-0a00000c / vxlan-0a00000b
+
+CTRL -- UNDERLAY
+C1 -- UNDERLAY
+C2 -- UNDERLAY
+C3 -- UNDERLAY
+C4 -- UNDERLAY
+
+CTRL -- TENANT : qrouter + qdhcp
+C1 -- TENANT
+C2 -- TENANT
+C3 -- TENANT
+C4 -- TENANT
+
+note right of TENANT
+Instancias actuales:
+- wp-web-01 10.10.10.76
+- wp-db-01 10.10.10.152
+- test-rbd-ephemeral 10.10.10.144 (SHUTOFF)
+- test-vm1 10.10.10.229 (SHUTOFF)
+end note
+
+@enduml

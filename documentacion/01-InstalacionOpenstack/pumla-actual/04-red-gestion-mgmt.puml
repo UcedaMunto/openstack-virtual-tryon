@@ -1,0 +1,38 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam linetype ortho
+
+title Red de gestion actual - 10.0.0.0/24
+
+cloud "MGMT 10.0.0.0/24\nUso: APIs internas, RabbitMQ, overlay underlay" as MGMT
+
+node "controller\nbr-mgmt 10.0.0.11/24\nbr-vxlan 10.0.0.11/32" as CTRL
+node "compute1\nbr-mgmt 10.0.0.10/24\nbr-vxlan 10.0.0.10/32" as C1
+node "compute2\nbr-mgmt 10.0.0.12/24\nbr-vxlan 10.0.0.12/32" as C2
+node "compute3\nbr-mgmt 10.0.0.13/24\nbr-vxlan 10.0.0.13/32" as C3
+node "compute4\nbr-mgmt 10.0.0.14/24\nbr-vxlan 10.0.0.14/32" as C4
+node "storage1\nenp7s0 10.0.0.15/24" as ST1
+node "object1\nenp2s0 10.0.0.51/24" as O1
+node "object2\nenp2s0 10.0.0.52/24" as O2
+
+MGMT -- CTRL
+MGMT -- C1
+MGMT -- C2
+MGMT -- C3
+MGMT -- C4
+MGMT -- ST1
+MGMT -- O1
+MGMT -- O2
+
+note right of CTRL
+Usos en esta red:
+- OpenStack control plane
+- Neutron OVS tunnel local_ip
+- Comunicacion inter-nodos
+- Namespaces qrouter/qdhcp en controller
+end note
+
+@enduml

@@ -1,0 +1,79 @@
+--- storageclass ---
+allowVolumeExpansion: true
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"allowVolumeExpansion":true,"apiVersion":"storage.k8s.io/v1","kind":"StorageClass","metadata":{"annotations":{},"name":"cephfs-storage"},"mountOptions":["_netdev","ms_mode=legacy"],"parameters":{"clusterID":"97af58d1-9efd-11f1-bbf1-52540063e430","csi.storage.k8s.io/controller-expand-secret-name":"ceph-csi-cephfs-secret","csi.storage.k8s.io/controller-expand-secret-namespace":"default","csi.storage.k8s.io/node-stage-secret-name":"ceph-csi-cephfs-secret","csi.storage.k8s.io/node-stage-secret-namespace":"default","csi.storage.k8s.io/provisioner-secret-name":"ceph-csi-cephfs-secret","csi.storage.k8s.io/provisioner-secret-namespace":"default","fsName":"storage","pool":"cephfs.storage.data"},"provisioner":"cephfs.csi.ceph.com","reclaimPolicy":"Delete"}
+  creationTimestamp: "2026-08-23T16:23:11Z"
+  name: cephfs-storage
+  resourceVersion: "99044"
+  uid: 56fc1f38-2a6c-4fee-81d3-1a66168a46ee
+mountOptions:
+- _netdev
+- ms_mode=legacy
+parameters:
+  clusterID: 97af58d1-9efd-11f1-bbf1-52540063e430
+  csi.storage.k8s.io/controller-expand-secret-name: ceph-csi-cephfs-secret
+  csi.storage.k8s.io/controller-expand-secret-namespace: default
+  csi.storage.k8s.io/node-stage-secret-name: ceph-csi-cephfs-secret
+  csi.storage.k8s.io/node-stage-secret-namespace: default
+  csi.storage.k8s.io/provisioner-secret-name: ceph-csi-cephfs-secret
+  csi.storage.k8s.io/provisioner-secret-namespace: default
+  fsName: storage
+  pool: cephfs.storage.data
+provisioner: cephfs.csi.ceph.com
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+--- ceph-csi-config cm ---
+apiVersion: v1
+data:
+  config.json: '[{"clusterID":"97af58d1-9efd-11f1-bbf1-52540063e430","monitors":["192.168.90.40:6789"]}]'
+kind: ConfigMap
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","data":{"config.json":"[{\"clusterID\":\"97af58d1-9efd-11f1-bbf1-52540063e430\",\"monitors\":[\"192.168.90.40:6789\"]}]"},"kind":"ConfigMap","metadata":{"annotations":{},"name":"ceph-csi-config","namespace":"default"}}
+  creationTimestamp: "2026-08-23T14:33:06Z"
+  name: ceph-csi-config
+  namespace: default
+  resourceVersion: "81056"
+  uid: e2ad1eba-39b1-40fb-8002-96062697c0b4
+--- ceph-config cm ---
+apiVersion: v1
+data:
+  ceph.conf: |
+    [global]
+    mon host = 192.168.90.40:3300,192.168.90.40:6789
+  keyring: |
+    [client.k8]
+            key = AQCdFItquSx2JRAA+Vl4zhGX+shWV6eXCxDKWg==
+kind: ConfigMap
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","data":{"ceph.conf":"[global]\nmon host = 192.168.90.40:3300,192.168.90.40:6789\n","keyring":"[client.k8]\n        key = AQCdFItquSx2JRAA+Vl4zhGX+shWV6eXCxDKWg==\n"},"kind":"ConfigMap","metadata":{"annotations":{},"name":"ceph-config","namespace":"default"}}
+  creationTimestamp: "2026-08-23T14:33:06Z"
+  name: ceph-config
+  namespace: default
+  resourceVersion: "96355"
+  uid: c334cfe8-7d8b-42d6-a00f-fe3b40ac2521
+--- ceph-csi-cephfs-secret ---
+apiVersion: v1
+data:
+  adminID: azg=
+  adminKey: QVFDZEZJdHF1U3gySlJBQStWbDR6aEdYK3NoV1Y2ZVhDeERLV2c9PQ==
+  userID: azg=
+  userKey: QVFDZEZJdHF1U3gySlJBQStWbDR6aEdYK3NoV1Y2ZVhDeERLV2c9PQ==
+kind: Secret
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","data":{"adminID":"azg=","adminKey":"QVFDZEZJdHF1U3gySlJBQStWbDR6aEdYK3NoV1Y2ZVhDeERLV2c9PQ==","userID":"azg=","userKey":"QVFDZEZJdHF1U3gySlJBQStWbDR6aEdYK3NoV1Y2ZVhDeERLV2c9PQ=="},"kind":"Secret","metadata":{"annotations":{},"name":"ceph-csi-cephfs-secret","namespace":"default"}}
+  creationTimestamp: "2026-08-23T14:33:06Z"
+  name: ceph-csi-cephfs-secret
+  namespace: default
+  resourceVersion: "91297"
+  uid: f02a1830-c282-463f-81c3-4457caf648ed
+type: Opaque

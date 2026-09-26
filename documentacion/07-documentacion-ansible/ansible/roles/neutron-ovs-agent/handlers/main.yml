@@ -1,0 +1,5 @@
+---
+- name: reiniciar neutron-openvswitch-agent
+  service:
+    name: neutron-openvswitch-agent
+    state: restarted

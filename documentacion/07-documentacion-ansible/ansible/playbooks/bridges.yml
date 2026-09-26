@@ -1,0 +1,33 @@
+---
+# playbooks/bridges.yml
+# ─────────────────────────────────────────────────────────────────────────────
+# Fase 1: Configurar Linux bridges (br-mgmt, br-vlan, br-vxlan) en todos los
+# nodos y asegurar que OVS tiene br-provider con br-vlan como uplink.
+#
+# Orden de ejecución:
+#   1. Primero los computes (en paralelo) — si algo falla, el controller sigue up
+#   2. Después el controller
+#
+# Idempotente: se puede re-ejecutar sin riesgo.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Play 1: Linux bridges en los computes ────────────────────────────────────
+- name: Configurar Linux bridges en los computes
+  hosts: compute
+  become: true
+  # Los 4 computes se configuran en paralelo (forks=5 en ansible.cfg)
+  roles:
+    - role: linux-bridges
+      tags: [bridges, netplan]
+    - role: ovs-bridges
+      tags: [bridges, ovs]
+
+# ── Play 2: Linux bridges en el controller (último, más crítico) ─────────────
+- name: Configurar Linux bridges en el controller
+  hosts: controller
+  become: true
+  roles:
+    - role: linux-bridges
+      tags: [bridges, netplan]
+    - role: ovs-bridges
+      tags: [bridges, ovs]

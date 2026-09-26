@@ -1,0 +1,28 @@
+---
+# Tasks del role linux-bridges
+# Crea y configura br-mgmt, br-vlan y br-vxlan en todos los nodos
+
+- name: Generar fichero netplan con Linux bridges
+  template:
+    src: netplan.yaml.j2
+    dest: "{{ netplan_file }}"
+    owner: root
+    group: root
+    mode: '0600'
+  notify: aplicar netplan
+
+- name: Forzar MAC de br-mgmt al MAC de la NIC física (fix KVM)
+  # KVM solo acepta tramas del MAC asignado al vnet del host.
+  # Cuando Linux crea un bridge, puede asignar un MAC aleatorio.
+  # Forzamos el MAC de br-mgmt = MAC de enp7s0.
+  command: "ip link set br-mgmt address {{ mgmt_mac }}"
+  when:
+    - mgmt_mac is defined
+    - "'br-mgmt' in ansible_interfaces"
+  changed_when: false
+
+- name: Asegurar que br-vxlan está UP
+  # br-vxlan no tiene NIC física → puede quedarse DOWN tras netplan apply
+  command: ip link set br-vxlan up
+  when: "'br-vxlan' in ansible_interfaces"
+  changed_when: false

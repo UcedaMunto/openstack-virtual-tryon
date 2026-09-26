@@ -1,0 +1,3 @@
+# [LAPTOP]
+sudo cp /var/lib/libvirt/images/compute.qcow2 /var/lib/libvirt/images/storage1.qcow2
+sudo chown libvirt-qemu:kvm /var/lib/libvirt/images/storage1.qcow2

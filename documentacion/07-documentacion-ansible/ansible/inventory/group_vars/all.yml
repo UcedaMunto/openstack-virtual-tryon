@@ -1,0 +1,53 @@
+# group_vars/all.yml
+# Variables comunes a TODOS los nodos del cluster
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Credenciales OpenStack ──────────────────────────────────────────────────
+openstack_admin_password: icc115
+openstack_region: RegionOne
+openstack_domain: Default
+controller_fqdn: controller          # hostname que usan los servicios internamente
+controller_mgmt_ip: 10.0.0.11        # IP de gestión del controller (br-mgmt)
+controller_public_ip: 203.0.113.239  # IP pública del controller
+
+# ── Credenciales de servicios internos ─────────────────────────────────────
+rabbitmq_user: openstack
+rabbitmq_password: icc115
+mariadb_root_password: icc115
+mariadb_nova_password: icc115
+mariadb_neutron_password: icc115
+mariadb_keystone_password: icc115
+mariadb_glance_password: icc115
+mariadb_placement_password: icc115
+memcached_port: 11211
+
+# ── Modelo de red OpenStack ──────────────────────────────────────────────────
+# Nombre lógico de la red provider en Neutron
+neutron_provider_network_name: provider
+# Bridge OVS que gestiona la red provider
+neutron_provider_bridge: br-provider
+# Nombre del bridge Linux que hace de uplink del provider
+neutron_provider_uplink_bridge: br-vlan
+# Mappings bridge_mappings del agente OVS
+neutron_bridge_mappings: "{{ neutron_provider_network_name }}:{{ neutron_provider_bridge }}"
+
+# ── Interfaces de red en cada nodo ──────────────────────────────────────────
+# Nota: las IPs específicas (mgmt_ip, public_ip) se definen en hosts.yml
+# como variables de host, NO aquí.
+mgmt_interface: enp7s0       # NIC que irá a br-mgmt
+provider_interface: enp8s0   # NIC que irá a br-vlan (y luego a OVS)
+public_interface: enp1s0     # NIC de acceso externo (SSH, API)
+public_gateway: 203.0.113.1
+public_prefix: 24
+mgmt_prefix: 24
+nameservers:
+  - 8.8.8.8
+  - 1.1.1.1
+
+# ── Configuración de bridges Linux ──────────────────────────────────────────
+bridge_stp: false
+bridge_forward_delay: 0
+
+# ── Rutas de ficheros en los nodos ───────────────────────────────────────────
+admin_openrc_path: /root/admin-openrc
+netplan_file: /etc/netplan/50-cloud-init.yaml

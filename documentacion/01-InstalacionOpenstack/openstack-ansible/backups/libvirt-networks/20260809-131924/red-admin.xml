@@ -1,0 +1,9 @@
+<network>
+  <name>red-admin</name>
+  <uuid>1e094429-651c-4ade-86d7-032b6ea00453</uuid>
+  <bridge name='red-admin' stp='on' delay='0'/>
+  <mac address='52:54:00:3c:17:2a'/>
+  <ip address='192.168.50.1' netmask='255.255.255.0'>
+  </ip>
+</network>
+

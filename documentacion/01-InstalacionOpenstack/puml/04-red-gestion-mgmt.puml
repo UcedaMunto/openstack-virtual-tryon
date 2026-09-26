@@ -1,0 +1,165 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontSize 11
+skinparam defaultFontName "Arial"
+skinparam nodeBorderColor #1565C0
+skinparam nodeBorderThickness 1.8
+skinparam rectangleBorderColor #1565C0
+skinparam rectangleBorderThickness 1.2
+skinparam cloudBorderColor #1565C0
+skinparam arrowColor #1565C0
+skinparam arrowThickness 1.5
+
+top to bottom direction
+
+title <b>Red de Gestion -- br-mgmt</b>\n<size:10>Hardware: enp7s0  |  Bridge Linux: br-mgmt  |  Red logica: 10.0.0.0/24\nEquivalente imagen: eth0 (Management) -> br-mgmt -> Red de Gestion</size>
+
+' ============================================================
+'  KVM NETWORK
+' ============================================================
+cloud "<b>openstack-admin</b>  [virbr10]\n10.0.0.0/24\nRed de Gestion / APIs / RabbitMQ\nUnderlay VXLAN" as ADM #E3F2FD
+
+' ============================================================
+'  CONTROLLER
+' ============================================================
+node "<b>controller</b>  (serverocontroller)\n203.0.113.239  (acceso SSH)" as CTRL #FFF9C4 {
+  rectangle "<b>enp7s0</b>\nNIC física\n(sin IP — miembro bridge)" as CE7 #FFCC80
+  rectangle "<b>br-mgmt</b>\n10.0.0.11/24\nLinux bridge\n← enp7s0" as CMGMT #B3E5FC
+  rectangle "<b>br-vxlan</b>\n10.0.0.11/32 ★\nBridge software\n(sin NIC física)" as CVXLAN #DCEDC8
+  rectangle "<b>Servicios OSA</b>\nnova-api · keystone\nnova-conductor · nova-scheduler\nneutron-server · glance\nnova-novncproxy" as CSVC #FFFDE7
+}
+
+' ============================================================
+'  COMPUTE1
+' ============================================================
+node "<b>compute1</b>  (203.0.113.240)" as C1 #F3E5F5 {
+  rectangle "<b>enp7s0</b>  (sin IP)" as C1E7 #FFCC80
+  rectangle "<b>br-mgmt</b>  10.0.0.10/24\n← enp7s0" as C1MGMT #B3E5FC
+  rectangle "<b>br-vxlan</b>  10.0.0.10/32 ★" as C1VX #DCEDC8
+  rectangle "<b>nova-compute</b>\nneutron-ovs-agent" as C1SVC #FFFDE7
+}
+
+' ============================================================
+'  COMPUTE2
+' ============================================================
+node "<b>compute2</b>  (203.0.113.241)" as C2 #F3E5F5 {
+  rectangle "<b>enp7s0</b>  (sin IP)" as C2E7 #FFCC80
+  rectangle "<b>br-mgmt</b>  10.0.0.12/24\n← enp7s0" as C2MGMT #B3E5FC
+  rectangle "<b>br-vxlan</b>  10.0.0.12/32 ★" as C2VX #DCEDC8
+  rectangle "<b>nova-compute</b>\nneutron-ovs-agent" as C2SVC #FFFDE7
+}
+
+' ============================================================
+'  COMPUTE3
+' ============================================================
+node "<b>compute3</b>  (203.0.113.242)" as C3 #F3E5F5 {
+  rectangle "<b>enp7s0</b>  (sin IP)" as C3E7 #FFCC80
+  rectangle "<b>br-mgmt</b>  10.0.0.13/24\n← enp7s0" as C3MGMT #B3E5FC
+  rectangle "<b>br-vxlan</b>  10.0.0.13/32 ★" as C3VX #DCEDC8
+  rectangle "<b>nova-compute</b>\nneutron-ovs-agent" as C3SVC #FFFDE7
+}
+
+' ============================================================
+'  COMPUTE4
+' ============================================================
+node "<b>compute4</b>  (203.0.113.243)" as C4 #F3E5F5 {
+  rectangle "<b>enp7s0</b>  (sin IP)" as C4E7 #FFCC80
+  rectangle "<b>br-mgmt</b>  10.0.0.14/24\n← enp7s0" as C4MGMT #B3E5FC
+  rectangle "<b>br-vxlan</b>  10.0.0.14/32 ★" as C4VX #DCEDC8
+  rectangle "<b>nova-compute</b>\nneutron-ovs-agent" as C4SVC #FFFDE7
+}
+
+' ============================================================
+'  CONEXIONES FÍSICAS (enp7s0 → br-mgmt → virbr10)
+' ============================================================
+CE7   -up->  CMGMT  : member
+C1E7  -up->  C1MGMT : member
+C2E7  -up->  C2MGMT : member
+C3E7  -up->  C3MGMT : member
+C4E7  -up->  C4MGMT : member
+
+CMGMT  -up-> ADM : "<size:9>10.0.0.11</size>"
+C1MGMT -up-> ADM : "<size:9>10.0.0.10</size>"
+C2MGMT -up-> ADM : "<size:9>10.0.0.12</size>"
+C3MGMT -up-> ADM : "<size:9>10.0.0.13</size>"
+C4MGMT -up-> ADM : "<size:9>10.0.0.14</size>"
+
+' ============================================================
+'  SERVICIOS USAN br-mgmt
+' ============================================================
+CSVC  --> CMGMT  : APIs / RabbitMQ / Memcached
+C1SVC --> C1MGMT : nova API / neutron tunnels
+C2SVC --> C2MGMT
+C3SVC --> C3MGMT
+C4SVC --> C4MGMT
+
+' ============================================================
+'  br-vxlan comparte IP con br-mgmt (lab 2 NICs)
+' ============================================================
+CVXLAN  .right.  CMGMT  : <color:#388E3C><size:9>misma IP /32\nvia br-mgmt</size></color>
+
+note as NOTA_VXLAN
+  <b>br-vxlan /32 (no /24):</b>
+  En este lab de 2 NICs, br-vxlan no tiene NIC fisica.
+  Se asigna /32 (host address solo) para evitar crear
+  una ruta 10.0.0.0/24 duplicada que compita con br-mgmt.
+  El trafico VXLAN real fluye por br-mgmt -> enp7s0.
+  En un despliegue con 3 NICs, br-vxlan tendria eth2 dedicada.
+end note
+
+note as GLOSARIO #FFFDE7
+  <b>Glosario</b>
+  <b>br-mgmt</b>       Linux bridge de gestion. Agrupa la NIC fisica (enp7s0)
+                 y expone una IP en 10.0.0.0/24. Todos los servicios
+                 OpenStack (APIs, RabbitMQ, MySQL) usan esta interfaz
+                 para comunicarse entre nodos del cluster.
+
+  <b>Linux bridge</b>  Conmutador L2 implementado en el kernel Linux.
+                 Actua como un switch virtual: los puertos miembro
+                 comparten el mismo dominio de broadcast.
+
+  <b>enp7s0</b>        NIC fisica del nodo, conectada a virbr10 (KVM).
+                 Se convierte en puerto miembro del bridge; pierde
+                 su IP directa y la cede a br-mgmt.
+
+  <b>br-vxlan</b>      Bridge software sin NIC fisica. Usa /32 (no /24) para
+                 evitar rutas duplicadas en este lab de 2 NICs.
+                 Funciona como IP de origen/destino del tunel VXLAN
+                 entre computes (trafico sale por br-mgmt).
+
+  <b>virbr10</b>       Red virtual KVM openstack-admin (10.0.0.0/24).
+                 Equivale a la red de gestion / Management Network
+                 del modelo OpenStack-Ansible de referencia.
+end note
+
+' layout vertical -- apila nodos en columna
+CTRL -[hidden]down- C1
+C1   -[hidden]down- C2
+C2   -[hidden]down- C3
+C3   -[hidden]down- C4
+
+note as CMDS #E8F5E9
+  <b>Comandos de verificacion -- Red de Gestion (br-mgmt)</b>
+
+  En cada nodo (SSH a 203.0.113.x):
+    ip link show type bridge       -- ver todos los Linux bridges activos
+    bridge link show               -- ver enp7s0 como miembro de br-mgmt
+    ip addr show br-mgmt           -- confirmar IP /24 del bridge de gestion
+    ip addr show br-vxlan          -- confirmar /32 (no /24, evita ruta duplicada)
+    ip route | grep 10.0.0         -- debe haber UNA sola ruta 10.0.0.0/24 via br-mgmt
+
+  Conectividad entre nodos (ping por red de gestion):
+    ping -c 2 10.0.0.11            -- controller
+    ping -c 2 10.0.0.10            -- compute1
+    ping -c 2 10.0.0.12            -- compute2
+    ping -c 2 10.0.0.13            -- compute3
+    ping -c 2 10.0.0.14            -- compute4
+
+  Verificar miembro fisico y estado del bridge:
+    brctl show br-mgmt             -- enp7s0 debe aparecer como miembro
+    ip -d link show br-mgmt        -- ver flags: UP LOWER_UP
+    ip -d link show br-vxlan       -- ver flags (puede ser DOWN si no hay VMs)
+end note
+
+@enduml

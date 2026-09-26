@@ -1,0 +1,59 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam linetype ortho
+
+title OpenStack actual - Topologia de redes y nodos (2026-07-21)
+
+cloud "Red publica\n203.0.113.0/24\nGW 203.0.113.1" as PUB
+cloud "Red gestion\n10.0.0.0/24" as MGMT
+cloud "Provider Neutron\n192.168.122.0/24\n(provider-subnet)" as PROV
+cloud "Tenant selfservice\n10.10.10.0/24\n(selfservice-subnet)" as TENANT
+
+node "controller\n203.0.113.239\nmgmt 10.0.0.11\nRoles: API/Horizon, Neutron L3+DHCP+OVS\nOVS: br-provider, br-int, br-tun" as CTRL
+node "compute1\n203.0.113.240\nmgmt 10.0.0.10\nRoles: nova-compute(inactive), OVS agent\nOVS: br-provider, br-int, br-tun" as C1
+node "compute2\n203.0.113.241\nmgmt 10.0.0.12\nRoles: nova-compute, OVS agent, VMs WordPress\nOVS: br-provider, br-int, br-tun" as C2
+node "compute3\n203.0.113.242\nmgmt 10.0.0.13\nRoles: nova-compute, OVS agent\nOVS: br-provider, br-int, br-tun" as C3
+node "compute4\n203.0.113.243\nmgmt 10.0.0.14\nRoles: nova-compute, OVS agent\nOVS: br-provider, br-int, br-tun" as C4
+node "storage1\n203.0.113.244\nmgmt 10.0.0.15\nRol: Cinder/Ceph (HEALTH_WARN)" as ST1
+node "object1\n203.0.113.245\nmgmt 10.0.0.51\nRol: Swift object" as O1
+node "object2\n203.0.113.246\nmgmt 10.0.0.52\nRol: Swift object" as O2
+
+PUB -- CTRL : enp1s0
+PUB -- C1 : enp1s0
+PUB -- C2 : enp1s0
+PUB -- C3 : enp1s0
+PUB -- C4 : enp1s0
+PUB -- ST1 : enp1s0
+PUB -- O1 : enp1s0
+PUB -- O2 : enp1s0
+
+MGMT -- CTRL : br-mgmt
+MGMT -- C1 : br-mgmt
+MGMT -- C2 : br-mgmt
+MGMT -- C3 : br-mgmt
+MGMT -- C4 : br-mgmt
+MGMT -- ST1 : enp7s0
+MGMT -- O1 : enp2s0
+MGMT -- O2 : enp2s0
+
+PROV -- CTRL : br-provider
+PROV -- C1 : br-provider
+PROV -- C2 : br-provider
+PROV -- C3 : br-provider
+PROV -- C4 : br-provider
+
+CTRL -- TENANT : qrouter + qdhcp namespaces
+C1 -- TENANT : ports tap/qr via br-int
+C2 -- TENANT : ports tap/qr via br-int
+
+note right of CTRL
+Redes Neutron:
+- provider-net: 192.168.122.0/24
+- selfservice-net: 10.10.10.0/24
+Router: router1 ACTIVE/UP
+end note
+
+@enduml

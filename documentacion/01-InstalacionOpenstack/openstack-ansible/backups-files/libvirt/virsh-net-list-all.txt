@@ -1,0 +1,8 @@
+ Name          State    Autostart   Persistent
+------------------------------------------------
+ ceph-egress   active   yes         yes
+ k8s-lab       active   yes         yes
+ os-external   active   yes         yes
+ os-mgmt       active   yes         yes
+ os-tunnel     active   yes         yes
+

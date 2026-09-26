@@ -1,0 +1,14 @@
+---
+- name: reload systemd daemon
+  systemd:
+    daemon_reload: true
+
+- name: reiniciar libvirtd
+  service:
+    name: libvirtd
+    state: restarted
+
+- name: reiniciar nova-compute
+  service:
+    name: nova-compute
+    state: restarted

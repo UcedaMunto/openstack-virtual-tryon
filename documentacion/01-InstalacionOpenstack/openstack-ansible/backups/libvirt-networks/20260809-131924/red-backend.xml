@@ -1,0 +1,14 @@
+<network>
+  <name>red-backend</name>
+  <uuid>1d61b600-46d2-4fd1-ae7e-769dc8c5a9dc</uuid>
+  <forward mode='nat'>
+    <nat>
+      <port start='1024' end='65535'/>
+    </nat>
+  </forward>
+  <bridge name='red-backend' stp='on' delay='0'/>
+  <mac address='52:54:00:8f:10:ed'/>
+  <ip address='192.168.20.1' netmask='255.255.255.0'>
+  </ip>
+</network>
+

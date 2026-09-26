@@ -1,0 +1,54 @@
+apiVersion: ceph.rook.io/v1
+kind: CephFilesystem
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"ceph.rook.io/v1","kind":"CephFilesystem","metadata":{"annotations":{},"name":"myfs","namespace":"rook-ceph"},"spec":{"dataPools":[{"failureDomain":"host","name":"replicated","replicated":{"size":3}}],"metadataPool":{"replicated":{"size":3}},"metadataServer":{"activeCount":1,"activeStandby":false},"preserveFilesystemOnDelete":true}}
+  creationTimestamp: "2026-08-26T02:17:31Z"
+  finalizers:
+  - cephfilesystem.ceph.rook.io
+  generation: 2
+  name: myfs
+  namespace: rook-ceph
+  resourceVersion: "101940"
+  uid: e394098b-7fb1-462a-b2a6-1b607f935de8
+spec:
+  dataPools:
+  - application: ""
+    erasureCoded:
+      codingChunks: 0
+      dataChunks: 0
+    failureDomain: host
+    mirroring: {}
+    name: replicated
+    quotas: {}
+    replicated:
+      size: 3
+    statusCheck:
+      mirror: {}
+  metadataPool:
+    application: ""
+    erasureCoded:
+      codingChunks: 0
+      dataChunks: 0
+    mirroring: {}
+    quotas: {}
+    replicated:
+      size: 3
+    statusCheck:
+      mirror: {}
+  metadataServer:
+    activeCount: 1
+    placement: {}
+    resources: {}
+  preserveFilesystemOnDelete: true
+  statusCheck:
+    mirror: {}
+status:
+  cephx:
+    daemon:
+      keyCephVersion: 20.2.4-0
+      keyGeneration: 1
+      keyType: aes256k
+  observedGeneration: 2
+  phase: Ready

@@ -1,0 +1,495 @@
+nohup: ignoring input
+Deploying Playbooks
+[WARNING]: Invalid characters were found in group names but not replaced, use
+-vvvv to see details
+
+PLAY [Gather facts for all hosts] **********************************************
+
+TASK [Group hosts to determine when using --limit] *****************************
+ok: [anfitrion]
+ok: [asus-tuf]
+ok: [server]
+ok: [localhost]
+
+TASK [Gather facts] ************************************************************
+[WARNING]: Could not match supplied host pattern, ignoring:
+all_using_limit_True
+ok: [server]
+ok: [anfitrion]
+ok: [localhost]
+ok: [asus-tuf]
+
+PLAY [Gather facts for all hosts (if using --limit)] ***************************
+skipping: no hosts matched
+
+PLAY [Group hosts based on configuration] **************************************
+
+TASK [Group hosts based on Kolla action] ***************************************
+ok: [anfitrion]
+ok: [asus-tuf]
+ok: [server]
+ok: [localhost]
+
+TASK [Group hosts based on enabled services] ***********************************
+ok: [anfitrion] => (item=enable_aodh_False)
+ok: [anfitrion] => (item=enable_barbican_False)
+ok: [anfitrion] => (item=enable_blazar_False)
+ok: [anfitrion] => (item=enable_ceilometer_False)
+ok: [anfitrion] => (item=enable_ceph_rgw_False)
+ok: [anfitrion] => (item=enable_cinder_True)
+ok: [anfitrion] => (item=enable_cloudkitty_False)
+ok: [anfitrion] => (item=enable_collectd_False)
+ok: [anfitrion] => (item=enable_cyborg_False)
+ok: [anfitrion] => (item=enable_designate_False)
+ok: [anfitrion] => (item=enable_etcd_False)
+ok: [anfitrion] => (item=enable_fluentd_True)
+ok: [anfitrion] => (item=enable_glance_True)
+ok: [anfitrion] => (item=enable_gnocchi_False)
+ok: [anfitrion] => (item=enable_grafana_False)
+ok: [anfitrion] => (item=enable_hacluster_False)
+ok: [anfitrion] => (item=enable_heat_True)
+ok: [anfitrion] => (item=enable_horizon_True)
+ok: [anfitrion] => (item=enable_influxdb_False)
+ok: [anfitrion] => (item=enable_ironic_False)
+ok: [anfitrion] => (item=enable_iscsid_True)
+ok: [anfitrion] => (item=enable_keystone_True)
+ok: [anfitrion] => (item=enable_kuryr_False)
+ok: [anfitrion] => (item=enable_letsencrypt_False)
+ok: [anfitrion] => (item=enable_loadbalancer_True)
+ok: [anfitrion] => (item=enable_magnum_False)
+ok: [anfitrion] => (item=enable_manila_False)
+ok: [anfitrion] => (item=enable_mariadb_True)
+ok: [anfitrion] => (item=enable_masakari_False)
+ok: [anfitrion] => (item=enable_memcached_True)
+ok: [anfitrion] => (item=enable_mistral_False)
+ok: [anfitrion] => (item=enable_multipathd_False)
+ok: [anfitrion] => (item=enable_neutron_True)
+ok: [anfitrion] => (item=enable_nova_True)
+ok: [anfitrion] => (item=enable_octavia_False)
+ok: [anfitrion] => (item=enable_opensearch_False)
+ok: [anfitrion] => (item=enable_opensearch_dashboards_False)
+ok: [anfitrion] => (item=enable_openvswitch_True_enable_ovs_dpdk_False)
+ok: [anfitrion] => (item=enable_ovn_False)
+ok: [anfitrion] => (item=enable_placement_True)
+ok: [anfitrion] => (item=enable_prometheus_False)
+ok: [anfitrion] => (item=enable_rabbitmq_True)
+ok: [anfitrion] => (item=enable_valkey_False)
+ok: [anfitrion] => (item=enable_skyline_False)
+ok: [anfitrion] => (item=enable_tacker_False)
+ok: [anfitrion] => (item=enable_telegraf_False)
+ok: [anfitrion] => (item=enable_trove_False)
+ok: [anfitrion] => (item=enable_watcher_False)
+ok: [anfitrion] => (item=enable_zun_False)
+ok: [asus-tuf] => (item=enable_aodh_False)
+ok: [asus-tuf] => (item=enable_barbican_False)
+ok: [asus-tuf] => (item=enable_blazar_False)
+ok: [asus-tuf] => (item=enable_ceilometer_False)
+ok: [asus-tuf] => (item=enable_ceph_rgw_False)
+ok: [asus-tuf] => (item=enable_cinder_True)
+ok: [asus-tuf] => (item=enable_cloudkitty_False)
+ok: [asus-tuf] => (item=enable_collectd_False)
+ok: [asus-tuf] => (item=enable_cyborg_False)
+ok: [asus-tuf] => (item=enable_designate_False)
+ok: [asus-tuf] => (item=enable_etcd_False)
+ok: [asus-tuf] => (item=enable_fluentd_True)
+ok: [asus-tuf] => (item=enable_glance_True)
+ok: [asus-tuf] => (item=enable_gnocchi_False)
+ok: [asus-tuf] => (item=enable_grafana_False)
+ok: [asus-tuf] => (item=enable_hacluster_False)
+ok: [asus-tuf] => (item=enable_heat_True)
+ok: [asus-tuf] => (item=enable_horizon_True)
+ok: [asus-tuf] => (item=enable_influxdb_False)
+ok: [asus-tuf] => (item=enable_ironic_False)
+ok: [asus-tuf] => (item=enable_iscsid_True)
+ok: [asus-tuf] => (item=enable_keystone_True)
+ok: [asus-tuf] => (item=enable_kuryr_False)
+ok: [asus-tuf] => (item=enable_letsencrypt_False)
+ok: [asus-tuf] => (item=enable_loadbalancer_True)
+ok: [asus-tuf] => (item=enable_magnum_False)
+ok: [asus-tuf] => (item=enable_manila_False)
+ok: [asus-tuf] => (item=enable_mariadb_True)
+ok: [asus-tuf] => (item=enable_masakari_False)
+ok: [asus-tuf] => (item=enable_memcached_True)
+ok: [asus-tuf] => (item=enable_mistral_False)
+ok: [asus-tuf] => (item=enable_multipathd_False)
+ok: [asus-tuf] => (item=enable_neutron_True)
+ok: [asus-tuf] => (item=enable_nova_True)
+ok: [asus-tuf] => (item=enable_octavia_False)
+ok: [asus-tuf] => (item=enable_opensearch_False)
+ok: [asus-tuf] => (item=enable_opensearch_dashboards_False)
+ok: [asus-tuf] => (item=enable_openvswitch_True_enable_ovs_dpdk_False)
+ok: [asus-tuf] => (item=enable_ovn_False)
+ok: [asus-tuf] => (item=enable_placement_True)
+ok: [asus-tuf] => (item=enable_prometheus_False)
+ok: [asus-tuf] => (item=enable_rabbitmq_True)
+ok: [asus-tuf] => (item=enable_valkey_False)
+ok: [asus-tuf] => (item=enable_skyline_False)
+ok: [asus-tuf] => (item=enable_tacker_False)
+ok: [asus-tuf] => (item=enable_telegraf_False)
+ok: [asus-tuf] => (item=enable_trove_False)
+ok: [asus-tuf] => (item=enable_watcher_False)
+ok: [asus-tuf] => (item=enable_zun_False)
+ok: [server] => (item=enable_aodh_False)
+ok: [server] => (item=enable_barbican_False)
+ok: [server] => (item=enable_blazar_False)
+ok: [server] => (item=enable_ceilometer_False)
+ok: [server] => (item=enable_ceph_rgw_False)
+ok: [server] => (item=enable_cinder_True)
+ok: [server] => (item=enable_cloudkitty_False)
+ok: [server] => (item=enable_collectd_False)
+ok: [server] => (item=enable_cyborg_False)
+ok: [server] => (item=enable_designate_False)
+ok: [server] => (item=enable_etcd_False)
+ok: [server] => (item=enable_fluentd_True)
+ok: [server] => (item=enable_glance_True)
+ok: [server] => (item=enable_gnocchi_False)
+ok: [server] => (item=enable_grafana_False)
+ok: [server] => (item=enable_hacluster_False)
+ok: [server] => (item=enable_heat_True)
+ok: [server] => (item=enable_horizon_True)
+ok: [server] => (item=enable_influxdb_False)
+ok: [server] => (item=enable_ironic_False)
+ok: [server] => (item=enable_iscsid_True)
+ok: [server] => (item=enable_keystone_True)
+ok: [server] => (item=enable_kuryr_False)
+ok: [server] => (item=enable_letsencrypt_False)
+ok: [server] => (item=enable_loadbalancer_True)
+ok: [server] => (item=enable_magnum_False)
+ok: [server] => (item=enable_manila_False)
+ok: [server] => (item=enable_mariadb_True)
+ok: [server] => (item=enable_masakari_False)
+ok: [server] => (item=enable_memcached_True)
+ok: [server] => (item=enable_mistral_False)
+ok: [server] => (item=enable_multipathd_False)
+ok: [server] => (item=enable_neutron_True)
+ok: [server] => (item=enable_nova_True)
+ok: [server] => (item=enable_octavia_False)
+ok: [server] => (item=enable_opensearch_False)
+ok: [server] => (item=enable_opensearch_dashboards_False)
+ok: [server] => (item=enable_openvswitch_True_enable_ovs_dpdk_False)
+ok: [server] => (item=enable_ovn_False)
+ok: [server] => (item=enable_placement_True)
+ok: [server] => (item=enable_prometheus_False)
+ok: [server] => (item=enable_rabbitmq_True)
+ok: [server] => (item=enable_valkey_False)
+ok: [server] => (item=enable_skyline_False)
+ok: [server] => (item=enable_tacker_False)
+ok: [server] => (item=enable_telegraf_False)
+ok: [server] => (item=enable_trove_False)
+ok: [server] => (item=enable_watcher_False)
+ok: [server] => (item=enable_zun_False)
+ok: [localhost] => (item=enable_aodh_False)
+ok: [localhost] => (item=enable_barbican_False)
+ok: [localhost] => (item=enable_blazar_False)
+ok: [localhost] => (item=enable_ceilometer_False)
+ok: [localhost] => (item=enable_ceph_rgw_False)
+ok: [localhost] => (item=enable_cinder_True)
+ok: [localhost] => (item=enable_cloudkitty_False)
+ok: [localhost] => (item=enable_collectd_False)
+ok: [localhost] => (item=enable_cyborg_False)
+ok: [localhost] => (item=enable_designate_False)
+ok: [localhost] => (item=enable_etcd_False)
+ok: [localhost] => (item=enable_fluentd_True)
+ok: [localhost] => (item=enable_glance_True)
+ok: [localhost] => (item=enable_gnocchi_False)
+ok: [localhost] => (item=enable_grafana_False)
+ok: [localhost] => (item=enable_hacluster_False)
+ok: [localhost] => (item=enable_heat_True)
+ok: [localhost] => (item=enable_horizon_True)
+ok: [localhost] => (item=enable_influxdb_False)
+ok: [localhost] => (item=enable_ironic_False)
+ok: [localhost] => (item=enable_iscsid_True)
+ok: [localhost] => (item=enable_keystone_True)
+ok: [localhost] => (item=enable_kuryr_False)
+ok: [localhost] => (item=enable_letsencrypt_False)
+ok: [localhost] => (item=enable_loadbalancer_True)
+ok: [localhost] => (item=enable_magnum_False)
+ok: [localhost] => (item=enable_manila_False)
+ok: [localhost] => (item=enable_mariadb_True)
+ok: [localhost] => (item=enable_masakari_False)
+ok: [localhost] => (item=enable_memcached_True)
+[WARNING]: Could not match supplied host pattern, ignoring:
+kolla_action_precheck
+ok: [localhost] => (item=enable_mistral_False)
+ok: [localhost] => (item=enable_multipathd_False)
+ok: [localhost] => (item=enable_neutron_True)
+ok: [localhost] => (item=enable_nova_True)
+ok: [localhost] => (item=enable_octavia_False)
+ok: [localhost] => (item=enable_opensearch_False)
+ok: [localhost] => (item=enable_opensearch_dashboards_False)
+ok: [localhost] => (item=enable_openvswitch_True_enable_ovs_dpdk_False)
+ok: [localhost] => (item=enable_ovn_False)
+ok: [localhost] => (item=enable_placement_True)
+ok: [localhost] => (item=enable_prometheus_False)
+ok: [localhost] => (item=enable_rabbitmq_True)
+ok: [localhost] => (item=enable_valkey_False)
+ok: [localhost] => (item=enable_skyline_False)
+ok: [localhost] => (item=enable_tacker_False)
+ok: [localhost] => (item=enable_telegraf_False)
+ok: [localhost] => (item=enable_trove_False)
+ok: [localhost] => (item=enable_watcher_False)
+ok: [localhost] => (item=enable_zun_False)
+
+PLAY [Apply role prechecks] ****************************************************
+skipping: no hosts matched
+
+PLAY [Apply role common] *******************************************************
+
+PLAY [Apply role cron] *********************************************************
+
+PLAY [Apply role fluentd] ******************************************************
+
+PLAY [Apply role loadbalancer] *************************************************
+
+TASK [include_role : cinder] ***************************************************
+included: cinder for anfitrion
+
+TASK [haproxy-config : Copying over cinder haproxy config] *********************
+ok: [anfitrion] => (item={'key': 'cinder-api', 'value': {'container_name': 'cinder_api', 'group': 'cinder-api', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-api:2025.2-ubuntu-noble', 'volumes': ['/etc/kolla/cinder-api/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', 'kolla_logs:/var/log/kolla/', '/dev/shm:/dev/shm', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_curl http://192.168.0.10:8776'], 'timeout': '30'}, 'wsgi': 'cinder.wsgi.api:application', 'haproxy': {'cinder_api': {'enabled': 'yes', 'mode': 'http', 'external': False, 'port': '8776', 'listen_port': '8776', 'tls_backend': 'no', 'backend_http_extra': ['option httpchk']}, 'cinder_api_external': {'enabled': 'yes', 'mode': 'http', 'external': True, 'external_fqdn': '192.168.0.200', 'port': '8776', 'listen_port': '8776', 'tls_backend': 'no', 'backend_http_extra': ['option httpchk']}}}})
+skipping: [anfitrion] => (item={'key': 'cinder-scheduler', 'value': {'container_name': 'cinder_scheduler', 'group': 'cinder-scheduler', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-scheduler:2025.2-ubuntu-noble', 'volumes': ['/etc/kolla/cinder-scheduler/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', 'kolla_logs:/var/log/kolla/', '/dev/shm:/dev/shm', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-scheduler 5672'], 'timeout': '30'}}}) 
+skipping: [anfitrion] => (item={'key': 'cinder-volume', 'value': {'container_name': 'cinder_volume', 'group': 'cinder-volume', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-volume:2025.2-ubuntu-noble', 'privileged': True, 'ipc_mode': 'host', 'tmpfs': [''], 'volumes': ['/etc/kolla/cinder-volume/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', '/dev/:/dev/', '/lib/modules:/lib/modules:ro', '/run:/run:shared', 'cinder:/var/lib/cinder', 'iscsi_info:/etc/iscsi', '', 'kolla_logs:/var/log/kolla/', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-volume 5672'], 'timeout': '30'}}}) 
+skipping: [anfitrion] => (item={'key': 'cinder-backup', 'value': {'container_name': 'cinder_backup', 'group': 'cinder-backup', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-backup:2025.2-ubuntu-noble', 'privileged': True, 'ipc_mode': 'host', 'volumes': ['/etc/kolla/cinder-backup/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', '/dev/:/dev/', '/lib/modules:/lib/modules:ro', '/run:/run:shared', 'cinder:/var/lib/cinder', 'iscsi_info:/etc/iscsi', 'kolla_logs:/var/log/kolla/', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-backup 5672'], 'timeout': '30'}}}) 
+
+TASK [haproxy-config : Add configuration for cinder when using single external frontend] ***
+skipping: [anfitrion] => (item={'key': 'cinder-api', 'value': {'container_name': 'cinder_api', 'group': 'cinder-api', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-api:2025.2-ubuntu-noble', 'volumes': ['/etc/kolla/cinder-api/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', 'kolla_logs:/var/log/kolla/', '/dev/shm:/dev/shm', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_curl http://192.168.0.10:8776'], 'timeout': '30'}, 'wsgi': 'cinder.wsgi.api:application', 'haproxy': {'cinder_api': {'enabled': 'yes', 'mode': 'http', 'external': False, 'port': '8776', 'listen_port': '8776', 'tls_backend': 'no', 'backend_http_extra': ['option httpchk']}, 'cinder_api_external': {'enabled': 'yes', 'mode': 'http', 'external': True, 'external_fqdn': '192.168.0.200', 'port': '8776', 'listen_port': '8776', 'tls_backend': 'no', 'backend_http_extra': ['option httpchk']}}}}) 
+skipping: [anfitrion] => (item={'key': 'cinder-scheduler', 'value': {'container_name': 'cinder_scheduler', 'group': 'cinder-scheduler', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-scheduler:2025.2-ubuntu-noble', 'volumes': ['/etc/kolla/cinder-scheduler/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', 'kolla_logs:/var/log/kolla/', '/dev/shm:/dev/shm', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-scheduler 5672'], 'timeout': '30'}}}) 
+skipping: [anfitrion] => (item={'key': 'cinder-volume', 'value': {'container_name': 'cinder_volume', 'group': 'cinder-volume', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-volume:2025.2-ubuntu-noble', 'privileged': True, 'ipc_mode': 'host', 'tmpfs': [''], 'volumes': ['/etc/kolla/cinder-volume/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', '/dev/:/dev/', '/lib/modules:/lib/modules:ro', '/run:/run:shared', 'cinder:/var/lib/cinder', 'iscsi_info:/etc/iscsi', '', 'kolla_logs:/var/log/kolla/', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-volume 5672'], 'timeout': '30'}}}) 
+skipping: [anfitrion] => (item={'key': 'cinder-backup', 'value': {'container_name': 'cinder_backup', 'group': 'cinder-backup', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-backup:2025.2-ubuntu-noble', 'privileged': True, 'ipc_mode': 'host', 'volumes': ['/etc/kolla/cinder-backup/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', '/dev/:/dev/', '/lib/modules:/lib/modules:ro', '/run:/run:shared', 'cinder:/var/lib/cinder', 'iscsi_info:/etc/iscsi', 'kolla_logs:/var/log/kolla/', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-backup 5672'], 'timeout': '30'}}}) 
+skipping: [anfitrion]
+
+TASK [haproxy-config : Configuring firewall for cinder] ************************
+skipping: [anfitrion] => (item={'key': 'cinder_api', 'value': {'enabled': 'yes', 'mode': 'http', 'external': False, 'port': '8776', 'listen_port': '8776', 'tls_backend': 'no', 'backend_http_extra': ['option httpchk']}}) 
+skipping: [anfitrion] => (item={'key': 'cinder_api_external', 'value': {'enabled': 'yes', 'mode': 'http', 'external': True, 'external_fqdn': '192.168.0.200', 'port': '8776', 'listen_port': '8776', 'tls_backend': 'no', 'backend_http_extra': ['option httpchk']}}) 
+skipping: [anfitrion]
+
+TASK [proxysql-config : Copying over cinder ProxySQL users config] *************
+ok: [anfitrion]
+
+TASK [proxysql-config : Copying over cinder ProxySQL rules config] *************
+[WARNING]: Could not match supplied host pattern, ignoring:
+enable_opensearch_True
+[WARNING]: Could not match supplied host pattern, ignoring:
+enable_letsencrypt_True
+[WARNING]: Could not match supplied host pattern, ignoring:
+enable_collectd_True
+[WARNING]: Could not match supplied host pattern, ignoring:
+enable_influxdb_True
+[WARNING]: Could not match supplied host pattern, ignoring:
+enable_telegraf_True
+[WARNING]: Could not match supplied host pattern, ignoring: enable_valkey_True
+[WARNING]: Could not match supplied host pattern, ignoring: mariadb_restart
+[WARNING]: Could not match supplied host pattern, ignoring: mariadb_start
+[WARNING]: Could not match supplied host pattern, ignoring:
+mariadb_bootstrap_restart
+[WARNING]: Could not match supplied host pattern, ignoring:
+enable_prometheus_True
+[WARNING]: Could not match supplied host pattern, ignoring:
+enable_multipathd_True
+[WARNING]: Could not match supplied host pattern, ignoring: rabbitmq_restart
+[WARNING]: Could not match supplied host pattern, ignoring: enable_etcd_True
+[WARNING]: Could not match supplied host pattern, ignoring:
+enable_ceph_rgw_True
+[WARNING]: Could not match supplied host pattern, ignoring: enable_ironic_True
+ok: [anfitrion]
+
+PLAY [Apply role opensearch] ***************************************************
+skipping: no hosts matched
+
+PLAY [Apply role letsencrypt] **************************************************
+skipping: no hosts matched
+
+PLAY [Apply role collectd] *****************************************************
+skipping: no hosts matched
+
+PLAY [Apply role influxdb] *****************************************************
+skipping: no hosts matched
+
+PLAY [Apply role telegraf] *****************************************************
+skipping: no hosts matched
+
+PLAY [Apply role valkey] *******************************************************
+skipping: no hosts matched
+
+PLAY [Apply role mariadb] ******************************************************
+
+PLAY [Restart mariadb services] ************************************************
+skipping: no hosts matched
+
+PLAY [Start mariadb services] **************************************************
+skipping: no hosts matched
+
+PLAY [Restart bootstrap mariadb service] ***************************************
+skipping: no hosts matched
+
+PLAY [Apply mariadb post-configuration] ****************************************
+
+PLAY [Apply role memcached] ****************************************************
+
+PLAY [Apply role prometheus] ***************************************************
+skipping: no hosts matched
+
+PLAY [Apply role prometheus-node-exporters] ************************************
+skipping: no hosts matched
+
+PLAY [Apply role iscsi] ********************************************************
+
+PLAY [Apply role multipathd] ***************************************************
+skipping: no hosts matched
+
+PLAY [Apply role rabbitmq] *****************************************************
+
+PLAY [Restart rabbitmq services] ***********************************************
+skipping: no hosts matched
+
+PLAY [Apply rabbitmq post-configuration] ***************************************
+
+PLAY [Apply role etcd] *********************************************************
+skipping: no hosts matched
+
+PLAY [Apply role keystone] *****************************************************
+
+PLAY [Apply role ceph-rgw] *****************************************************
+skipping: no hosts matched
+
+PLAY [Apply role glance] *******************************************************
+
+PLAY [Apply role ironic] *******************************************************
+skipping: no hosts matched
+
+PLAY [Apply role cinder] *******************************************************
+
+TASK [cinder : include_tasks] **************************************************
+included: /opt/kolla-ansible/share/kolla-ansible/ansible/roles/cinder/tasks/deploy.yml for anfitrion, asus-tuf
+
+TASK [service-ks-register : cinder | Creating/deleting services] ***************
+ok: [anfitrion] => (item=cinder (block-storage))
+ok: [anfitrion] => (item=cinderv3 (volumev3))
+
+TASK [service-ks-register : cinder | Creating/deleting endpoints] **************
+ok: [anfitrion] => (item=cinder -> http://192.168.0.200:8776/v3 -> internal)
+ok: [anfitrion] => (item=cinder -> http://192.168.0.200:8776/v3 -> public)
+ok: [anfitrion] => (item=cinderv3 -> http://192.168.0.200:8776/v3/%(tenant_id)s -> internal)
+ok: [anfitrion] => (item=cinderv3 -> http://192.168.0.200:8776/v3/%(tenant_id)s -> public)
+
+TASK [service-ks-register : cinder | Creating projects] ************************
+ok: [anfitrion] => (item=service)
+
+TASK [service-ks-register : cinder | Creating/deleting users] ******************
+[WARNING]: Module did not set no_log for update_password
+changed: [anfitrion] => (item=cinder -> service)
+
+TASK [service-ks-register : cinder | Creating roles] ***************************
+ok: [anfitrion] => (item=admin)
+
+TASK [service-ks-register : cinder | Granting/revoking user roles] *************
+ok: [anfitrion] => (item=cinder -> service -> admin)
+ok: [anfitrion] => (item=cinder -> service -> service)
+
+TASK [cinder : Ensuring config directories exist] ******************************
+ok: [anfitrion] => (item={'key': 'cinder-api', 'value': {'container_name': 'cinder_api', 'group': 'cinder-api', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-api:2025.2-ubuntu-noble', 'volumes': ['/etc/kolla/cinder-api/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', 'kolla_logs:/var/log/kolla/', '/dev/shm:/dev/shm', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_curl http://192.168.0.10:8776'], 'timeout': '30'}, 'wsgi': 'cinder.wsgi.api:application', 'haproxy': {'cinder_api': {'enabled': 'yes', 'mode': 'http', 'external': False, 'port': '8776', 'listen_port': '8776', 'tls_backend': 'no', 'backend_http_extra': ['option httpchk']}, 'cinder_api_external': {'enabled': 'yes', 'mode': 'http', 'external': True, 'external_fqdn': '192.168.0.200', 'port': '8776', 'listen_port': '8776', 'tls_backend': 'no', 'backend_http_extra': ['option httpchk']}}}})
+ok: [asus-tuf] => (item={'key': 'cinder-volume', 'value': {'container_name': 'cinder_volume', 'group': 'cinder-volume', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-volume:2025.2-ubuntu-noble', 'privileged': True, 'ipc_mode': 'host', 'tmpfs': [''], 'volumes': ['/etc/kolla/cinder-volume/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', '/dev/:/dev/', '/lib/modules:/lib/modules:ro', '/run:/run:shared', 'cinder:/var/lib/cinder', 'iscsi_info:/etc/iscsi', '', 'kolla_logs:/var/log/kolla/', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-volume 5672'], 'timeout': '30'}}})
+ok: [anfitrion] => (item={'key': 'cinder-scheduler', 'value': {'container_name': 'cinder_scheduler', 'group': 'cinder-scheduler', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-scheduler:2025.2-ubuntu-noble', 'volumes': ['/etc/kolla/cinder-scheduler/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', 'kolla_logs:/var/log/kolla/', '/dev/shm:/dev/shm', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-scheduler 5672'], 'timeout': '30'}}})
+ok: [asus-tuf] => (item={'key': 'cinder-backup', 'value': {'container_name': 'cinder_backup', 'group': 'cinder-backup', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-backup:2025.2-ubuntu-noble', 'privileged': True, 'ipc_mode': 'host', 'volumes': ['/etc/kolla/cinder-backup/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', '/dev/:/dev/', '/lib/modules:/lib/modules:ro', '/run:/run:shared', 'cinder:/var/lib/cinder', 'iscsi_info:/etc/iscsi', 'kolla_logs:/var/log/kolla/', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-backup 5672'], 'timeout': '30'}}})
+
+TASK [cinder : include_tasks] **************************************************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+
+TASK [cinder : include_tasks] **************************************************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+
+TASK [cinder : Check if policies shall be overwritten] *************************
+skipping: [anfitrion]
+
+TASK [cinder : Set cinder policy file] *****************************************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+
+TASK [cinder : include_tasks] **************************************************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+
+TASK [cinder : Copying over config.json files for services] ********************
+ok: [anfitrion] => (item={'key': 'cinder-api', 'value': {'container_name': 'cinder_api', 'group': 'cinder-api', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-api:2025.2-ubuntu-noble', 'volumes': ['/etc/kolla/cinder-api/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', 'kolla_logs:/var/log/kolla/', '/dev/shm:/dev/shm', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_curl http://192.168.0.10:8776'], 'timeout': '30'}, 'wsgi': 'cinder.wsgi.api:application', 'haproxy': {'cinder_api': {'enabled': 'yes', 'mode': 'http', 'external': False, 'port': '8776', 'listen_port': '8776', 'tls_backend': 'no', 'backend_http_extra': ['option httpchk']}, 'cinder_api_external': {'enabled': 'yes', 'mode': 'http', 'external': True, 'external_fqdn': '192.168.0.200', 'port': '8776', 'listen_port': '8776', 'tls_backend': 'no', 'backend_http_extra': ['option httpchk']}}}})
+ok: [asus-tuf] => (item={'key': 'cinder-volume', 'value': {'container_name': 'cinder_volume', 'group': 'cinder-volume', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-volume:2025.2-ubuntu-noble', 'privileged': True, 'ipc_mode': 'host', 'tmpfs': [''], 'volumes': ['/etc/kolla/cinder-volume/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', '/dev/:/dev/', '/lib/modules:/lib/modules:ro', '/run:/run:shared', 'cinder:/var/lib/cinder', 'iscsi_info:/etc/iscsi', '', 'kolla_logs:/var/log/kolla/', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-volume 5672'], 'timeout': '30'}}})
+ok: [anfitrion] => (item={'key': 'cinder-scheduler', 'value': {'container_name': 'cinder_scheduler', 'group': 'cinder-scheduler', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-scheduler:2025.2-ubuntu-noble', 'volumes': ['/etc/kolla/cinder-scheduler/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', 'kolla_logs:/var/log/kolla/', '/dev/shm:/dev/shm', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-scheduler 5672'], 'timeout': '30'}}})
+ok: [asus-tuf] => (item={'key': 'cinder-backup', 'value': {'container_name': 'cinder_backup', 'group': 'cinder-backup', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-backup:2025.2-ubuntu-noble', 'privileged': True, 'ipc_mode': 'host', 'volumes': ['/etc/kolla/cinder-backup/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', '/dev/:/dev/', '/lib/modules:/lib/modules:ro', '/run:/run:shared', 'cinder:/var/lib/cinder', 'iscsi_info:/etc/iscsi', 'kolla_logs:/var/log/kolla/', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-backup 5672'], 'timeout': '30'}}})
+
+TASK [cinder : Copying over cinder-wsgi.conf] **********************************
+skipping: [asus-tuf] => (item=/opt/kolla-ansible/share/kolla-ansible/ansible/roles/cinder/templates/cinder-wsgi.conf.j2) 
+skipping: [asus-tuf]
+skipping: [anfitrion] => (item=/opt/kolla-ansible/share/kolla-ansible/ansible/roles/cinder/templates/cinder-wsgi.conf.j2) 
+skipping: [anfitrion]
+
+TASK [Configure uWSGI for Cinder] **********************************************
+skipping: [asus-tuf]
+included: service-uwsgi-config for anfitrion
+
+TASK [service-uwsgi-config : Copying over cinder-api uWSGI config] *************
+ok: [anfitrion]
+
+TASK [cinder : Copying over cinder.conf] ***************************************
+ok: [anfitrion] => (item={'key': 'cinder-api', 'value': {'container_name': 'cinder_api', 'group': 'cinder-api', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-api:2025.2-ubuntu-noble', 'volumes': ['/etc/kolla/cinder-api/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', 'kolla_logs:/var/log/kolla/', '/dev/shm:/dev/shm', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_curl http://192.168.0.10:8776'], 'timeout': '30'}, 'wsgi': 'cinder.wsgi.api:application', 'haproxy': {'cinder_api': {'enabled': 'yes', 'mode': 'http', 'external': False, 'port': '8776', 'listen_port': '8776', 'tls_backend': 'no', 'backend_http_extra': ['option httpchk']}, 'cinder_api_external': {'enabled': 'yes', 'mode': 'http', 'external': True, 'external_fqdn': '192.168.0.200', 'port': '8776', 'listen_port': '8776', 'tls_backend': 'no', 'backend_http_extra': ['option httpchk']}}}})
+ok: [asus-tuf] => (item={'key': 'cinder-volume', 'value': {'container_name': 'cinder_volume', 'group': 'cinder-volume', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-volume:2025.2-ubuntu-noble', 'privileged': True, 'ipc_mode': 'host', 'tmpfs': [''], 'volumes': ['/etc/kolla/cinder-volume/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', '/dev/:/dev/', '/lib/modules:/lib/modules:ro', '/run:/run:shared', 'cinder:/var/lib/cinder', 'iscsi_info:/etc/iscsi', '', 'kolla_logs:/var/log/kolla/', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-volume 5672'], 'timeout': '30'}}})
+ok: [anfitrion] => (item={'key': 'cinder-scheduler', 'value': {'container_name': 'cinder_scheduler', 'group': 'cinder-scheduler', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-scheduler:2025.2-ubuntu-noble', 'volumes': ['/etc/kolla/cinder-scheduler/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', 'kolla_logs:/var/log/kolla/', '/dev/shm:/dev/shm', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-scheduler 5672'], 'timeout': '30'}}})
+ok: [asus-tuf] => (item={'key': 'cinder-backup', 'value': {'container_name': 'cinder_backup', 'group': 'cinder-backup', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-backup:2025.2-ubuntu-noble', 'privileged': True, 'ipc_mode': 'host', 'volumes': ['/etc/kolla/cinder-backup/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', '/dev/:/dev/', '/lib/modules:/lib/modules:ro', '/run:/run:shared', 'cinder:/var/lib/cinder', 'iscsi_info:/etc/iscsi', 'kolla_logs:/var/log/kolla/', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-backup 5672'], 'timeout': '30'}}})
+
+TASK [cinder : Generating 'hostnqn' file for cinder_volume] ********************
+skipping: [anfitrion]
+ok: [asus-tuf]
+
+TASK [cinder : Copying over existing policy file] ******************************
+skipping: [asus-tuf] => (item={'key': 'cinder-volume', 'value': {'container_name': 'cinder_volume', 'group': 'cinder-volume', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-volume:2025.2-ubuntu-noble', 'privileged': True, 'ipc_mode': 'host', 'tmpfs': [''], 'volumes': ['/etc/kolla/cinder-volume/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', '/dev/:/dev/', '/lib/modules:/lib/modules:ro', '/run:/run:shared', 'cinder:/var/lib/cinder', 'iscsi_info:/etc/iscsi', '', 'kolla_logs:/var/log/kolla/', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-volume 5672'], 'timeout': '30'}}}) 
+skipping: [anfitrion] => (item={'key': 'cinder-api', 'value': {'container_name': 'cinder_api', 'group': 'cinder-api', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-api:2025.2-ubuntu-noble', 'volumes': ['/etc/kolla/cinder-api/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', 'kolla_logs:/var/log/kolla/', '/dev/shm:/dev/shm', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_curl http://192.168.0.10:8776'], 'timeout': '30'}, 'wsgi': 'cinder.wsgi.api:application', 'haproxy': {'cinder_api': {'enabled': 'yes', 'mode': 'http', 'external': False, 'port': '8776', 'listen_port': '8776', 'tls_backend': 'no', 'backend_http_extra': ['option httpchk']}, 'cinder_api_external': {'enabled': 'yes', 'mode': 'http', 'external': True, 'external_fqdn': '192.168.0.200', 'port': '8776', 'listen_port': '8776', 'tls_backend': 'no', 'backend_http_extra': ['option httpchk']}}}}) 
+skipping: [asus-tuf] => (item={'key': 'cinder-backup', 'value': {'container_name': 'cinder_backup', 'group': 'cinder-backup', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-backup:2025.2-ubuntu-noble', 'privileged': True, 'ipc_mode': 'host', 'volumes': ['/etc/kolla/cinder-backup/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', '/dev/:/dev/', '/lib/modules:/lib/modules:ro', '/run:/run:shared', 'cinder:/var/lib/cinder', 'iscsi_info:/etc/iscsi', 'kolla_logs:/var/log/kolla/', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-backup 5672'], 'timeout': '30'}}}) 
+skipping: [asus-tuf]
+skipping: [anfitrion] => (item={'key': 'cinder-scheduler', 'value': {'container_name': 'cinder_scheduler', 'group': 'cinder-scheduler', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-scheduler:2025.2-ubuntu-noble', 'volumes': ['/etc/kolla/cinder-scheduler/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', 'kolla_logs:/var/log/kolla/', '/dev/shm:/dev/shm', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-scheduler 5672'], 'timeout': '30'}}}) 
+skipping: [anfitrion]
+
+TASK [cinder : Copying over nfs_shares files for cinder_volume] ****************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+
+TASK [service-check-containers : cinder | Check containers] ********************
+changed: [anfitrion] => (item={'key': 'cinder-api', 'value': {'container_name': 'cinder_api', 'group': 'cinder-api', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-api:2025.2-ubuntu-noble', 'volumes': ['/etc/kolla/cinder-api/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', 'kolla_logs:/var/log/kolla/', '/dev/shm:/dev/shm', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_curl http://192.168.0.10:8776'], 'timeout': '30'}, 'wsgi': 'cinder.wsgi.api:application', 'haproxy': {'cinder_api': {'enabled': 'yes', 'mode': 'http', 'external': False, 'port': '8776', 'listen_port': '8776', 'tls_backend': 'no', 'backend_http_extra': ['option httpchk']}, 'cinder_api_external': {'enabled': 'yes', 'mode': 'http', 'external': True, 'external_fqdn': '192.168.0.200', 'port': '8776', 'listen_port': '8776', 'tls_backend': 'no', 'backend_http_extra': ['option httpchk']}}}})
+changed: [asus-tuf] => (item={'key': 'cinder-volume', 'value': {'container_name': 'cinder_volume', 'group': 'cinder-volume', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-volume:2025.2-ubuntu-noble', 'privileged': True, 'ipc_mode': 'host', 'tmpfs': [''], 'volumes': ['/etc/kolla/cinder-volume/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', '/dev/:/dev/', '/lib/modules:/lib/modules:ro', '/run:/run:shared', 'cinder:/var/lib/cinder', 'iscsi_info:/etc/iscsi', '', 'kolla_logs:/var/log/kolla/', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-volume 5672'], 'timeout': '30'}}})
+changed: [anfitrion] => (item={'key': 'cinder-scheduler', 'value': {'container_name': 'cinder_scheduler', 'group': 'cinder-scheduler', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-scheduler:2025.2-ubuntu-noble', 'volumes': ['/etc/kolla/cinder-scheduler/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', 'kolla_logs:/var/log/kolla/', '/dev/shm:/dev/shm', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-scheduler 5672'], 'timeout': '30'}}})
+changed: [asus-tuf] => (item={'key': 'cinder-backup', 'value': {'container_name': 'cinder_backup', 'group': 'cinder-backup', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-backup:2025.2-ubuntu-noble', 'privileged': True, 'ipc_mode': 'host', 'volumes': ['/etc/kolla/cinder-backup/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', '/dev/:/dev/', '/lib/modules:/lib/modules:ro', '/run:/run:shared', 'cinder:/var/lib/cinder', 'iscsi_info:/etc/iscsi', 'kolla_logs:/var/log/kolla/', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-backup 5672'], 'timeout': '30'}}})
+
+TASK [service-check-containers : cinder | Notify handlers to restart containers] ***
+changed: [anfitrion] => {
+    "msg": "Notifying handlers"
+}
+changed: [asus-tuf] => {
+    "msg": "Notifying handlers"
+}
+
+TASK [service-check-containers : Include tasks] ********************************
+skipping: [anfitrion] => (item={'key': 'cinder-api', 'value': {'container_name': 'cinder_api', 'group': 'cinder-api', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-api:2025.2-ubuntu-noble', 'volumes': ['/etc/kolla/cinder-api/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', 'kolla_logs:/var/log/kolla/', '/dev/shm:/dev/shm', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_curl http://192.168.0.10:8776'], 'timeout': '30'}, 'wsgi': 'cinder.wsgi.api:application', 'haproxy': {'cinder_api': {'enabled': 'yes', 'mode': 'http', 'external': False, 'port': '8776', 'listen_port': '8776', 'tls_backend': 'no', 'backend_http_extra': ['option httpchk']}, 'cinder_api_external': {'enabled': 'yes', 'mode': 'http', 'external': True, 'external_fqdn': '192.168.0.200', 'port': '8776', 'listen_port': '8776', 'tls_backend': 'no', 'backend_http_extra': ['option httpchk']}}}}) 
+skipping: [anfitrion] => (item={'key': 'cinder-scheduler', 'value': {'container_name': 'cinder_scheduler', 'group': 'cinder-scheduler', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-scheduler:2025.2-ubuntu-noble', 'volumes': ['/etc/kolla/cinder-scheduler/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', 'kolla_logs:/var/log/kolla/', '/dev/shm:/dev/shm', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-scheduler 5672'], 'timeout': '30'}}}) 
+skipping: [anfitrion]
+skipping: [asus-tuf] => (item={'key': 'cinder-volume', 'value': {'container_name': 'cinder_volume', 'group': 'cinder-volume', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-volume:2025.2-ubuntu-noble', 'privileged': True, 'ipc_mode': 'host', 'tmpfs': [''], 'volumes': ['/etc/kolla/cinder-volume/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', '/dev/:/dev/', '/lib/modules:/lib/modules:ro', '/run:/run:shared', 'cinder:/var/lib/cinder', 'iscsi_info:/etc/iscsi', '', 'kolla_logs:/var/log/kolla/', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-volume 5672'], 'timeout': '30'}}}) 
+skipping: [asus-tuf] => (item={'key': 'cinder-backup', 'value': {'container_name': 'cinder_backup', 'group': 'cinder-backup', 'enabled': True, 'image': 'quay.io/openstack.kolla/cinder-backup:2025.2-ubuntu-noble', 'privileged': True, 'ipc_mode': 'host', 'volumes': ['/etc/kolla/cinder-backup/:/var/lib/kolla/config_files/:ro', '/etc/localtime:/etc/localtime:ro', '/etc/timezone:/etc/timezone:ro', '/dev/:/dev/', '/lib/modules:/lib/modules:ro', '/run:/run:shared', 'cinder:/var/lib/cinder', 'iscsi_info:/etc/iscsi', 'kolla_logs:/var/log/kolla/', ''], 'dimensions': {'ulimits': {'nofile': {'soft': 1048576, 'hard': 1048576}}}, 'healthcheck': {'interval': '30', 'retries': '3', 'start_period': '5', 'test': ['CMD-SHELL', 'healthcheck_port cinder-backup 5672'], 'timeout': '30'}}}) 
+skipping: [asus-tuf]
+
+TASK [cinder : include_tasks] **************************************************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+
+TASK [cinder : Creating Cinder database] ***************************************
+ok: [anfitrion]
+
+TASK [cinder : Creating Cinder database user and setting permissions] **********
+ok: [anfitrion]
+
+TASK [cinder : Running Cinder bootstrap container] *****************************
+fatal: [anfitrion]: FAILED! => {"changed": true, "msg": "Container exited with non-zero return code 1", "rc": 1, "stderr": "+ sudo -E kolla_set_configs\n2026-09-25 21:26:33.668 INFO Loading config file at /var/lib/kolla/config_files/config.json\n2026-09-25 21:26:33.668 INFO Validating config file\n2026-09-25 21:26:33.668 INFO Kolla config strategy set to: COPY_ALWAYS\n2026-09-25 21:26:33.668 INFO Copying service configuration files\n2026-09-25 21:26:33.668 INFO Copying /var/lib/kolla/config_files/cinder.conf to /etc/cinder/cinder.conf\n2026-09-25 21:26:33.669 INFO Setting permission for /etc/cinder/cinder.conf\n2026-09-25 21:26:33.669 INFO Copying /var/lib/kolla/config_files/cinder-api-uwsgi.ini to /etc/cinder/cinder-api-uwsgi.ini\n2026-09-25 21:26:33.669 INFO Setting permission for /etc/cinder/cinder-api-uwsgi.ini\n2026-09-25 21:26:33.669 INFO Writing out command to execute\n2026-09-25 21:26:33.670 INFO Setting permission for /var/lib/cinder\n2026-09-25 21:26:33.670 INFO Setting permission for /var/log/kolla/cinder\n2026-09-25 21:26:33.670 INFO Setting permission for /var/log/kolla/cinder/cinder-api.log\n++ cat /run_command\n+ CMD='uwsgi /etc/cinder/cinder-api-uwsgi.ini'\n+ ARGS=\n+ sudo kolla_copy_cacerts\n+ sudo kolla_install_projects\n+ [[ ! -n '' ]]\n+ . kolla_extend_start\n++ [[ ! -d /var/log/kolla/cinder ]]\n+++ stat -c %U:%G /var/log/kolla/cinder\n++ [[ cinder:cinder != \\c\\i\\n\\d\\e\\r\\:\\k\\o\\l\\l\\a ]]\n++ chown -R cinder:kolla /var/log/kolla/cinder\n+++ stat -c %a /var/log/kolla/cinder\n++ [[ 2755 != \\7\\5\\5 ]]\n++ chmod 755 /var/log/kolla/cinder\n++ . /usr/local/bin/kolla_cinder_extend_start\n+++ set -o errexit\n+++ [[ -n 0 ]]\n+++ cinder-manage db sync\n", "stderr_lines": ["+ sudo -E kolla_set_configs", "2026-09-25 21:26:33.668 INFO Loading config file at /var/lib/kolla/config_files/config.json", "2026-09-25 21:26:33.668 INFO Validating config file", "2026-09-25 21:26:33.668 INFO Kolla config strategy set to: COPY_ALWAYS", "2026-09-25 21:26:33.668 INFO Copying service configuration files", "2026-09-25 21:26:33.668 INFO Copying /var/lib/kolla/config_files/cinder.conf to /etc/cinder/cinder.conf", "2026-09-25 21:26:33.669 INFO Setting permission for /etc/cinder/cinder.conf", "2026-09-25 21:26:33.669 INFO Copying /var/lib/kolla/config_files/cinder-api-uwsgi.ini to /etc/cinder/cinder-api-uwsgi.ini", "2026-09-25 21:26:33.669 INFO Setting permission for /etc/cinder/cinder-api-uwsgi.ini", "2026-09-25 21:26:33.669 INFO Writing out command to execute", "2026-09-25 21:26:33.670 INFO Setting permission for /var/lib/cinder", "2026-09-25 21:26:33.670 INFO Setting permission for /var/log/kolla/cinder", "2026-09-25 21:26:33.670 INFO Setting permission for /var/log/kolla/cinder/cinder-api.log", "++ cat /run_command", "+ CMD='uwsgi /etc/cinder/cinder-api-uwsgi.ini'", "+ ARGS=", "+ sudo kolla_copy_cacerts", "+ sudo kolla_install_projects", "+ [[ ! -n '' ]]", "+ . kolla_extend_start", "++ [[ ! -d /var/log/kolla/cinder ]]", "+++ stat -c %U:%G /var/log/kolla/cinder", "++ [[ cinder:cinder != \\c\\i\\n\\d\\e\\r\\:\\k\\o\\l\\l\\a ]]", "++ chown -R cinder:kolla /var/log/kolla/cinder", "+++ stat -c %a /var/log/kolla/cinder", "++ [[ 2755 != \\7\\5\\5 ]]", "++ chmod 755 /var/log/kolla/cinder", "++ . /usr/local/bin/kolla_cinder_extend_start", "+++ set -o errexit", "+++ [[ -n 0 ]]", "+++ cinder-manage db sync"], "stdout": "", "stdout_lines": []}
+
+PLAY RECAP *********************************************************************
+anfitrion                  : ok=24   changed=3    unreachable=0    failed=1    skipped=13   rescued=0    ignored=0   
+asus-tuf                   : ok=11   changed=2    unreachable=0    failed=0    skipped=10   rescued=0    ignored=0   
+localhost                  : ok=4    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+server                     : ok=4    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Kolla Ansible playbook(s) /opt/kolla-ansible/share/kolla-ansible/ansible/site.yml exited 2

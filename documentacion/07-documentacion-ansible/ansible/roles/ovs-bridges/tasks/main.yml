@@ -1,0 +1,33 @@
+---
+# Tasks del role ovs-bridges
+# Asegura que OVS tiene br-provider con br-vlan como uplink
+
+- name: Instalar paquete openvswitch-switch (si no está)
+  apt:
+    name: openvswitch-switch
+    state: present
+
+- name: Asegurar que br-provider existe en OVS
+  # openvswitch_bridge es idempotente: "present" = créalo si no existe
+  openvswitch_bridge:
+    bridge: "{{ neutron_provider_bridge }}"
+    state: present
+    fail_mode: secure
+  notify: reiniciar neutron-openvswitch-agent
+
+- name: Asegurar que br-vlan es uplink de br-provider
+  # Conecta el Linux bridge br-vlan (que tiene enp8s0) al OVS br-provider
+  openvswitch_port:
+    bridge: "{{ neutron_provider_bridge }}"
+    port: "{{ neutron_provider_uplink_bridge }}"
+    state: present
+  notify: reiniciar neutron-openvswitch-agent
+
+- name: Verificar estado de br-provider
+  command: ovs-vsctl list-ports "{{ neutron_provider_bridge }}"
+  register: br_provider_ports
+  changed_when: false
+
+- name: Mostrar puertos de br-provider
+  debug:
+    msg: "Puertos de {{ neutron_provider_bridge }}: {{ br_provider_ports.stdout_lines }}"

@@ -1,0 +1,71 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam linetype ortho
+skinparam shadowing false
+
+left to right direction
+
+title OpenStack - VXLAN entre compute1 y compute2 (datos reales)
+
+cloud "RED DE GESTION (underlay)\n10.0.0.0/24\nTransporte VXLAN UDP 4789" as MGMT #E8F5E9
+cloud "RED TENANT (overlay)\nselfservice-net 10.10.10.0/24" as TENANT #E3F2FD
+
+frame "COMPUTE1\nHost: 203.0.113.240" as C1 {
+  rectangle "IP br-mgmt: 10.0.0.10/24\nIP br-vxlan: 10.0.0.10/32" as C1IP #F5F5F5
+
+  rectangle "br-int\nIntegration bridge\nConecta puertos tap + patch-tun" as C1INT #E1F5FE
+  rectangle "br-tun\nTunnel bridge\nEncapsula/decapsula VXLAN" as C1TUN #EDE7F6
+  rectangle "br-provider\nSalida provider (via br-vlan/enp8s0)" as C1PROV #E8F5E9
+
+  rectangle "patch-tun" as C1P1 #FFFDE7
+  rectangle "patch-int" as C1P2 #FFFDE7
+
+  rectangle "VM en compute1\ntest-vm1 10.10.10.229\nEstado: SHUTOFF" as C1VM #FFEBEE
+}
+
+frame "COMPUTE2\nHost: 203.0.113.241" as C2 {
+  rectangle "IP br-mgmt: 10.0.0.12/24\nIP br-vxlan: 10.0.0.12/32" as C2IP #F5F5F5
+
+  rectangle "br-int\nIntegration bridge\nConecta puertos tap + patch-tun" as C2INT #E1F5FE
+  rectangle "br-tun\nTunnel bridge\nEncapsula/decapsula VXLAN" as C2TUN #EDE7F6
+  rectangle "br-provider\nSalida provider (via br-vlan/enp8s0)" as C2PROV #E8F5E9
+
+  rectangle "patch-tun" as C2P1 #FFFDE7
+  rectangle "patch-int" as C2P2 #FFFDE7
+
+  rectangle "VMs WordPress en compute2\nwp-web-01 10.10.10.76 (FIP 192.168.122.137)\nwp-db-01 10.10.10.152 (FIP 192.168.122.152)" as C2VM #E8F5E9
+}
+
+C1INT --> C1P1
+C1P1 --> C1TUN
+C1TUN --> C1P2
+C1P2 --> C1INT
+
+C2INT --> C2P1
+C2P1 --> C2TUN
+C2TUN --> C2P2
+C2P2 --> C2INT
+
+C1INT -- C1VM : puertos tap (si VM activa)
+C2INT -- C2VM : puertos tap activos
+
+C1IP -- MGMT
+C2IP -- MGMT
+
+C1TUN <..> C2TUN : Tunel VXLAN\nUDP 4789\nLocal/Remote: 10.0.0.10 <-> 10.0.0.12
+
+C1INT -- TENANT
+C2INT -- TENANT
+
+note bottom
+Como leer este diagrama:
+1) br-vxlan /32 NO es una red compartida; es identidad local del endpoint VXLAN.
+2) El trafico VXLAN viaja por la red de gestion 10.0.0.0/24 (br-mgmt/enp7s0).
+3) br-int integra puertos de VMs; br-tun encapsula/decapsula VXLAN; br-provider maneja salida provider.
+4) En este estado, compute2 tiene VMs activas; compute1 tiene test-vm1 en SHUTOFF.
+end note
+
+@enduml

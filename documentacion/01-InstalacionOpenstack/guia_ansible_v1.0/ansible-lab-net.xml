@@ -1,0 +1,11 @@
+<network>
+  <name>ansible-lab</name>
+  <bridge name='virbr-ansible' stp='on' delay='0'/>
+  <forward mode='nat'/>            <!-- da salida a Internet vía NAT, igual que la red 'default' -->
+  <ip address='192.168.60.1' netmask='255.255.255.0'>
+    <dhcp>
+      <!-- Rango DHCP alto (100-200); las VMs usarán IP estática fuera de este rango -->
+      <range start='192.168.60.100' end='192.168.60.200'/>
+    </dhcp>
+  </ip>
+</network>

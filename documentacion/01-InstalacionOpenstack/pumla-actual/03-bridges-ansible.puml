@@ -1,0 +1,84 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam linetype ortho
+
+title OpenStack actual - Interfaces y bridges por nodo
+
+node "controller" as CTRL {
+  rectangle "enp1s0 203.0.113.239/24" as CE1
+  rectangle "enp7s0 UP (sin IP)" as CE7
+  rectangle "enp8s0 UP (sin IP)" as CE8
+  rectangle "br-mgmt 10.0.0.11/24" as CBM
+  rectangle "br-vlan UP (sin IP)" as CBV
+  rectangle "br-vxlan 10.0.0.11/32" as CBX
+  rectangle "OVS br-provider/br-int/br-tun\nconnected:true" as COVS
+}
+
+node "compute1" as C1 {
+  rectangle "enp1s0 203.0.113.240/24" as C1E1
+  rectangle "enp7s0 UP" as C1E7
+  rectangle "enp8s0 UP" as C1E8
+  rectangle "br-mgmt 10.0.0.10/24" as C1BM
+  rectangle "br-vlan UP" as C1BV
+  rectangle "br-vxlan 10.0.0.10/32" as C1BX
+  rectangle "OVS br-provider/br-int/br-tun\nconnected:true" as C1OVS
+}
+
+node "compute2" as C2 {
+  rectangle "enp1s0 203.0.113.241/24" as C2E1
+  rectangle "enp7s0 UP" as C2E7
+  rectangle "enp8s0 UP" as C2E8
+  rectangle "br-mgmt 10.0.0.12/24" as C2BM
+  rectangle "br-vlan UP" as C2BV
+  rectangle "br-vxlan 10.0.0.12/32" as C2BX
+  rectangle "OVS br-provider/br-int/br-tun\nconnected:true" as C2OVS
+}
+
+node "compute3" as C3 {
+  rectangle "enp1s0 203.0.113.242/24" as C3E1
+  rectangle "enp7s0 UP" as C3E7
+  rectangle "enp8s0 UP" as C3E8
+  rectangle "br-mgmt 10.0.0.13/24" as C3BM
+  rectangle "br-vlan UP" as C3BV
+  rectangle "br-vxlan 10.0.0.13/32" as C3BX
+  rectangle "OVS br-provider/br-int/br-tun\nconnected:true" as C3OVS
+}
+
+node "compute4" as C4 {
+  rectangle "enp1s0 203.0.113.243/24" as C4E1
+  rectangle "enp7s0 UP" as C4E7
+  rectangle "enp8s0 UP" as C4E8
+  rectangle "br-mgmt 10.0.0.14/24" as C4BM
+  rectangle "br-vlan UP" as C4BV
+  rectangle "br-vxlan 10.0.0.14/32" as C4BX
+  rectangle "OVS br-provider/br-int/br-tun\nconnected:true" as C4OVS
+}
+
+note bottom
+Notas de estado actual:
+- En ip -br, br-int/br-tun/br-provider pueden verse DOWN y aun asi OVS estar operativo.
+- compute1 tiene nova-compute inactive; el resto de computes con nova-compute active.
+- En compute2 existen taps activos de WordPress (tap3d52..., tape6a80...).
+- Uso de enp7s0: transporte de gestion/underlay (10.0.0.0/24); esta como puerto del bridge br-mgmt,
+  por eso normalmente aparece UP y sin IP directa.
+- Interfaces que proveen Internet a los nodos (hostes): enp1s0 en controller, compute1, compute2, compute3 y compute4
+  (red 203.0.113.0/24, ruta por defecto via 203.0.113.1).
+- Salida externa de VMs/floating IP: red provider a traves de br-provider/br-vlan (uplink fisico enp8s0)
+  y ruteo/NAT en el qrouter de Neutron en el controller.
+- Para que sirven los bridges:
+  * br-mgmt: bridge Linux de gestion (API internas, control plane, underlay VXLAN).
+  * br-vlan: bridge Linux de uplink provider (conecta enp8s0 hacia OVS br-provider).
+  * br-vxlan: bridge Linux con IP /32 para identidad de tunel sin crear ruta /24 duplicada.
+  * br-int (OVS): bridge de integracion de puertos tap, qr/qg y patch ports.
+  * br-tun (OVS): bridge de tuneles VXLAN (encapsulado UDP 4789).
+  * br-provider (OVS): bridge de salida a red provider para floating IP y trafico norte-sur.
+- Cuantos bridges hay por tipo en nodos OpenStack (controller + computes):
+  * Linux bridges: 3 por nodo (br-mgmt, br-vlan, br-vxlan) -> 15 en total.
+  * OVS bridges: 3 por nodo (br-int, br-tun, br-provider) -> 15 en total.
+  * Total en esos 5 nodos: 30 bridges.
+end note
+
+@enduml

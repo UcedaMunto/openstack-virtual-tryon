@@ -1,0 +1,9 @@
+<network>
+  <name>red-ceph-cluster</name>
+  <uuid>1966a971-01b9-4aa7-a1b7-2ebd25974dd0</uuid>
+  <bridge name='brceph0' stp='on' delay='0'/>
+  <mac address='52:54:00:87:d2:88'/>
+  <ip address='192.168.60.1' netmask='255.255.255.0'>
+  </ip>
+</network>
+

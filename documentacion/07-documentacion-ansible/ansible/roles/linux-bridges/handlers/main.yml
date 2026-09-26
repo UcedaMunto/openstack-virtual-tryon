@@ -1,0 +1,9 @@
+---
+# Handlers del role linux-bridges
+
+- name: aplicar netplan
+  # Se ejecuta solo si el template de netplan cambió
+  # "netplan apply" aplica la nueva configuración de red de forma atómica
+  command: netplan apply
+  # Tras netplan apply, Ansible puede perder la conexión SSH brevemente
+  # si la IP de br-mgmt cambia. "async" espera hasta que vuelva.

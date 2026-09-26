@@ -1,0 +1,111 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontSize 11
+skinparam defaultFontName "Arial"
+skinparam nodeBorderColor #2E7D32
+skinparam nodeBorderThickness 1.8
+skinparam rectangleBorderColor #2E7D32
+skinparam rectangleBorderThickness 1.2
+skinparam cloudBorderColor #2E7D32
+skinparam arrowColor #2E7D32
+skinparam arrowThickness 1.5
+
+top to bottom direction
+
+title <b>Red Pública / Provider — br-vlan + OVS br-provider</b>\n<size:10>Hardware: enp8s0  ·  Linux bridge: br-vlan  ·  OVS: br-provider  ·  Red: 192.168.122.0/24 (flat)\nEquivalente imagen: eth1 (VLAN/Provider) → br-vlan → Red Pública</size>
+
+' ============================================================
+'  KVM NETWORK + EXTERNAL
+' ============================================================
+cloud "<b>openstack-provider</b>  [virbr30]\nL2 flat — sin IP en host\nRed física simulada para instancias" as PROV_NET #E8F5E9
+
+cloud "<b>Internet / Router KVM Host</b>\n203.0.113.1 (ThinkPad)\nFloating IP pool: 192.168.122.100-200\ngw instancias: 192.168.122.122" as INTERNET #FFEBEE
+
+' ============================================================
+'  CONTROLLER — L3 agent centralizado
+' ============================================================
+node "<b>controller</b>  (serverocontroller)" as CTRL #FFF9C4 {
+  rectangle "<b>enp8s0</b>  (sin IP)\nNIC física → miembro br-vlan" as CE8 #FFCC80
+  rectangle "<b>br-vlan</b>  (sin IP)\nLinux bridge  ← enp8s0\nUplink físico provider" as CVLAN #C8E6C9
+  rectangle "<b>OVS br-provider</b>\nuplink: br-vlan ✓\nphy-br-provider → patch → br-int\nfail_mode: secure" as COVSP #A5D6A7
+  rectangle "<b>OVS br-int</b>\nqg-port (floating IP)\nqr-port (tenant side)\nint-br-provider (patch)" as COVSI #A5D6A7
+  rectangle "<b>qrouter-namespace</b>\nNeutron L3 agent\nSNAT/DNAT: 10.10.10.x ↔ 192.168.122.x\nFloating IPs: 192.168.122.100-200" as L3NS #FFCC80
+}
+
+' ============================================================
+'  COMPUTE1 (representativo — misma arch en c2/c3/c4)
+' ============================================================
+node "<b>compute1</b>  (203.0.113.240)\n<size:9>[misma arquitectura en compute2, compute3, compute4]</size>" as C1 #F3E5F5 {
+  rectangle "<b>enp8s0</b>  (sin IP)\n→ miembro br-vlan" as C1E8 #FFCC80
+  rectangle "<b>br-vlan</b>  (sin IP)\nLinux bridge ← enp8s0" as C1VLAN #C8E6C9
+  rectangle "<b>OVS br-provider</b>\nuplink: br-vlan ✓\nphy-br-provider (patch → br-int)" as C1OVSP #A5D6A7
+  rectangle "<b>OVS br-int</b>\ntap-XXXX (instancias)\nint-br-provider (patch)" as C1OVSI #A5D6A7
+  node "<b>VM instancia</b>\nvirtio NIC\nIP tenant: 10.10.10.X\nFloating: 192.168.122.1XX" as VM #FFFDE7
+}
+
+' ============================================================
+'  FLUJO TRÁFICO N-S (NORTE-SUR)
+' ============================================================
+VM        -up->   C1OVSI : "tap interface"
+C1OVSI    <-->    C1OVSP : "int-br-provider\nphy-br-provider\n(patch ports)"
+C1OVSP    -up->   C1VLAN : "br-vlan uplink"
+C1VLAN    -up->   C1E8   : "NIC física"
+
+CE8       -up->   CVLAN  : "member"
+CVLAN     -up->   COVSP  : "br-vlan uplink\nen OVS ctrl"
+COVSP     <-->    COVSI  : "int-br-provider\nphy-br-provider"
+COVSI     <-->    L3NS   : "qg-port (provider side)\nqr-port (tenant side)"
+
+' ============================================================
+'  CONEXIONES A RED PROVIDER / INTERNET
+' ============================================================
+C1E8   -right-> PROV_NET : "<size:9>enp8s0</size>"
+CE8    -right-> PROV_NET : "<size:9>enp8s0</size>"
+PROV_NET -up-> INTERNET : "<size:9>virbr30 → ThinkPad\n192.168.122.0/24</size>"
+
+L3NS  --> INTERNET : "<color:#C62828><b>Floating IPs\n192.168.122.x</b></color>\nNAT SNAT/DNAT"
+
+note bottom of C1
+  Cadena de paquetes para tráfico N-S (VM → internet):
+  VM → tap → br-int (OVS) → patch → br-provider (OVS)
+  → br-vlan (Linux bridge) → enp8s0 → virbr30 (KVM)
+  → qrouter namespace (NAT) → enp1s0 → internet
+end note
+
+note right of CTRL
+  El controlador corre neutron-l3-agent:
+  · qrouter namespace hace SNAT/DNAT
+  · Floating IP 192.168.122.x asignada al namespace
+  · Gateway externo: 192.168.122.122 (del pool provider)
+end note
+
+' layout vertical -- apila nodos en columna
+CTRL -[hidden]down- C1
+
+note as CMDS #E8F5E9
+  <b>Comandos de verificacion -- Red Provider / br-vlan + OVS</b>
+
+  En cada nodo (SSH a 203.0.113.x):
+    ovs-vsctl show                        -- ver bridges OVS y puertos
+    ovs-vsctl list-ports br-provider      -- debe incluir br-vlan (uplink fisico)
+    ovs-vsctl list-ports br-int           -- puertos de integracion (tap, patch, qr)
+    ip link show type bridge              -- ver br-vlan (Linux bridge)
+    bridge link show                      -- enp8s0 debe ser miembro de br-vlan
+    ip addr show br-vlan                  -- no debe tener IP (solo uplink)
+
+  En el controller (agentes y redes OpenStack):
+    openstack network agent list          -- todos los agentes alive=True
+    openstack network list                -- ver redes provider y tenant
+    openstack floating ip list            -- ver floating IPs asignadas
+    ip netns show                         -- ver qrouter-XXX y qdhcp-XXX
+    ip netns exec qrouter-XXX ip addr     -- IPs en namespace L3 (floating + gw)
+    ip netns exec qrouter-XXX ip route    -- rutas dentro del namespace
+
+  Flujos OVS (avanzado):
+    ovs-ofctl dump-flows br-provider      -- flujos de reenvio provider
+    ovs-ofctl dump-flows br-int           -- flujos de integracion
+    ovs-ofctl dump-ports br-provider      -- estadisticas de puertos
+end note
+
+@enduml

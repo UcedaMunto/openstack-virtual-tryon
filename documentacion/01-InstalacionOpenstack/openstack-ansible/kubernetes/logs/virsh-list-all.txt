@@ -1,0 +1,32 @@
+ Id   Name                State
+------------------------------------
+ 11   k8-master           running
+ 12   k8-worker1          running
+ 13   k8-worker2          running
+ 14   k8-worker3          running
+ -    ansible-ctrl        shut off
+ -    compute             shut off
+ -    compute-clone7      shut off
+ -    compute2            shut off
+ -    compute2-clone7     shut off
+ -    compute3            shut off
+ -    compute3-clone7     shut off
+ -    compute4            shut off
+ -    controller          shut off
+ -    controller-clone7   shut off
+ -    controller-clone8   shut off
+ -    os-compute01        shut off
+ -    os-compute02        shut off
+ -    os-controller       shut off
+ -    os-network          shut off
+ -    server1             shut off
+ -    server2             shut off
+ -    server3             shut off
+ -    storage1-clone7     shut off
+ -    swift1              shut off
+ -    swift1-clone7       shut off
+ -    swift2              shut off
+ -    swift2-clone7       shut off
+ -    swift3              shut off
+ -    swift3-clone7       shut off
+

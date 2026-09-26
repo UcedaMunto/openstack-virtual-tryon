@@ -1,0 +1,48 @@
+network:
+  version: 2
+  ethernets:
+    {{ public_interface }}:
+      dhcp4: false
+      dhcp6: false
+      link-local: []
+      addresses: ["{{ public_ip }}/{{ public_prefix }}"]
+      routes:
+        - to: default
+          via: {{ public_gateway }}
+      nameservers:
+        addresses: [{{ nameservers | join(', ') }}]
+    {{ mgmt_interface }}:
+      dhcp4: false
+      dhcp6: false
+      link-local: []
+    {{ provider_interface }}:
+      dhcp4: false
+      dhcp6: false
+      link-local: []
+  bridges:
+    br-mgmt:
+      dhcp4: false
+      dhcp6: false
+      link-local: []
+      macaddress: "{{ mgmt_mac }}"
+      addresses: ["{{ mgmt_ip }}/{{ mgmt_prefix }}"]
+      interfaces: ["{{ mgmt_interface }}"]
+      parameters:
+        stp: {{ bridge_stp | lower }}
+        forward-delay: {{ bridge_forward_delay }}
+    br-vlan:
+      dhcp4: false
+      dhcp6: false
+      link-local: []
+      interfaces: ["{{ provider_interface }}"]
+      parameters:
+        stp: {{ bridge_stp | lower }}
+        forward-delay: {{ bridge_forward_delay }}
+    br-vxlan:
+      dhcp4: false
+      dhcp6: false
+      link-local: []
+      addresses: ["{{ mgmt_ip }}/32"]    # /32 evita ruta duplicada con br-mgmt (/24)
+      parameters:
+        stp: {{ bridge_stp | lower }}
+        forward-delay: {{ bridge_forward_delay }}

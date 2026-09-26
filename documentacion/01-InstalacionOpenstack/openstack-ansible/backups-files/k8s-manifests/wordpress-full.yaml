@@ -1,0 +1,309 @@
+--- namespace wordpress ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Namespace","metadata":{"annotations":{},"name":"wordpress"},"spec":{},"status":{}}
+  creationTimestamp: "2026-08-23T16:27:39Z"
+  labels:
+    kubernetes.io/metadata.name: wordpress
+  name: wordpress
+  resourceVersion: "100055"
+  uid: 3058cd6e-526b-4791-b6a6-b058c2871123
+spec:
+  finalizers:
+  - kubernetes
+status:
+  phase: Active
+--- wordpress-secrets ---
+apiVersion: v1
+data:
+  mariadb-password: RGJQYXNzNjFlNWE1NDJlNjEx
+  mariadb-root-password: Um9vdFBhc3NhZGNlNjc4YTNkYWY=
+  wordpress-admin-password: V3BQYXNzODY0ZWQzYWZiMDM2
+kind: Secret
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","data":{"mariadb-password":"RGJQYXNzNjFlNWE1NDJlNjEx","mariadb-root-password":"Um9vdFBhc3NhZGNlNjc4YTNkYWY=","wordpress-admin-password":"V3BQYXNzODY0ZWQzYWZiMDM2"},"kind":"Secret","metadata":{"annotations":{},"name":"wordpress-secrets","namespace":"wordpress"}}
+  creationTimestamp: "2026-08-23T16:27:40Z"
+  name: wordpress-secrets
+  namespace: wordpress
+  resourceVersion: "100058"
+  uid: fd0cd0d3-8fd0-4a91-9d26-528f70463021
+type: Opaque
+--- pvcs ---
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"wordpress-content","namespace":"wordpress"},"spec":{"accessModes":["ReadWriteMany"],"resources":{"requests":{"storage":"10Gi"}},"storageClassName":"cephfs-storage"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: cephfs.csi.ceph.com
+      volume.kubernetes.io/storage-provisioner: cephfs.csi.ceph.com
+    creationTimestamp: "2026-08-23T16:27:47Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: wordpress-content
+    namespace: wordpress
+    resourceVersion: "100097"
+    uid: dee245d5-13ef-4cff-a112-c1d803557895
+  spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 10Gi
+    storageClassName: cephfs-storage
+    volumeMode: Filesystem
+    volumeName: pvc-dee245d5-13ef-4cff-a112-c1d803557895
+  status:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 10Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"wordpress-db","namespace":"wordpress"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"10Gi"}},"storageClassName":"cephfs-storage"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: cephfs.csi.ceph.com
+      volume.kubernetes.io/storage-provisioner: cephfs.csi.ceph.com
+    creationTimestamp: "2026-08-23T16:27:47Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: wordpress-db
+    namespace: wordpress
+    resourceVersion: "100100"
+    uid: 3ae6491d-7af8-47cc-94d2-a7faccaad047
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 10Gi
+    storageClassName: cephfs-storage
+    volumeMode: Filesystem
+    volumeName: pvc-3ae6491d-7af8-47cc-94d2-a7faccaad047
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 10Gi
+    phase: Bound
+kind: List
+metadata:
+  resourceVersion: ""
+--- deployment ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"name":"wordpress","namespace":"wordpress"},"spec":{"replicas":1,"selector":{"matchLabels":{"app":"wordpress"}},"template":{"metadata":{"labels":{"app":"wordpress"}},"spec":{"containers":[{"env":[{"name":"WORDPRESS_DB_HOST","value":"127.0.0.1:3306"},{"name":"WORDPRESS_DB_USER","value":"wordpress"},{"name":"WORDPRESS_DB_PASSWORD","valueFrom":{"secretKeyRef":{"key":"mariadb-password","name":"wordpress-secrets"}}},{"name":"WORDPRESS_DB_NAME","value":"wordpress"}],"image":"wordpress:6.8-apache","name":"wordpress","ports":[{"containerPort":80}],"volumeMounts":[{"mountPath":"/var/www/html","name":"wordpress-content"}]},{"env":[{"name":"MARIADB_DATABASE","value":"wordpress"},{"name":"MARIADB_USER","value":"wordpress"},{"name":"MARIADB_PASSWORD","valueFrom":{"secretKeyRef":{"key":"mariadb-password","name":"wordpress-secrets"}}},{"name":"MARIADB_ROOT_PASSWORD","valueFrom":{"secretKeyRef":{"key":"mariadb-root-password","name":"wordpress-secrets"}}}],"image":"mariadb:11.4","name":"mariadb","volumeMounts":[{"mountPath":"/var/lib/mysql","name":"wordpress-db"}]},{"args":["redis-server","--appendonly","yes"],"image":"redis:7.4","name":"redis","ports":[{"containerPort":6379}]}],"volumes":[{"name":"wordpress-content","persistentVolumeClaim":{"claimName":"wordpress-content"}},{"name":"wordpress-db","persistentVolumeClaim":{"claimName":"wordpress-db"}}]}}}}
+  creationTimestamp: "2026-08-23T16:28:15Z"
+  generation: 1
+  name: wordpress
+  namespace: wordpress
+  resourceVersion: "100432"
+  uid: a50dd55a-40f1-4d93-a4e6-c126155838cf
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: wordpress
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: wordpress
+    spec:
+      containers:
+      - env:
+        - name: WORDPRESS_DB_HOST
+          value: 127.0.0.1:3306
+        - name: WORDPRESS_DB_USER
+          value: wordpress
+        - name: WORDPRESS_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: mariadb-password
+              name: wordpress-secrets
+        - name: WORDPRESS_DB_NAME
+          value: wordpress
+        image: wordpress:6.8-apache
+        imagePullPolicy: IfNotPresent
+        name: wordpress
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/www/html
+          name: wordpress-content
+      - env:
+        - name: MARIADB_DATABASE
+          value: wordpress
+        - name: MARIADB_USER
+          value: wordpress
+        - name: MARIADB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: mariadb-password
+              name: wordpress-secrets
+        - name: MARIADB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: mariadb-root-password
+              name: wordpress-secrets
+        image: mariadb:11.4
+        imagePullPolicy: IfNotPresent
+        name: mariadb
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: wordpress-db
+      - args:
+        - redis-server
+        - --appendonly
+        - "yes"
+        image: redis:7.4
+        imagePullPolicy: IfNotPresent
+        name: redis
+        ports:
+        - containerPort: 6379
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: wordpress-content
+        persistentVolumeClaim:
+          claimName: wordpress-content
+      - name: wordpress-db
+        persistentVolumeClaim:
+          claimName: wordpress-db
+status:
+  availableReplicas: 1
+  conditions:
+  - lastTransitionTime: "2026-08-23T16:29:07Z"
+    lastUpdateTime: "2026-08-23T16:29:07Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  - lastTransitionTime: "2026-08-23T16:28:15Z"
+    lastUpdateTime: "2026-08-23T16:29:07Z"
+    message: ReplicaSet "wordpress-7b5ff89d57" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  observedGeneration: 1
+  readyReplicas: 1
+  replicas: 1
+  terminatingReplicas: 0
+  updatedReplicas: 1
+--- service ---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"wordpress","namespace":"wordpress"},"spec":{"ports":[{"name":"http","port":80,"targetPort":80}],"selector":{"app":"wordpress"},"type":"ClusterIP"}}
+  creationTimestamp: "2026-08-23T16:28:15Z"
+  name: wordpress
+  namespace: wordpress
+  resourceVersion: "100208"
+  uid: fb717b50-8a7e-4c39-9322-6a4d5922316b
+spec:
+  clusterIP: 10.107.77.16
+  clusterIPs:
+  - 10.107.77.16
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: wordpress
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
+--- ingress ---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"nginx.ingress.kubernetes.io/ssl-redirect":"true"},"name":"wordpress","namespace":"wordpress"},"spec":{"ingressClassName":"nginx","rules":[{"http":{"paths":[{"backend":{"service":{"name":"wordpress","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}}],"tls":[{"secretName":"wordpress-tls"}]}}
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  creationTimestamp: "2026-08-23T16:31:27Z"
+  generation: 1
+  name: wordpress
+  namespace: wordpress
+  resourceVersion: "101341"
+  uid: 2db7150a-bbf1-426c-b770-de5c5a9175b7
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - backend:
+          service:
+            name: wordpress
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  tls:
+  - secretName: wordpress-tls
+status:
+  loadBalancer:
+    ingress:
+    - ip: 192.168.90.50
+--- wordpress-tls secret ---
+apiVersion: v1
+data:
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURRekNDQWl1Z0F3SUJBZ0lVYlFldkUzYW0xZWx5cmRMQVh6Z0crQkN0M2tVd0RRWUpLb1pJaHZjTkFRRUwKQlFBd01URVdNQlFHQTFVRUF3d05NVGt5TGpFMk9DNDVNQzQxTURFWE1CVUdBMVVFQ2d3T1MzVmlaWEp1WlhSbApjeUJNWVdJd0hoY05Nall3T0RJek1UWXpNVEUyV2hjTk1qY3dPREl6TVRZek1URTJXakF4TVJZd0ZBWURWUVFECkRBMHhPVEl1TVRZNExqa3dMalV3TVJjd0ZRWURWUVFLREE1TGRXSmxjbTVsZEdWeklFeGhZakNDQVNJd0RRWUoKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBSmNBenUvM0h1WXpkZW5GK2JjRG5VV3ZYZEF3M1Fhawp3VUdtOGR4VmFpcnRLeDFVWkJ6N3ZueWtkSUVyMHZqTVZST2lVT2s1aVh3VVZkN2hkd0FNd05VT3dUd1hXQ2tWCll4RjJMYXd6NEJOSmxrV0VNV1NQZjE0aUhodzZjOHpMdEhuS2JJb3R2SkIyaUdGODU5enlSczBpNDVScTRObDEKRG52ck9DSnFhWkloZFc2ak9QK3NNblJqWENhQVhKOTNtMmVia3B5L1JsZzZKMGFiSDNsWVV2eEs3cCt1UHNweQpoSE1ZMGNOMkJ2MU9lakRySmFtYzF4NncwRStudmpIRjFxZThDcUg2c2NVWC9pRk9ISzd1Y2hnUldWdGJkT2RHCkFLK3gyaVNid29tZExwb3VhZ1NGSGtXRXFuaGJSR1hLRCtmbXVVVllZVEorcmhPMG9GUDdYcGtDQXdFQUFhTlQKTUZFd0hRWURWUjBPQkJZRUZIRXhaY3lmOWdwRzFRWndnRTFUaldSeHBVOUdNQjhHQTFVZEl3UVlNQmFBRkhFeApaY3lmOWdwRzFRWndnRTFUaldSeHBVOUdNQThHQTFVZEV3RUIvd1FGTUFNQkFmOHdEUVlKS29aSWh2Y05BUUVMCkJRQURnZ0VCQUk1bHZNTVB5NjhFMldEd0JoekVOUjFrSEhuaUxRM3R4MGhUTU1OWTZQUXVNWkQ1Y3k0SUNiY24KTEU0SUtoUnE2Qmx4UmxpZDZCNHFOOU5iWGJCbVloNzlPdGFSZkpINjJsV1R5OTRtUGRWWldIMVVLRnVxODRKaQpZSUNLVnVSc0w0Z1dWV2U0YlFlSG5SZUJsTmRkKzN4M2xrOW9uMmZnZ1VhL3NwWkpzc3RhTkFzendLMmJiNEdlCnVCQUZnWStkVHNoeC9UTW1LdDZtUDliQTZPc3VLdFNpY2gzaytDOFdIQ05oRmRIUGJTc2FLak1DVm9hVS9tRnUKbFlPQlp4RUxpOVdJbzRySnpaVUh3VjYvQ1YzUmFaZFN3cURqTStJV0JDRXRxZUtydzlycnNsMUtRS0NXNXQ0VAozK1lIaGFpbmRldWg1ZmdiMDZ1SHV1UUlhanc4S05RPQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+  tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2UUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktjd2dnU2pBZ0VBQW9JQkFRQ1hBTTd2OXg3bU0zWHAKeGZtM0E1MUZyMTNRTU4wR3BNRkJwdkhjVldvcTdTc2RWR1FjKzc1OHBIU0JLOUw0ekZVVG9sRHBPWWw4RkZYZQo0WGNBRE1EVkRzRThGMWdwRldNUmRpMnNNK0FUU1paRmhERmtqMzllSWg0Y09uUE15N1I1eW15S0xieVFkb2hoCmZPZmM4a2JOSXVPVWF1RFpkUTU3NnpnaWFtbVNJWFZ1b3pqL3JESjBZMXdtZ0Z5ZmQ1dG5tNUtjdjBaWU9pZEcKbXg5NVdGTDhTdTZmcmo3S2NvUnpHTkhEZGdiOVRub3c2eVdwbk5jZXNOQlBwNzR4eGRhbnZBcWgrckhGRi80aApUaHl1N25JWUVWbGJXM1RuUmdDdnNkb2ttOEtKblM2YUxtb0VoUjVGaEtwNFcwUmx5Zy9uNXJsRldHRXlmcTRUCnRLQlQrMTZaQWdNQkFBRUNnZ0VBR0x4emFjaGwyYWg2NjZONGczUTJYbnk2aGJrSGNBZnJ0NVZCUUFxRzlJYTYKL2hnOXVTaTlITjUwemxjdlBYMzlmdFNqWS8wK3FpS0xxWkh1SkVZeWpZUlgvNy9FTzZDckJLaURGVmMvSVBHNApTZVY4a09CWDZVUDJBa0pLQjNXa09DSkNrd1VvZzFMRGh4TEd5Y0V2ZTNtNFphNzNhKy82d2k1M1dOM3RNdGlECllWRFRtbFlUbTNHTFhLL1dSQWdtaHhnWmF6NlBpaUJ5cldXczV5TkFJQmgyZ1RiQXZxZFJBK3lzcmNUNVRIWHAKQ2RNdHhEMVBWa0pVUWJhalF3K1hHSnlKcDQydEwxVFg3UU9pME4rTjZTNzRtbXkwN0lvYVBocU85MXZQYWpLRwpyRWZYemU1MjFLSTJrZmRabVFibk5KeXRtOWtsUlBxRTc4NDB0blFiZlFLQmdRREZJb2Fnb0YrUnA2dCtlZFBICjBuL3E0cFc2Y0JPTWQxanNvZlFCdHNLZDNXUTY5Q0NTK2p2ODlOZ3A5TDhjMEYvQTQ0K2tiODIxOGNEYzdIWmwKRWdDemRHMEFYb2FDcmh6bXhJY095MDBkYTlDVVVFbHNPcXlVRTVtQ2h5bXZVNjQyN3NPQ1k5VzFVNG5CYWh1cgpLNW02bk1RNDhwVERtR3NaRVgycXhNclpKUUtCZ1FERUY5eHozRjc1QVFJSHZwYmUrYlFzNUduNlEvVGNFQUxIClMwRGFkZUE4aXhla2VHZU1qZFRhazhsYWl4RWxEVUV4bVBGVWlvcmFHaWt5bFVueUIyN29mL0J4d2N3eE5qclIKZjVFVy8zcWNWMHRJNDBubFRpMGNhWVg5Q2lVYzZPREFyS2Eyb1dOZ3lhZitsd0syblNwdWk2dHF6dG14bmdRYgp1blE2M2wzM1pRS0JnUUNhbUlmaGdjTlEwNS9lMEtWdnlEbCt0M0RhUTdoZzZOdDR2MDArNXRkYXU5czFqR3ZiCk41aEJ1TFdvdVlJQ2s3cno1c0dvSC9HLzVMWHR5eGJTRGpzMGdISlczc28zdzFsdzgrQkNqdGFMNHhnd3A0SGMKK1dxTHVZOGlXT01zMXNBQjNsNithNUtWMzh4aFBOZ3o5VDVhcFVRUXNOUlBTOEY1YUVrWDJicUdiUUtCZ0ViagppV0twSy94QWpRZFhzeHJ3a2w0WVJPZWdZWWlja1NTUzQrTVY4Zlp4SWg3bkdDZ0xyZ05Hb2VnRmxqRWExWktrCmc3bllTOUlFMnhmYU9GMHlxcm1LWnRYNUJXUlZBblp4ODNXbzdoNU93SHlkRGozRFFUT2dRanZ6eXU3a2tUdVcKTHI2ZklWb0FES2RRMkQ1RUd1N1R0eWhwbHZGSytwazdrb0VsbWpxeEFvR0FKT0xGLzgvNnR3ZGNhT3dOdGpYRwpRM0QwOTc3SHB1RjVjcERTcjFBMHA0ck4rZFJYZXRpRGdUYTFpWmFPUFNpT3M0UHlXekJpc3FjY2VqdU9rb2R6CktLQVdIaWFpcWRFWTM2UGdWbFVoM0hEb21GMEdpa2pPUFlGUTh6UUdDZGExUHdDY2Vld0FRRWlObWNZMHBFOEcKZ3pndW1MWi9BR0Jyc3F0MXgwUThSdlU9Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K
+kind: Secret
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","data":{"tls.crt":"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURRekNDQWl1Z0F3SUJBZ0lVYlFldkUzYW0xZWx5cmRMQVh6Z0crQkN0M2tVd0RRWUpLb1pJaHZjTkFRRUwKQlFBd01URVdNQlFHQTFVRUF3d05NVGt5TGpFMk9DNDVNQzQxTURFWE1CVUdBMVVFQ2d3T1MzVmlaWEp1WlhSbApjeUJNWVdJd0hoY05Nall3T0RJek1UWXpNVEUyV2hjTk1qY3dPREl6TVRZek1URTJXakF4TVJZd0ZBWURWUVFECkRBMHhPVEl1TVRZNExqa3dMalV3TVJjd0ZRWURWUVFLREE1TGRXSmxjbTVsZEdWeklFeGhZakNDQVNJd0RRWUoKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBSmNBenUvM0h1WXpkZW5GK2JjRG5VV3ZYZEF3M1Fhawp3VUdtOGR4VmFpcnRLeDFVWkJ6N3ZueWtkSUVyMHZqTVZST2lVT2s1aVh3VVZkN2hkd0FNd05VT3dUd1hXQ2tWCll4RjJMYXd6NEJOSmxrV0VNV1NQZjE0aUhodzZjOHpMdEhuS2JJb3R2SkIyaUdGODU5enlSczBpNDVScTRObDEKRG52ck9DSnFhWkloZFc2ak9QK3NNblJqWENhQVhKOTNtMmVia3B5L1JsZzZKMGFiSDNsWVV2eEs3cCt1UHNweQpoSE1ZMGNOMkJ2MU9lakRySmFtYzF4NncwRStudmpIRjFxZThDcUg2c2NVWC9pRk9ISzd1Y2hnUldWdGJkT2RHCkFLK3gyaVNid29tZExwb3VhZ1NGSGtXRXFuaGJSR1hLRCtmbXVVVllZVEorcmhPMG9GUDdYcGtDQXdFQUFhTlQKTUZFd0hRWURWUjBPQkJZRUZIRXhaY3lmOWdwRzFRWndnRTFUaldSeHBVOUdNQjhHQTFVZEl3UVlNQmFBRkhFeApaY3lmOWdwRzFRWndnRTFUaldSeHBVOUdNQThHQTFVZEV3RUIvd1FGTUFNQkFmOHdEUVlKS29aSWh2Y05BUUVMCkJRQURnZ0VCQUk1bHZNTVB5NjhFMldEd0JoekVOUjFrSEhuaUxRM3R4MGhUTU1OWTZQUXVNWkQ1Y3k0SUNiY24KTEU0SUtoUnE2Qmx4UmxpZDZCNHFOOU5iWGJCbVloNzlPdGFSZkpINjJsV1R5OTRtUGRWWldIMVVLRnVxODRKaQpZSUNLVnVSc0w0Z1dWV2U0YlFlSG5SZUJsTmRkKzN4M2xrOW9uMmZnZ1VhL3NwWkpzc3RhTkFzendLMmJiNEdlCnVCQUZnWStkVHNoeC9UTW1LdDZtUDliQTZPc3VLdFNpY2gzaytDOFdIQ05oRmRIUGJTc2FLak1DVm9hVS9tRnUKbFlPQlp4RUxpOVdJbzRySnpaVUh3VjYvQ1YzUmFaZFN3cURqTStJV0JDRXRxZUtydzlycnNsMUtRS0NXNXQ0VAozK1lIaGFpbmRldWg1ZmdiMDZ1SHV1UUlhanc4S05RPQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==","tls.key":"LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2UUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktjd2dnU2pBZ0VBQW9JQkFRQ1hBTTd2OXg3bU0zWHAKeGZtM0E1MUZyMTNRTU4wR3BNRkJwdkhjVldvcTdTc2RWR1FjKzc1OHBIU0JLOUw0ekZVVG9sRHBPWWw4RkZYZQo0WGNBRE1EVkRzRThGMWdwRldNUmRpMnNNK0FUU1paRmhERmtqMzllSWg0Y09uUE15N1I1eW15S0xieVFkb2hoCmZPZmM4a2JOSXVPVWF1RFpkUTU3NnpnaWFtbVNJWFZ1b3pqL3JESjBZMXdtZ0Z5ZmQ1dG5tNUtjdjBaWU9pZEcKbXg5NVdGTDhTdTZmcmo3S2NvUnpHTkhEZGdiOVRub3c2eVdwbk5jZXNOQlBwNzR4eGRhbnZBcWgrckhGRi80aApUaHl1N25JWUVWbGJXM1RuUmdDdnNkb2ttOEtKblM2YUxtb0VoUjVGaEtwNFcwUmx5Zy9uNXJsRldHRXlmcTRUCnRLQlQrMTZaQWdNQkFBRUNnZ0VBR0x4emFjaGwyYWg2NjZONGczUTJYbnk2aGJrSGNBZnJ0NVZCUUFxRzlJYTYKL2hnOXVTaTlITjUwemxjdlBYMzlmdFNqWS8wK3FpS0xxWkh1SkVZeWpZUlgvNy9FTzZDckJLaURGVmMvSVBHNApTZVY4a09CWDZVUDJBa0pLQjNXa09DSkNrd1VvZzFMRGh4TEd5Y0V2ZTNtNFphNzNhKy82d2k1M1dOM3RNdGlECllWRFRtbFlUbTNHTFhLL1dSQWdtaHhnWmF6NlBpaUJ5cldXczV5TkFJQmgyZ1RiQXZxZFJBK3lzcmNUNVRIWHAKQ2RNdHhEMVBWa0pVUWJhalF3K1hHSnlKcDQydEwxVFg3UU9pME4rTjZTNzRtbXkwN0lvYVBocU85MXZQYWpLRwpyRWZYemU1MjFLSTJrZmRabVFibk5KeXRtOWtsUlBxRTc4NDB0blFiZlFLQmdRREZJb2Fnb0YrUnA2dCtlZFBICjBuL3E0cFc2Y0JPTWQxanNvZlFCdHNLZDNXUTY5Q0NTK2p2ODlOZ3A5TDhjMEYvQTQ0K2tiODIxOGNEYzdIWmwKRWdDemRHMEFYb2FDcmh6bXhJY095MDBkYTlDVVVFbHNPcXlVRTVtQ2h5bXZVNjQyN3NPQ1k5VzFVNG5CYWh1cgpLNW02bk1RNDhwVERtR3NaRVgycXhNclpKUUtCZ1FERUY5eHozRjc1QVFJSHZwYmUrYlFzNUduNlEvVGNFQUxIClMwRGFkZUE4aXhla2VHZU1qZFRhazhsYWl4RWxEVUV4bVBGVWlvcmFHaWt5bFVueUIyN29mL0J4d2N3eE5qclIKZjVFVy8zcWNWMHRJNDBubFRpMGNhWVg5Q2lVYzZPREFyS2Eyb1dOZ3lhZitsd0syblNwdWk2dHF6dG14bmdRYgp1blE2M2wzM1pRS0JnUUNhbUlmaGdjTlEwNS9lMEtWdnlEbCt0M0RhUTdoZzZOdDR2MDArNXRkYXU5czFqR3ZiCk41aEJ1TFdvdVlJQ2s3cno1c0dvSC9HLzVMWHR5eGJTRGpzMGdISlczc28zdzFsdzgrQkNqdGFMNHhnd3A0SGMKK1dxTHVZOGlXT01zMXNBQjNsNithNUtWMzh4aFBOZ3o5VDVhcFVRUXNOUlBTOEY1YUVrWDJicUdiUUtCZ0ViagppV0twSy94QWpRZFhzeHJ3a2w0WVJPZWdZWWlja1NTUzQrTVY4Zlp4SWg3bkdDZ0xyZ05Hb2VnRmxqRWExWktrCmc3bllTOUlFMnhmYU9GMHlxcm1LWnRYNUJXUlZBblp4ODNXbzdoNU93SHlkRGozRFFUT2dRanZ6eXU3a2tUdVcKTHI2ZklWb0FES2RRMkQ1RUd1N1R0eWhwbHZGSytwazdrb0VsbWpxeEFvR0FKT0xGLzgvNnR3ZGNhT3dOdGpYRwpRM0QwOTc3SHB1RjVjcERTcjFBMHA0ck4rZFJYZXRpRGdUYTFpWmFPUFNpT3M0UHlXekJpc3FjY2VqdU9rb2R6CktLQVdIaWFpcWRFWTM2UGdWbFVoM0hEb21GMEdpa2pPUFlGUTh6UUdDZGExUHdDY2Vld0FRRWlObWNZMHBFOEcKZ3pndW1MWi9BR0Jyc3F0MXgwUThSdlU9Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K"},"kind":"Secret","metadata":{"annotations":{},"name":"wordpress-tls","namespace":"wordpress"},"type":"kubernetes.io/tls"}
+  creationTimestamp: "2026-08-23T16:31:16Z"
+  name: wordpress-tls
+  namespace: wordpress
+  resourceVersion: "101225"
+  uid: cd8c6bc8-a362-481d-8d5b-ad8c075a3849
+type: kubernetes.io/tls

@@ -1,0 +1,11 @@
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+enp2s0f0         UP             192.168.0.195/24 fe80::a58b:fdae:473d:dee4/64 
+wlp3s0           UP             192.168.0.152/24 fe80::c21f:4982:ab08:bb27/64 
+br-admin-ju11    DOWN           192.168.50.1/24 
+br-ext-ju11      DOWN           192.168.0.196/24 
+br-share-ju11    DOWN           
+virbr30          DOWN           
+virbr113         DOWN           203.0.113.1/24 
+virbr10          DOWN           10.0.0.1/24 
+docker0          DOWN           172.17.0.1/16 
+virbr-ansible    DOWN           192.168.60.1/24 

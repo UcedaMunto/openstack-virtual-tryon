@@ -1,0 +1,123 @@
+Inferring fsid 97af58d1-9efd-11f1-bbf1-52540063e430
+Inferring config /var/lib/ceph/97af58d1-9efd-11f1-bbf1-52540063e430/mon.os-storage01/config
+Using ceph image with id 'ff836bb28e7d' and tag 'v19' created on 2026-08-18 15:06:29 +0000 UTC
+quay.io/ceph/ceph@sha256:ff836bb28e7d0be0ec4dd22e79407174452a96e11ee62e9cdd1fa47f4bcc3bdc
+  cluster:
+    id:     97af58d1-9efd-11f1-bbf1-52540063e430
+    health: HEALTH_WARN
+            Monitors are configured to use emergency allowed ciphers
+            1 auth client entities with insecure key types
+            Degraded data redundancy: 3508/7016 objects degraded (50.000%), 78 pgs degraded, 81 pgs undersized
+ 
+  services:
+    mon: 1 daemons, quorum os-storage01 (age 78m)
+    mgr: os-storage01.nblchv(active, since 2h)
+    mds: 1/1 daemons up, 1 standby
+    osd: 2 osds: 2 up (since 2h), 2 in (since 2h)
+ 
+  data:
+    volumes: 1/1 healthy
+    pools:   3 pools, 81 pgs
+    objects: 3.51k objects, 255 MiB
+    usage:   465 MiB used, 35 GiB / 35 GiB avail
+    pgs:     3508/7016 objects degraded (50.000%)
+             78 active+undersized+degraded
+             3  active+undersized
+ 
+  progress:
+    Global Recovery Event (0s)
+      [............................] 
+ 
+---fs status---
+Inferring fsid 97af58d1-9efd-11f1-bbf1-52540063e430
+Inferring config /var/lib/ceph/97af58d1-9efd-11f1-bbf1-52540063e430/mon.os-storage01/config
+Using ceph image with id 'ff836bb28e7d' and tag 'v19' created on 2026-08-18 15:06:29 +0000 UTC
+quay.io/ceph/ceph@sha256:ff836bb28e7d0be0ec4dd22e79407174452a96e11ee62e9cdd1fa47f4bcc3bdc
+storage - 2 clients
+=======
+RANK  STATE               MDS                 ACTIVITY     DNS    INOS   DIRS   CAPS  
+ [1m0[0m    [1;32mactive[0m  storage.os-storage01.ychtkk  Reqs:    0 /s  4105   3821    374   3779   
+        POOL           TYPE     USED  AVAIL  
+cephfs.storage.meta  metadata  22.6M  16.2G  
+cephfs.storage.data    data     240M  16.2G  
+        STANDBY MDS          
+storage.os-storage01.yvbtka  
+MDS version: ceph version 19.2.6 (f9fd95b4335bad6a26d7a74468f55d269e8dbef4) squid (stable)
+---osd pool ls detail---
+Inferring fsid 97af58d1-9efd-11f1-bbf1-52540063e430
+Inferring config /var/lib/ceph/97af58d1-9efd-11f1-bbf1-52540063e430/mon.os-storage01/config
+Using ceph image with id 'ff836bb28e7d' and tag 'v19' created on 2026-08-18 15:06:29 +0000 UTC
+quay.io/ceph/ceph@sha256:ff836bb28e7d0be0ec4dd22e79407174452a96e11ee62e9cdd1fa47f4bcc3bdc
+pool 1 'cephfs.storage.meta' replicated size 2 min_size 1 crush_rule 0 object_hash rjenkins pg_num 16 pgp_num 1 pgp_num_target 16 autoscale_mode on last_change 26 lfor 0/0/22 flags hashpspool stripe_width 0 pg_autoscale_bias 4 pg_num_min 16 recovery_priority 5 application cephfs read_balance_score 2.00
+pool 2 'cephfs.storage.data' replicated size 2 min_size 1 crush_rule 0 object_hash rjenkins pg_num 64 pgp_num 1 pgp_num_target 64 autoscale_mode on last_change 28 lfor 0/0/22 flags hashpspool,bulk stripe_width 0 application cephfs read_balance_score 2.00
+pool 3 '.mgr' replicated size 2 min_size 1 crush_rule 0 object_hash rjenkins pg_num 1 pgp_num 1 autoscale_mode on last_change 32 flags hashpspool stripe_width 0 pg_num_max 32 pg_num_min 1 application mgr read_balance_score 2.00
+
+---auth ls---
+Inferring fsid 97af58d1-9efd-11f1-bbf1-52540063e430
+Inferring config /var/lib/ceph/97af58d1-9efd-11f1-bbf1-52540063e430/mon.os-storage01/config
+Using ceph image with id 'ff836bb28e7d' and tag 'v19' created on 2026-08-18 15:06:29 +0000 UTC
+quay.io/ceph/ceph@sha256:ff836bb28e7d0be0ec4dd22e79407174452a96e11ee62e9cdd1fa47f4bcc3bdc
+mds.storage.os-storage01.ychtkk
+	key: AgBiAotqCc7oDSAA7Kt4TkFPtTQWx5cS5DCCdZrUrC0rHoZPebGOlhwmFlA=
+	caps: [mds] allow
+	caps: [mon] profile mds
+	caps: [osd] allow rw tag cephfs *=*
+mds.storage.os-storage01.yvbtka
+	key: AgBkAotq/PbCByAAiIMCs/9M70VsDzhXy+RypEDgfmeTbzad2RqNzBrdnJg=
+	caps: [mds] allow
+	caps: [mon] profile mds
+	caps: [osd] allow rw tag cephfs *=*
+osd.0
+	key: AgDzAYtqbGGuOiAAA8teV4R0u9lBEdMJD8lMqFo7dWesZN+WxC5hkTbY6eA=
+	caps: [mgr] allow profile osd
+	caps: [mon] allow profile osd
+	caps: [osd] allow *
+osd.1
+	key: AgAbAotqIPUqHiAAwtE3KzgX4U4h3xRv9UWJvqbRlrH4b26MtmHQ9kqVQgg=
+	caps: [mgr] allow profile osd
+	caps: [mon] allow profile osd
+	caps: [osd] allow *
+client.admin
+	key: AgB8AYtqrKg1LyAARXoEXX9q3i2fou8UZcFZC8cINmbT/xj+9cBRHx2Q1Lc=
+	caps: [mds] allow *
+	caps: [mgr] allow *
+	caps: [mon] allow *
+	caps: [osd] allow *
+client.bootstrap-mds
+	key: AgB/AYtqa5xFKyAAeonyHPri/+nERLHVd9QNAZ8BQ2VcgBL1i1RFwwbPoks=
+	caps: [mon] allow profile bootstrap-mds
+client.bootstrap-mgr
+	key: AgB/AYtqJM1FKyAAXMptOqlT/YIUpB6wkK8xQ/hBZLb2g9Rctk9DwKIzmRM=
+	caps: [mon] allow profile bootstrap-mgr
+client.bootstrap-osd
+	key: AgB/AYtqlPpFKyAAshZuUsgjNMrPVSYF6ooKo3Kp5XOgD9ZgB+W8gC5WTl4=
+	caps: [mon] allow profile bootstrap-osd
+client.bootstrap-rbd
+	key: AgB/AYtqYilGKyAAFcTFkuq7evexJuy8GHrGmo7IiIoYG/sjSGzYlVZfmmI=
+	caps: [mon] allow profile bootstrap-rbd
+client.bootstrap-rbd-mirror
+	key: AgB/AYtq7VVGKyAAQaoIFSYS0xPwI8Z8WFJEdViFnYiws7dukgoNAG+kXU0=
+	caps: [mon] allow profile bootstrap-rbd-mirror
+client.bootstrap-rgw
+	key: AgB/AYtqxH1GKyAAXM2dz35vRa37WinWUy0KMxwTQvHjkBbJoIjpB2FCfrE=
+	caps: [mon] allow profile bootstrap-rgw
+client.ceph-exporter.os-storage01
+	key: AgC1AYtqRXG+JCAAQOUeQO6IRUsV+o/H0PGUp6FHUEHYiXsjlR+XGmaeKzg=
+	caps: [mgr] allow r
+	caps: [mon] profile ceph-exporter
+	caps: [osd] allow r
+client.crash.os-storage01
+	key: AgC3AYtq0fcEGiAAX3Lr9Rj1puHHB6v+9DLeoFTYRswrS3anDNZ3Tj1v/rY=
+	caps: [mgr] profile crash
+	caps: [mon] profile crash
+client.k8
+	key: AQCdFItquSx2JRAA+Vl4zhGX+shWV6eXCxDKWg==
+	caps: [mds] allow rw
+	caps: [mgr] allow rw
+	caps: [mon] allow r
+	caps: [osd] allow rw
+mgr.os-storage01.nblchv
+	key: AgB9AYtqdC30BCAAi0FiER+eOER3k5/GeYEaa/xG2Vw67ln6uNqdJLLAl1o=
+	caps: [mds] allow *
+	caps: [mon] profile mgr
+	caps: [osd] allow *

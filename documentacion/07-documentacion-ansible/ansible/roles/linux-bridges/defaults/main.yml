@@ -1,0 +1,15 @@
+---
+# Valores por defecto del role linux-bridges
+# Sobreescribibles desde group_vars/ o host_vars/
+
+# Interfaces físicas (los nombres reales de este lab)
+public_interface: enp1s0
+mgmt_interface: enp7s0
+provider_interface: enp8s0
+
+# Parámetros del bridge Linux
+bridge_stp: false
+bridge_forward_delay: 0
+
+# Fichero netplan destino
+netplan_file: /etc/netplan/50-cloud-init.yaml

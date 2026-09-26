@@ -1,0 +1,153 @@
+﻿Universidad de El Salvador
+Facultad de Ingeniería y Arquitectura
+Escuela de Ingeniería de Sistemas Informáticos
+
+Contenedores Linux
+lxd/lxc
+
+Damián Morales
+damian.morales@ues.edu.sv
+
+1. Contexto
+Los contenedores representan una herramienta muy versátil en cuando su uso en infraestructura tecnológica ya que pueden abstraer piezas del sistema operativo para poder desplegar aplicaciones de forma rápida. Los contenedores más populares son los basados en docker. Existen además los contenedores docker la posibilidad de usar contenedores de manera nativa a través de un kernel linux, haciendo uso de lxc. La diferencia entre los contenedores docker y los lxc radica principalmente que los primeros son efímeros en cuanto a su uso y comportamiento. Es decir, cualquier cambio en las configuraciones del contenedor implica destruirlo y volverlo a crear. En cambio un contenedor lxc es permanente y las configuraciones serán duraderas, están centrados en desplegarse como un directorio linux, haciendo uso de los recursos disponibles del equipo host, siempre y cuando no se le diga lo contrario o se le limiten sus usos. LXD por otra parte es un conjunto de herramientas de configuraciones disponibles para poder configurar y manipular de manera más fácil los contenedores lxc.
+
+2. Resultados de Aprendizaje
+    • Instalar y configurar lxd como cluster de contenedores lxc.
+    • Trabajar con contenedores linux para realizar tareas específicas.
+    • Desplegar redes en un cluster lxd así como interfaces de red que puedan utilizarse en un contenedor lxc.
+
+3. Instalación y configuración
+Se hará una instalación asumiendo que se dispone de un equipo con Ubuntu. Por lo tanto se instalará haciendo uso de snapd
+
+sudo apt update
+sudo apt install snapd
+
+Una vez se tiene instalado snapd como herramienta para alcanzar paquetes se hace la instalación de lxd.
+
+sudo snap install lxd
+
+4. Configuración de cluster lxd
+A este punto usted debería de tener instalados los paquetes necesarios para ejecutar contenedores lxc, por lo tanto se procederá a configurar el cluster lxd, para que empiece a lanzar contenedores.
+Lxd posee una configuración interactiva en cli, cuando se quiere integrar a un cluster o crear un cluster de más de un equipo. En nuestro caso haremos la configuración mínima, para que se auto configure de forma automática.
+
+$lxd init --minimal
+
+Esta orden podrá tardar un par de segundos antes de devolver el prompt en pantalla., se paciente.
+Si concluye y no presenta errores, entonces usted ya tiene instalado y configurado correctamente el cluster. 
+
+5. Lanzamiento de contenedores
+Lxc le permitirá aprovisionar contenedores con sus correspondientes sistemas operativos, sin requerir disponer de una imagen local sobre la cual crear la instancia, ya que esto lo hará directamente usando los canales lxd con los diferentes sistemas operativos, usted puede optar descubrir los diferentes opciones disponibles para ciertos sistemas operativos, a través del ejemplo siguiente:
+
+$lxc image list ubuntu:
+
+Esto devolverá una lista extensa en consola de las posibles opciones que tiene para lanzar contenedores basados en ubuntu. 
+
+$lxc image list images:
+Le mostrará una lista completa de las imágenes asociadas a la configuración, las cuales usted podrá consumir para lanzar instancias. Puede obtener una lista completa de imágenes en la dirección. https://images.linuxcontainers.org/
+
+Note que las órdenes se ejecutan en modo usuario.
+Ahora bien, para lanzar una instancia basada en una imagen ubuntu, usted podrá hacerlo de la siguiente manera:
+
+$lxc launch ubuntu:22.04 controller
+
+En este caso se creará una instancia de contenedor linux  con Ubuntu 22.04 al cual se le está nombrando como controller. Tenerlo listo, tardará unos segundos, dependiendo de su velocidad de Internet.
+En este punto debe de tener en cuenta que las instancias que se crean, están predeterminadas a consumir los recursos del equipo host, es decir que si se quiere limitar la cantidad de recursos a consumir deberán de pasarse por parámetro de manera explícita, como se muestra a continuación.
+
+$lxc launch ubuntu:22.04 controller --config limits.cpu=1 --config limits.memory=1024MiB
+
+
+A la orden anterior se le está indicando que lance una instancia con ubuntu 22.04 pero que se limite el uso de núcleos a 1, así como la memoria ram a 1GB.
+
+6. Contenedores como VM
+LXC también le permite trabajar contenedores como comportamiento de Máquinas Virtuales, únicamente debe tener en cuenta para esta posibilidad que estará trabajando con un hypervisor tipo 2 basado en qemu.
+Podrá lanzar una instancia tipo VM de la siguiente manera:
+
+$lxc launch images:debian/12 debian-vm --vm --device root,size=20GiB
+
+
+Notará cuando liste los contenedores, que este se lista como del tipo: VIRTUAL-MACHINE.
+
+
+7. Trabajando con contenedores
+Una vez usted ya tiene los primeros contenedores corriendo, tendrá la posibilidad de listarlos para conocer sus configuraciones básicas a través de:
+
+$lxc list
+
++------------+---------+---------------------+----------------------------------------------+-----------+-----------+
+|    NAME    |  STATE  |        IPV4         |                     IPV6                     |   TYPE    | SNAPSHOTS |
++------------+---------+---------------------+----------------------------------------------+-----------+-----------+
+| controller | RUNNING | 10.140.60.54 (eth0) | fd42:76c6:3f1:618b:216:3eff:feb2:a114 (eth0) | CONTAINER | 0         |
++------------+---------+---------------------+----------------------------------------------+-----------+-----------+
+
+
+
+Si todo está en orden debería de listar el contener crear en el paso anterior, con una dirección ip asignada. En caso que no le aparezca asignada una dirección IP, seguramente en el paso de inicialización del clúster no se creó el bridge hacia la interfaz de red. Usted lo puede verificar listando las interfaces:
+
+$ip a
+
+7: lxdbr0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+    link/ether 00:16:3e:52:e1:5c brd ff:ff:ff:ff:ff:ff
+    inet 10.140.60.1/24 scope global lxdbr0
+       valid_lft forever preferred_lft forever
+    inet6 fd42:76c6:3f1:618b::1/64 scope global 
+       valid_lft forever preferred_lft forever
+    inet6 fe80::216:3eff:fe52:e15c/64 scope link 
+       valid_lft forever preferred_lft forever
+
+
+
+La interfaz lxdbr0 debería de listarse para saber que toda la configuración por default está debidamente realizada.
+
+Detener el contenedor llamado controller
+$lxc stop controller
+
+Iniciar el contenedor llamado controller
+$lxc start controller
+
+Eliminar el contenedor llamado controller
+$lxc delete controller
+
+
+7.1. Conectando al contenedor
+Usted podrá conectarse a la consola del contenedor recién creado de la siguiente manera:
+
+$lxc exec controller -- bash
+
+Para el caso controller es el nombre que se le asignó al contenedor, bash es el tipo de terminal y consola que se consumirá.
+
+
+
+7.2. Trabajando con redes
+LXD como cluster permite crear múltiples puentes, sobre los cuales se conectan los contenedores para obtener recursos de red según sea necesario.
+Por lo general en ambientes cloud siempre se trabaja con dos tipos de redes de manera general.
+Provider: Red sobre la cual se obtiene acceso a Internet, en este caso los contenedores que requieran acceso a Internet se conectarán a ella. Por lo general esta tarea se hace a través de NAT.
+Internal: Red sobre la cual se corren configuraciones aisladas de internet, por donde se ven los contenedores conectados a un mismo dominio de colisión (como si estuvieran a un mismo switch y vlan)
+
+Creando una red provider basada en NAT y con salida a internet.
+lxc network create provider ipv6.address=none ipv4.address=10.0.10.1/24 ipv4.nat=true
+
+Creando una red internal sin salida a internet
+lxc network create internal ipv6.address=none ipv4.address=10.0.20.1/24 ipv4.nat=false
+
+Esto debería de mostrar una salida como la siguiente:
+$ip a
+
+15: internal: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default qlen 1000
+    link/ether 00:16:3e:78:e3:7b brd ff:ff:ff:ff:ff:ff
+    inet 10.0.20.1/24 scope global tenant
+       valid_lft forever preferred_lft forever
+28: provider: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default qlen 1000 link/ether 00:16:3e:0e:ce:1b brd ff:ff:ff:ff:ff:ff inet 10.0.10.1/24 scope global provider valid_lft forever preferred_lft forever
+
+
+7.3. Asociando una interfaz de contenedor a red
+Una vez tenemos creadas las diferentes redes a utilizar en los contenedores es importante definir como asignarlas.
+LXC siempre entenderá de interfaces de red al estilo antiguo: eth0 y eth1, en tal sentido, se puede trabajar con ellas para asignarlas. Por default siempre intentará asignar a la interfaz eth0 una configuración de red, que puede corresponder con el bridge que autoconfigurar al inicializar el cluster.
+
+
+Asociándose interfaces a una instancia para que tenga acceso a Internet.
+lxc config device add controller eth0 nic name=eth0 nictype=bridged parent=provider ipv4.address=10.0.10.11/24
+
+Asociándose interfaces a una instancia sin acceso a internet.
+lxc config device add controller eth1 nic name=eth0 nictype=bridged parent=internal ipv4.address=10.0.20.11/24
+
+Para que los cambios tengan efecto, se deberá reiniciar el contenedor, así como verificar que las configuraciones de la interfaz de red del contenedor corresponda con las redes asignadas según la interfaz.

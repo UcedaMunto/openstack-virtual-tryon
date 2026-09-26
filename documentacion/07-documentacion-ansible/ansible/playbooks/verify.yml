@@ -1,0 +1,94 @@
+---
+# playbooks/verify.yml
+# ─────────────────────────────────────────────────────────────────────────────
+# Verificación completa del cluster tras el despliegue.
+# NO hace cambios — solo comprueba y reporta.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Play 1: Verificar bridges en todos los nodos ─────────────────────────────
+- name: Verificar Linux bridges
+  hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Comprobar que br-mgmt existe y tiene IP
+      assert:
+        that:
+          - "'br-mgmt' in ansible_interfaces"
+          - ansible_br_mgmt.ipv4.address == mgmt_ip
+        fail_msg: "br-mgmt no tiene IP {{ mgmt_ip }} en {{ inventory_hostname }}"
+        success_msg: "br-mgmt OK: {{ mgmt_ip }}"
+
+    - name: Comprobar que br-vlan existe
+      assert:
+        that:
+          - "'br-vlan' in ansible_interfaces"
+        fail_msg: "br-vlan no existe en {{ inventory_hostname }}"
+        success_msg: "br-vlan OK"
+
+    - name: Comprobar que OVS br-provider tiene br-vlan
+      command: ovs-vsctl list-ports br-provider
+      register: br_provider_ports
+      changed_when: false
+      failed_when: "'br-vlan' not in br_provider_ports.stdout"
+
+    - name: Mostrar puertos OVS
+      debug:
+        msg: "{{ inventory_hostname }}: br-provider ports = {{ br_provider_ports.stdout_lines }}"
+
+# ── Play 2: Verificar servicios en computes ───────────────────────────────────
+- name: Verificar servicios en computes
+  hosts: compute
+  become: true
+  tasks:
+    - name: Comprobar nova-compute activo
+      service_facts:
+
+    - name: Assert nova-compute running
+      assert:
+        that: ansible_facts.services['nova-compute.service'].state == 'running'
+        fail_msg: "nova-compute NO está activo en {{ inventory_hostname }}"
+        success_msg: "nova-compute OK en {{ inventory_hostname }}"
+
+    - name: Assert neutron-openvswitch-agent running
+      assert:
+        that: ansible_facts.services['neutron-openvswitch-agent.service'].state == 'running'
+        fail_msg: "neutron-openvswitch-agent NO está activo en {{ inventory_hostname }}"
+        success_msg: "neutron-openvswitch-agent OK en {{ inventory_hostname }}"
+
+# ── Play 3: Verificar desde el controller ─────────────────────────────────────
+- name: Verificar cluster desde el controller (OpenStack API)
+  hosts: controller
+  become: true
+  tasks:
+    - name: Listar compute services
+      command: "bash -c 'source {{ admin_openrc_path }} && openstack compute service list -f value -c Binary -c Host -c State'"
+      register: compute_services
+      changed_when: false
+
+    - name: Mostrar compute services
+      debug:
+        msg: "{{ compute_services.stdout_lines }}"
+
+    - name: Listar network agents
+      command: "bash -c 'source {{ admin_openrc_path }} && openstack network agent list -f value -c Agent_Type -c Host -c Alive'"
+      register: network_agents
+      changed_when: false
+
+    - name: Mostrar network agents
+      debug:
+        msg: "{{ network_agents.stdout_lines }}"
+
+    - name: Verificar que todos los computes están UP
+      assert:
+        that: "'down' not in compute_services.stdout"
+        fail_msg: "Hay computes DOWN: {{ compute_services.stdout }}"
+        success_msg: "Todos los computes están UP"
+
+    - name: Verificar que todos los agentes están ALIVE
+      assert:
+        that: "'False' not in network_agents.stdout"
+        fail_msg: "Hay agentes neutron no alive"
+        success_msg: "Todos los agentes neutron están ALIVE"
+        fail_msg: "Hay agentes neutron no alive"
+        success_msg: "Todos los agentes neutron están ALIVE"

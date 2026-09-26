@@ -1,0 +1,63 @@
+---
+# Tasks del role nova-compute
+
+- name: Instalar nova-compute y dependencias KVM
+  apt:
+    name:
+      - nova-compute
+      - nova-compute-kvm
+      - qemu-kvm
+      - libvirt-daemon-system
+      - python3-libvirt
+    state: present
+    update_cache: false   # Ya actualizamos en el play de common
+
+- name: Crear directorio override de libvirtd
+  file:
+    path: /etc/systemd/system/libvirtd.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Override de libvirtd — eliminar --timeout 120
+  # El --timeout 120 cierra libvirtd si nova-compute no conecta en 2 min.
+  # Esto causa un ciclo de fallos al arrancar. Lo eliminamos.
+  copy:
+    dest: /etc/systemd/system/libvirtd.service.d/override.conf
+    content: "{{ libvirtd_override_content }}"
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - reload systemd daemon
+    - reiniciar libvirtd
+
+- name: Borrar compute_id heredado del clone (evitar UUID duplicado)
+  # Si este nodo fue clonado, puede tener el UUID de compute1.
+  # Nova rechaza un compute con UUID ya registrado.
+  file:
+    path: /var/lib/nova/compute_id
+    state: absent
+  notify: reiniciar nova-compute
+
+- name: Configurar nova.conf
+  template:
+    src: nova.conf.j2
+    dest: /etc/nova/nova.conf
+    owner: nova
+    group: nova
+    mode: '0640'
+  notify: reiniciar nova-compute
+
+- name: Habilitar y arrancar libvirtd
+  service:
+    name: libvirtd
+    state: started
+    enabled: true
+
+- name: Habilitar y arrancar nova-compute
+  service:
+    name: nova-compute
+    state: started
+    enabled: true

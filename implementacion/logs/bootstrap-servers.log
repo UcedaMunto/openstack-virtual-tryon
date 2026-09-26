@@ -1,0 +1,393 @@
+Bootstrapping servers
+[WARNING]: Invalid characters were found in group names but not replaced, use
+-vvvv to see details
+
+PLAY [Gather facts for all hosts] **********************************************
+
+TASK [Group hosts to determine when using --limit] *****************************
+ok: [anfitrion]
+ok: [asus-tuf]
+ok: [server]
+ok: [localhost]
+
+TASK [Gather facts] ************************************************************
+[WARNING]: Could not match supplied host pattern, ignoring:
+all_using_limit_True
+ok: [server]
+ok: [anfitrion]
+ok: [localhost]
+ok: [asus-tuf]
+
+PLAY [Gather facts for all hosts (if using --limit)] ***************************
+skipping: no hosts matched
+
+PLAY [Apply role baremetal] ****************************************************
+
+TASK [openstack.kolla.etc_hosts : Include etc-hosts.yml] ***********************
+included: /home/uceda/.ansible/collections/ansible_collections/openstack/kolla/roles/etc_hosts/tasks/etc-hosts.yml for anfitrion, asus-tuf, server
+
+TASK [openstack.kolla.etc_hosts : Ensure localhost in /etc/hosts] **************
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.etc_hosts : Ensure hostname does not point to 127.0.1.1 in /etc/hosts] ***
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.etc_hosts : Generate /etc/hosts for all of the nodes] ****
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.etc_hosts : Check whether /etc/cloud/cloud.cfg exists] ***
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.etc_hosts : Disable cloud-init manage_etc_hosts] *********
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.baremetal : Ensure unprivileged users can use ping] ******
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.baremetal : Gather package facts] ************************
+ok: [server]
+ok: [asus-tuf]
+ok: [anfitrion]
+
+TASK [openstack.kolla.baremetal : Set firewall default policy] *****************
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.baremetal : Disable firewalld] ***************************
+skipping: [anfitrion] => (item=firewalld) 
+skipping: [anfitrion]
+skipping: [asus-tuf] => (item=firewalld) 
+skipping: [asus-tuf]
+skipping: [server] => (item=firewalld) 
+skipping: [server]
+
+TASK [openstack.kolla.packages : Install packages] *****************************
+ok: [server]
+ok: [asus-tuf]
+ok: [anfitrion]
+
+TASK [openstack.kolla.packages : Remove packages] ******************************
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Install/Uninstall] ******************************
+included: /home/uceda/.ansible/collections/ansible_collections/openstack/kolla/roles/docker/tasks/install.yml for anfitrion, asus-tuf, server
+
+TASK [openstack.kolla.docker : Enable Docker repository] ***********************
+included: /home/uceda/.ansible/collections/ansible_collections/openstack/kolla/roles/docker/tasks/repo-Debian.yml for anfitrion, asus-tuf, server
+
+TASK [openstack.kolla.docker : Install CA certificates and gnupg packages] *****
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Ensure apt sources list directory exists] *******
+ok: [anfitrion]
+ok: [asus-tuf]
+ok: [server]
+
+TASK [openstack.kolla.docker : Ensure apt keyrings directory exists] ***********
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Install docker apt gpg key] *********************
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Install docker apt pin] *************************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker : Ensure old docker repository absent] ************
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Enable docker apt repository] *******************
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Update the apt cache] ***************************
+changed: [server]
+changed: [anfitrion]
+changed: [asus-tuf]
+
+TASK [openstack.kolla.docker : Check which containers are running] *************
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Check if docker systemd unit exists] ************
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Mask the docker systemd unit on Debian/Ubuntu] ***
+changed: [anfitrion]
+changed: [asus-tuf]
+changed: [server]
+
+TASK [openstack.kolla.docker : Install packages] *******************************
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Start docker] ***********************************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker : Wait for Docker to start] ***********************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker : Ensure containers are running after Docker upgrade] ***
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker : Ensure docker config directory exists] **********
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Write docker config] ****************************
+ok: [server]
+changed: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Flush handlers] *********************************
+
+TASK [openstack.kolla.docker : Flush handlers] *********************************
+
+TASK [openstack.kolla.docker : Flush handlers] *********************************
+
+RUNNING HANDLER [openstack.kolla.docker : Restart docker] **********************
+changed: [anfitrion]
+
+TASK [openstack.kolla.docker : Get Docker API version] *************************
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Parse Docker system info] ***********************
+ok: [anfitrion]
+ok: [asus-tuf]
+ok: [server]
+
+TASK [openstack.kolla.docker : Determine if Docker uses containerd image store] ***
+ok: [anfitrion]
+ok: [asus-tuf]
+ok: [server]
+
+TASK [openstack.kolla.docker : Ensure /etc/containerd exists] ******************
+skipping: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Copying over containerd config] *****************
+skipping: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Remove old docker options file] *****************
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker : Ensure docker service directory exists] *********
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker : Configure docker service] ***********************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker : Ensure the path for CA file for private registry exists] ***
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker : Ensure the CA file for private registry exists] ***
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker : Flush handlers] *********************************
+
+TASK [openstack.kolla.docker : Flush handlers] *********************************
+
+TASK [openstack.kolla.docker : Flush handlers] *********************************
+
+TASK [openstack.kolla.docker : Start and enable docker] ************************
+ok: [anfitrion]
+changed: [server]
+changed: [asus-tuf]
+
+TASK [openstack.kolla.kolla_user : Ensure groups are present] ******************
+skipping: [anfitrion] => (item=docker) 
+skipping: [anfitrion] => (item=sudo) 
+skipping: [anfitrion] => (item=kolla) 
+skipping: [anfitrion]
+skipping: [asus-tuf] => (item=docker) 
+skipping: [asus-tuf] => (item=sudo) 
+skipping: [asus-tuf] => (item=kolla) 
+skipping: [asus-tuf]
+skipping: [server] => (item=docker) 
+skipping: [server] => (item=sudo) 
+skipping: [server] => (item=kolla) 
+skipping: [server]
+
+TASK [openstack.kolla.kolla_user : Create kolla user] **************************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.kolla_user : Add public key to kolla user authorized keys] ***
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.kolla_user : Grant kolla user passwordless sudo] *********
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker_sdk : Get Python] *********************************
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker_sdk : Check if Python environment is externally managed] ***
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker_sdk : Set docker_sdk_python_externally_managed fact] ***
+ok: [anfitrion]
+ok: [asus-tuf]
+ok: [server]
+
+TASK [openstack.kolla.docker_sdk : Install/Uninstall] **************************
+included: /home/uceda/.ansible/collections/ansible_collections/openstack/kolla/roles/docker_sdk/tasks/install.yml for anfitrion, asus-tuf, server
+
+TASK [openstack.kolla.docker_sdk : Ensure apt sources list directory exists] ***
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker_sdk : Ensure apt keyrings directory exists] *******
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker_sdk : Install osbpo apt gpg key] ******************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker_sdk : Enable osbpo apt repository] ****************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker_sdk : Install packages] ***************************
+ok: [server]
+ok: [anfitrion]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.docker_sdk : Check if virtualenv is a directory] *********
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker_sdk : Check if packaging is already installed] ****
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker_sdk : Install packaging into virtualenv] **********
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker_sdk : Install latest pip and packaging in the virtualenv] ***
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.docker_sdk : Install docker SDK for python using pip] ****
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.baremetal : Ensure node_config_directory directory exists] ***
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.apparmor_libvirt : Include tasks from remove-profile.yml] ***
+included: /home/uceda/.ansible/collections/ansible_collections/openstack/kolla/roles/apparmor_libvirt/tasks/remove-profile.yml for anfitrion, asus-tuf, server
+
+TASK [openstack.kolla.apparmor_libvirt : Get stat of libvirtd apparmor profile] ***
+ok: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+TASK [openstack.kolla.apparmor_libvirt : Get stat of libvirtd apparmor disable profile] ***
+ok: [anfitrion]
+ok: [asus-tuf]
+ok: [server]
+
+TASK [openstack.kolla.apparmor_libvirt : Remove apparmor profile for libvirt] ***
+skipping: [asus-tuf]
+skipping: [server]
+changed: [anfitrion]
+
+TASK [openstack.kolla.baremetal : Change state of selinux] *********************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.baremetal : Set https proxy for git] *********************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.baremetal : Set http proxy for git] **********************
+skipping: [anfitrion]
+skipping: [asus-tuf]
+skipping: [server]
+
+TASK [openstack.kolla.baremetal : Copying over kolla.target] *******************
+changed: [anfitrion]
+ok: [server]
+ok: [asus-tuf]
+
+PLAY RECAP *********************************************************************
+anfitrion                  : ok=44   changed=6    unreachable=0    failed=0    skipped=28   rescued=0    ignored=0   
+asus-tuf                   : ok=44   changed=3    unreachable=0    failed=0    skipped=27   rescued=0    ignored=0   
+localhost                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+server                     : ok=44   changed=3    unreachable=0    failed=0    skipped=27   rescued=0    ignored=0   
+
